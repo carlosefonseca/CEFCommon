@@ -104,11 +104,13 @@ public final class AppUpdater {
     public static void updateApp(final Context activity) {
         if (latestVersion == null) {
             if (latestVersions == null) {
-                throw new RuntimeException("No known update checked");
+                Toast.makeText(activity, "Error :(", Toast.LENGTH_SHORT).show();
+                Log.w(TAG, new RuntimeException("No known update checked"));
             } else if (latestVersions.containsKey(channel)) {
                 latestVersion = latestVersions.get(channel);
             } else {
-                throw new RuntimeException("No known update checked");
+                Toast.makeText(activity, "Error :(", Toast.LENGTH_SHORT).show();
+                Log.w(TAG, new RuntimeException("No known update checked."));
             }
         }
 
