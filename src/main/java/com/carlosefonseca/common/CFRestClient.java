@@ -280,7 +280,7 @@ public class CFRestClient {
                     if (error == null) {
                         responseHandler.onSuccess(200, new Header[0], "");
                     } else {
-                        responseHandler.onFailure(500, new Header[0], "", new Exception(status));
+                        responseHandler.onFailure(500, new Header[0], "", new Exception(status + " / " + error.getMessage(), error));
                     }
                 }
             }.execute();
