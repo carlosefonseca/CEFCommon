@@ -104,7 +104,12 @@ public class CFActivity extends FragmentActivity {
     protected void onStop() {
         super.onStop();
         if (dialog != null) dialog.dismiss();
-        if (getLatestActivity() == this) latestActivity = null;
+        clearLatestActivityIfSame();
+    }
+
+    private void clearLatestActivityIfSame() {
+        final CFActivity activity = latestActivity != null ? latestActivity.get() : null;
+        if (activity != null && activity.equals(this)) latestActivity = null;
     }
 
     @Override
