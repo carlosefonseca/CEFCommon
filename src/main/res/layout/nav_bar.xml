@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/nav_bar_root"
+        style="?NavBarBase"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fitsSystemWindows="true">
+
+    <ImageButton
+            android:id="@+id/back_bt"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            style="?NavBarBack"
+            />
+            <!--android:background="@drawable/gray_btn_states"-->
+            <!--android:src="@drawable/back_button"-->
+            <!--android:contentDescription="@string/cd_back"-->
+
+    <com.carlosefonseca.common.widgets.AutoResizeTextView
+            android:layout_width="0dp"
+            android:layout_height="50dp"
+            android:layout_weight="1"
+            tools:text="TEXT"
+            android:lineSpacingMultiplier="1.1"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:maxLines="2"
+            android:ellipsize="end"
+            android:paddingLeft="20dp"
+            android:paddingRight="20dp"
+            android:id="@+id/nav_title"
+            style="?NavBarTitle"
+            />
+
+</LinearLayout>

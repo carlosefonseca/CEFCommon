@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+
+<LinearLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        tools:ignore="HardcodedText">
+
+    <Button
+            android:id="@+id/minus"
+            style="?NumberPickerButton"
+            android:text="—"/>
+
+    <EditText
+            android:id="@+id/value"
+            android:gravity="center"
+            android:selectAllOnFocus="true"
+            style="?NumberPickerEditText"
+            android:inputType="phone">
+    </EditText>
+
+    <Button
+            android:id="@+id/plus"
+            style="?NumberPickerButton"
+            android:text="+"/>
+</LinearLayout>

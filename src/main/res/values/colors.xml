@@ -1,0 +1,7 @@
+<resources>
+
+    <color name="black_overlay">#66000000</color>
+
+    <drawable name="list_background">@color/White</drawable>
+
+</resources>
