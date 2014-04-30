@@ -15,6 +15,8 @@ import java.security.InvalidParameterException;
  * Works fine when mixed with {@link android.view.View.OnLongClickListener}.
  * No idea how to integrate this with a {@link android.view.View.OnClickListener} or
  * {@link android.view.GestureDetector.OnDoubleTapListener}.
+ *
+ * Looks like you need to set {@link View#setClickable(boolean)} to true on views that aren't buttons.
  */
 @SuppressWarnings("ConstantConditions")
 public class TripleTapTouchListener implements View.OnTouchListener {
