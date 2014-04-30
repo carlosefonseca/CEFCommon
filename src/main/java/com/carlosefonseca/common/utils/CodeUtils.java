@@ -64,6 +64,14 @@ public final class CodeUtils {
 
     public static String separator(final String text) {return "════════ " + text + " ════════";}
 
+    public static void sleep(int i) {
+        try {
+            Thread.sleep(i);
+        } catch (InterruptedException e) {
+            Log.e(TAG, "" + e.getMessage(), e);
+        }
+    }
+
     public interface RunnableWithView<T extends View> {
         void run(T view);
     }
