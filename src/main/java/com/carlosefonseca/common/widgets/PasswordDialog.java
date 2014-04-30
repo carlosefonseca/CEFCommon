@@ -32,6 +32,7 @@ public class PasswordDialog {
                 if (value.equals(password)) {
                     onCorrect.run();
                 }
+                dialog.dismiss();
             }
         };
 
