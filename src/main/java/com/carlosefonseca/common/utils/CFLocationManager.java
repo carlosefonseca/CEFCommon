@@ -131,7 +131,8 @@ public class CFLocationManager implements GooglePlayServicesClient.ConnectionCal
         if (mRequest == null) {
             mRequest = LocationRequest.create()
                                       .setInterval(frequencyMillis)
-                                      .setFastestInterval(1000)
+                                      .setFastestInterval(frequencyMillis / 2)
+                                      .setSmallestDisplacement(5)
                                       .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
         }
         return mRequest;
