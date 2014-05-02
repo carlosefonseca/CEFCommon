@@ -57,4 +57,12 @@ public final class ListUtils {
         }
         return list;
     }
+
+    public static void removeNullElements(ArrayList<?> arrayList) {
+        for (int i = arrayList.size() - 1; i >= 0; i--) {
+            if (arrayList.get(i) == null) {
+                arrayList.remove(i);
+            }
+        }
+    }
 }
