@@ -3,6 +3,7 @@ package com.carlosefonseca.common;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Handler;
+import android.os.Looper;
 import com.carlosefonseca.common.utils.*;
 import com.google.gson.*;
 import com.loopj.android.http.AsyncHttpClient;
@@ -33,6 +34,7 @@ import java.util.Date;
 import java.util.Locale;
 
 import static com.carlosefonseca.common.utils.CodeUtils.getTag;
+import static com.carlosefonseca.common.utils.CodeUtils.isMainThread;
 
 public class CFRestClient {
     protected static final String EMPTY_MESSAGE = "EMPTY";
@@ -224,10 +226,8 @@ public class CFRestClient {
             client.post(getAbsoluteUrl(url), params, responseHandler);
         }
 
-        public static void post(String url,
-                                RequestParams params,
-                                @Nullable String jsonBody,
-                                AsyncHttpResponseHandler responseHandler) {
+        public static void post(final String url, final RequestParams params,
+                                @Nullable String jsonBody, final AsyncHttpResponseHandler responseHandler) {
             StringEntity se = null;
             try {
 //                se = new StringEntity(StringEscapeUtils.escapeJava(jsonBody));
@@ -235,9 +235,20 @@ public class CFRestClient {
             } catch (UnsupportedEncodingException e) {
                 Log.e(TAG, "Exception", e);
             }
+            final StringEntity s = se;
             Log.v(TAG, "POST: " + getAbsoluteUrl(url) + "?" + params.toString());
             Log.v(TAG, "POST: " + jsonBody);
-            client.post(context, getAbsoluteUrl(url) + "?" + params.toString(), se, "application/json", responseHandler);
+            Runnable runnable = new Runnable() {
+                @Override
+                public void run() {
+                    client.post(context, getAbsoluteUrl(url) + "?" + params.toString(), s, "application/json", responseHandler);
+                }
+            };
+            if (!isMainThread()) {
+                new Handler(Looper.getMainLooper()).post(runnable);
+            } else {
+                runnable.run();
+            }
         }
 
         public static void post(final String url, final File file, final TextHttpResponseHandler responseHandler) {

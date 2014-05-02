@@ -106,7 +106,7 @@ public final class TypeFaceManager {
      *
      * @return List of filenames.
      */
-    private static List<String> getFileList() {
+    public static List<String> getFileList() {
         if (filelist == null) {
             try {
                 filelist = Arrays.asList(CFApp.getContext().getAssets().list(FONTS_FOLDER.replace("/", "")));

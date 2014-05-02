@@ -171,7 +171,7 @@ public class AudioPlayer {
      */
     @Nullable
     public static MediaPlayer getMediaPlayerForFile(Context c, File audioFile) {
-        if (audioFile.exists()) {
+        if (audioFile.exists() && audioFile.isFile()) {
             Log.v(TAG, "" + audioFile.getName() + " Setting up...");
             MediaPlayer mediaPlayer = MediaPlayer.create(c, Uri.fromFile(audioFile));
             if (mediaPlayer != null) {

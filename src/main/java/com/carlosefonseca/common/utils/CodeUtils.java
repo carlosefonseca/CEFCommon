@@ -2,6 +2,7 @@ package com.carlosefonseca.common.utils;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -121,7 +122,30 @@ public final class CodeUtils {
         }
     }
 
+    public static void setupNumericEditText(final AlertDialog dialog,
+                                            final EditText editText,
+                                            @Nullable final DialogInterface.OnClickListener onDone) {
+        editText.setImeOptions(EditorInfo.IME_ACTION_DONE);
+        editText.setInputType(InputType.TYPE_CLASS_PHONE | InputType.TYPE_NUMBER_VARIATION_PASSWORD);
+        editText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if (onDone != null && (actionId == EditorInfo.IME_ACTION_SEARCH || actionId == EditorInfo.IME_ACTION_DONE ||
+                                       event.getAction() == KeyEvent.ACTION_DOWN &&
+                                       event.getKeyCode() == KeyEvent.KEYCODE_ENTER)) {
+                    // the user is done typing.
+                    onDone.onClick(dialog, 0);
+                    return true; // consume.
+                }
+                return false; // pass on to other listeners.
+            }
+        });
+    }
+
+
     @SuppressLint("InlinedApi")
+    @Deprecated
     public static void setupNumericEditText(final EditText editText, @Nullable final DialogInterface.OnClickListener onDone) {
         editText.setImeOptions(EditorInfo.IME_ACTION_DONE);
         editText.setInputType(InputType.TYPE_CLASS_PHONE | InputType.TYPE_NUMBER_VARIATION_PASSWORD);

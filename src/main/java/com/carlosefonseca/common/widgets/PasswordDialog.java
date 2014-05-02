@@ -27,6 +27,7 @@ public class PasswordDialog {
         alert.setView(input);
 
         final DialogInterface.OnClickListener onPositiveClick = new DialogInterface.OnClickListener() {
+            @Override
             public void onClick(DialogInterface dialog, int whichButton) {
                 String value = input.getText().toString();
                 if (value.equals(password)) {
@@ -36,17 +37,18 @@ public class PasswordDialog {
             }
         };
 
-        CodeUtils.setupNumericEditText(input, onPositiveClick);
 
         alert.setPositiveButton("OK", onPositiveClick);
 
         alert.setNegativeButton("Cancelar", new DialogInterface.OnClickListener() {
+            @Override
             public void onClick(DialogInterface dialog, int whichButton) {
                 // Canceled.
             }
         });
 
         d = alert.create();
+        CodeUtils.setupNumericEditText(d, input, onPositiveClick);
         return d;
     }
 

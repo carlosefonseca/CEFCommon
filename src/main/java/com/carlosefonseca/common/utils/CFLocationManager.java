@@ -12,44 +12,66 @@ import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.maps.LocationSource;
 
-import java.lang.String;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 public class CFLocationManager implements GooglePlayServicesClient.ConnectionCallbacks,
                                           GooglePlayServicesClient.OnConnectionFailedListener,
                                           LocationListener,
                                           LocationSource {
-    // These settings are the same as the settings for the map. They will in fact give you updates at
-    // the maximal rates currently possible.
-    private static final LocationRequest REQUEST = LocationRequest.create().setInterval(5000)         // 5 seconds
-            .setFastestInterval(2000)    // 16ms = 60fps
-            .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
     private static final String TAG = CodeUtils.getTag(CFLocationManager.class);
+
+    private LocationRequest mRequest;
+    private int frequencyMillis = 5000;
+
     protected OnLocationChangedListener mapLocationChangedListener;
     protected Handler handler;
     private boolean connectionRequested;
-    private List<OnLocationChangedListener> listeners = new ArrayList<OnLocationChangedListener>();
+    private Set<OnLocationChangedListener> listeners = new HashSet<OnLocationChangedListener>();
     private Location location;
     protected LocationClient mLocationClient;
+    private boolean mShouldBeLocating;
 
     private static void toast(String text) {
         if (CFApp.isTestDevice()) Toast.makeText(CFApp.getContext(), text, Toast.LENGTH_SHORT).show();
     }
 
-    void setUpLocationClientIfNeeded() {
+    /* GOOGLE */
+
+    /**
+     * when it connects, calls {@link #onConnected(android.os.Bundle)}
+     *
+     * @return True if LocationClient is ready, false if connecting.
+     */
+    boolean setUpLocationClientIfNeeded() {
         if (mLocationClient == null) {
-            mLocationClient = new LocationClient(CFApp.getContext(), this,  // ConnectionCallbacks
-                                                 this); // OnConnectionFailedListener
+            mLocationClient = new LocationClient(CFApp.getContext(), this, this);
         }
+
+        if (mLocationClient.isConnected()) return true;
+
+        if (!mLocationClient.isConnecting()) {
+            connectionRequested = true;
+            mLocationClient.connect();
+        }
+        return false;
     }
 
     @Override
     public void onConnected(Bundle connectionHint) {
         connectionRequested = false;
-        mLocationClient.requestLocationUpdates(REQUEST, this);  // LocationListener
+        if (mShouldBeLocating) startLocationUpdates();
         toast("onConnected");
     }
+
+    private void startLocationUpdates() {
+        mLocationClient.requestLocationUpdates(getLocationRequest(), this);
+    }
+
+    private void stopLocationUpdates() {
+        if (mLocationClient != null && mLocationClient.isConnected()) mLocationClient.removeLocationUpdates(this);
+    }
+
 
     @Override
     public void onDisconnected() {
@@ -60,53 +82,23 @@ public class CFLocationManager implements GooglePlayServicesClient.ConnectionCal
     @Override
     public void onConnectionFailed(ConnectionResult connectionResult) {
         connectionRequested = false;
-        toast("onConnectionFailed");
+        Toast.makeText(CFApp.getContext(), "Error on Location Services!", Toast.LENGTH_SHORT).show();
 
     }
 
-    @Override
-    public void onLocationChanged(Location location) {
-        this.location = location;
-        if (mapLocationChangedListener != null) mapLocationChangedListener.onLocationChanged(location);
-        for (OnLocationChangedListener listener : listeners) {
-            listener.onLocationChanged(location);
-        }
-//        EventBus.getDefault().postSticky(location);
-    }
-
-    public Location getLastLocation() {
-        return location != null
-               ? location
-               : mLocationClient != null && mLocationClient.isConnected() ? mLocationClient.getLastLocation() : null;
-    }
-
-    public void start() {
-        setUpLocationClientIfNeeded();
-        if (!hasStarted()) {
-            mLocationClient.connect();
-            connectionRequested = true;
-        }
-    }
-
-    public void stop() {
-        connectionRequested = false;
-        if (mLocationClient != null) mLocationClient.disconnect();
-    }
-
-    public void clear() {
-    }
+    public void clear() { }
 
     public boolean hasStarted() {
         return (mLocationClient != null &&
                 (mLocationClient.isConnected() || mLocationClient.isConnecting() || connectionRequested));
     }
 
+    /* (MAP) LOCATION SOURCE */
+
     @Override
     public void activate(OnLocationChangedListener onLocationChangedListener) {
         mapLocationChangedListener = onLocationChangedListener;
-        if (!hasStarted()) {
-            start();
-        }
+        start();
         if (location != null) onLocationChangedListener.onLocationChanged(location);
     }
 
@@ -114,6 +106,8 @@ public class CFLocationManager implements GooglePlayServicesClient.ConnectionCal
     public void deactivate() {
         mapLocationChangedListener = null;
     }
+
+    /* LISTENERS */
 
     public void addListener(OnLocationChangedListener listener) {
         listeners.add(listener);
@@ -124,5 +118,80 @@ public class CFLocationManager implements GooglePlayServicesClient.ConnectionCal
         listeners.remove(listener);
         Log.d(TAG, "Listeners--: " + listeners.size());
         if (listeners.isEmpty()) stop();
+    }
+
+    /**
+     * Optional.
+     */
+    public void prepare() {
+        setUpLocationClientIfNeeded();
+    }
+
+    private LocationRequest getLocationRequest() {
+        if (mRequest == null) {
+            mRequest = LocationRequest.create()
+                                      .setInterval(frequencyMillis)
+                                      .setFastestInterval(1000)
+                                      .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        }
+        return mRequest;
+    }
+
+
+    /* API */
+
+    @Override
+    public void onLocationChanged(Location location) {
+        this.location = location;
+        if (mapLocationChangedListener != null) mapLocationChangedListener.onLocationChanged(location);
+        for (OnLocationChangedListener listener : listeners) {
+            listener.onLocationChanged(location);
+        }
+    }
+
+    public void start() {
+        if (mShouldBeLocating) return;
+        mShouldBeLocating = true;
+        if (setUpLocationClientIfNeeded()) {
+            startLocationUpdates();
+        }
+    }
+
+    public void stop() {
+        mShouldBeLocating = false;
+        connectionRequested = false;
+        stopLocationUpdates();
+    }
+
+    public Location getLastLocation() {
+        if (mLocationClient != null && mLocationClient.isConnected()) {
+            Location googleLoc = mLocationClient.getLastLocation();
+            return location == null || googleLoc.getTime() > location.getTime() ? googleLoc : location;
+        }
+        return location;
+    }
+
+    public int getFrequencyMillis() {
+        return frequencyMillis;
+    }
+
+    public void setFrequencyMillis(int frequencyMillis) {
+        this.frequencyMillis = frequencyMillis;
+        mRequest = null;
+        if (mShouldBeLocating) {
+            startLocationUpdates();
+        }
+    }
+
+    public void close() {
+        stop();
+        if (mLocationClient != null) {
+            mLocationClient.unregisterConnectionCallbacks(this);
+            mLocationClient.unregisterConnectionFailedListener(this);
+            mLocationClient.disconnect();
+            mLocationClient = null;
+        }
+        listeners = null;
+        mapLocationChangedListener = null;
     }
 }
