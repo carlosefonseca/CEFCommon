@@ -27,8 +27,9 @@ public final class ListUtils {
         return list.subList(Math.max(list.size() - length, 0), list.size());
     }
 
+    @SafeVarargs
     public static <T> ArrayList<T> arrayListWithObjects(T... objects) {
-        ArrayList<T> list = new ArrayList<T>();
+        ArrayList<T> list = new ArrayList<>();
         Collections.addAll(list, objects);
         return list;
     }

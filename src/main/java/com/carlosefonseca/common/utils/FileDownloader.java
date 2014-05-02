@@ -1,86 +1,102 @@
 package com.carlosefonseca.common.utils;
 
 import android.os.AsyncTask;
-import android.util.Pair;
+import android.os.Build;
+import junit.framework.Assert;
 import org.apache.commons.collections4.CollectionUtils;
-import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
 import java.net.SocketException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.List;
-import java.util.concurrent.*;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public final class FileDownloader {
     private static final String TAG = CodeUtils.getTag(FileDownloader.class);
 
-    private static final int CORE_POOL_SIZE = 1;
-    private static final int MAXIMUM_POOL_SIZE = 5;
-    private static final int KEEP_ALIVE = 10;
-
-    public static AtomicInteger sDownloads = new AtomicInteger();
-
-    private static final BlockingQueue<Runnable> sPoolWorkQueue = new LinkedBlockingQueue<Runnable>(Integer.MAX_VALUE);
+    private static final int CPU_COUNT = Runtime.getRuntime().availableProcessors();
+    private static final int CORE_POOL_SIZE = CPU_COUNT + 1;
+    private static final int MAX_POOL_SIZE = CPU_COUNT * 2 + 1;
+    private static final long KEEP_ALIVE_TIME = 1L;
+    private static final int MAX_QUEUE_SIZE = 1024;
     private static ThreadPoolExecutor sThreadPoolExecutor;
 
-    private static final ThreadFactory sThreadFactory = new ThreadFactory() {
-        private final AtomicInteger mCount = new AtomicInteger(1);
-
-        @NotNull
-        @Override
-        public Thread newThread(@NotNull Runnable r) {
-            return new Thread(r, "AsyncTask #" + mCount.getAndIncrement());
-        }
-    };
+    public static AtomicInteger sDownloadCount = new AtomicInteger();
 
     private FileDownloader() {}
 
+    public static class Download {
+        public final String url;
+        public final File file;
+        int tries;
 
-    public static void downloadFiles(List<Pair<String, File>> toDownload) {
-        if (CollectionUtils.isEmpty(toDownload)) return;
-
-        if (sNotifier == null) sNotifier = new Notification();
-        if (sThreadPoolExecutor == null) {
-            sThreadPoolExecutor = new ThreadPoolExecutor(CORE_POOL_SIZE,
-                                                         MAXIMUM_POOL_SIZE,
-                                                         KEEP_ALIVE,
-                                                         TimeUnit.SECONDS,
-                                                         sPoolWorkQueue,
-                                                         sThreadFactory);
+        public Download(String url, File file) {
+            Assert.assertTrue("" + url + " is not a URL", url.startsWith("http"));
+            this.url = url;
+            this.file = file;
         }
 
-        if (sDownloads.get() == 0 && toDownload.size() != 0) sNotifier.start(sDownloads.get());
+        boolean canRetry() {
+            return tries < 5;
+        }
+    }
 
-        sDownloads.getAndAdd(toDownload.size());
+    public static void downloadFiles(List<Download> toDownload) {
+        if (CollectionUtils.isEmpty(toDownload)) return;
 
-        if (sDownloads.get() > 0) {
-            boolean downloadingSomething = false;
-            for (Pair<String, File> stringFilePair : toDownload) {
-                if (stringFilePair.first.startsWith("http")) {
-                    downloadingSomething = true;
-                    //noinspection unchecked
-                    new Downloader().execute(stringFilePair);
-                } else {
-                    Log.w(TAG, new RuntimeException("" + stringFilePair.first + " is not a URL"));
-                }
-            }
-            if (!downloadingSomething) sNotifier.finished();
+        if (sDownloadCount.getAndAdd(toDownload.size()) == 0) {
+            getNotifier().start(sDownloadCount.get());
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+            getThreadPoolExecutor();
+            for (Download download : toDownload) new Downloader().executeOnExecutor(sThreadPoolExecutor, download);
+        } else {
+            for (Download download : toDownload) new Downloader().execute(download);
+        }
+    }
+
+    static void download(Download toDownload) {
+        if (!toDownload.canRetry()) {
+            Log.w(TAG, "Download of '" + toDownload.url + "' reached the limit of retries.");
+            return;
+        }
+        sDownloadCount.addAndGet(1);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+            getThreadPoolExecutor();
+            new Downloader().executeOnExecutor(sThreadPoolExecutor, toDownload);
+        } else {
+            new Downloader().execute(toDownload);
+        }
+    }
+
+    private static void getThreadPoolExecutor() {
+        if (sThreadPoolExecutor == null) {
+            sThreadPoolExecutor = new ThreadPoolExecutor(CORE_POOL_SIZE,
+                                                         MAX_POOL_SIZE,
+                                                         KEEP_ALIVE_TIME,
+                                                         TimeUnit.SECONDS,
+                                                         new LinkedBlockingQueue<Runnable>(MAX_QUEUE_SIZE));
         }
     }
 
 
-    static class Downloader extends AsyncTask<Pair<String, File>, Integer, String> {
+    static class Downloader extends AsyncTask<Download, Integer, String> {
 
         public static final int TIMEOUT_MILLIS = 15 * 1000;
         private static final String TAG = CodeUtils.getTag(Downloader.class);
 
-        @SafeVarargs
         @Override
-        protected final String doInBackground(Pair<String, File>... params) {
-            String uri = params[0].first.replace(" ", "%20");
-            File path = params[0].second;
+        protected final String doInBackground(Download... params) {
+            final Download download = params[0];
+            String uri = download.url.replace(" ", "%20");
+            File path = download.file;
+//            Log.v(TAG, uri);
+            download.tries++;
 
             if (path.exists()) {
                 return null;
@@ -115,14 +131,33 @@ public final class FileDownloader {
 
                 if (!tempPath.renameTo(path)) {
                     Log.w(TAG, new RuntimeException("RENAME FAILED " + tempPath.getName() + " -> " + path.getName()));
+                    tempPath.delete();
+                    path.delete();
+                    download(download);
                     return path.getName();
                 }
-                Log.v(TAG, String.format("(%d remain) Downloaded %s", sDownloads.get() - 1, path.getName()));
-            } catch (SocketException | FileNotFoundException e) {
-                Log.i(TAG, String.format("(%d remain) Download of %s failed: %s", sDownloads.get() - 1, uri, e.getMessage()));
+                Log.v(TAG,
+                      String.format("(%d remain) Downloaded %s%s",
+                                    sDownloadCount.get() - 1,
+                                    path.getName(),
+                                    download.tries > 1 ? " " + download.tries + " tries" : "")
+                );
+            } catch (SocketException e) {
+                // Network error. May retry
+                Log.i(TAG,
+                      String.format("(%d remain) Download of %s failed (will retry): %s",
+                                    sDownloadCount.get() - 1,
+                                    uri,
+                                    e.getMessage())
+                );
+                download(download);
+                return path.getName();
+            } catch (FileNotFoundException e) {
+                // URL is wrong - do not retry
+                Log.i(TAG, String.format("(%d remain) Download of %s failed: %s", sDownloadCount.get() - 1, uri, e.getMessage()));
                 return path.getName();
             } catch (Exception e) {
-                Log.i(TAG, String.format("(%d remain) Download of %s failed", sDownloads.get() - 1, uri), e);
+                Log.i(TAG, String.format("(%d remain) Download of %s failed", sDownloadCount.get() - 1, uri), e);
                 return path.getName();
             }
             return null;
@@ -134,8 +169,9 @@ public final class FileDownloader {
                 sNotifier.fileFailed(failedFile);
                 Log.d(TAG, "Download of " + failedFile + " failed");
             }
-            sNotifier.queueUpdate(sDownloads.decrementAndGet());
-            if (sDownloads.get() == 0) {
+            final int i = sDownloadCount.decrementAndGet();
+            sNotifier.queueUpdate(i);
+            if (i == 0) {
                 sNotifier.finished();
             }
         }
@@ -147,6 +183,7 @@ public final class FileDownloader {
     private static FileDownloaderNotifier sNotifier;
 
     public static FileDownloaderNotifier getNotifier() {
+        if (sNotifier == null) sNotifier = new Notification();
         return sNotifier;
     }
 
@@ -177,7 +214,7 @@ public final class FileDownloader {
 
         @Override
         public void queueUpdate(int i) {
-//            Log.v(TAG, "Queue Update. New count: " + sDownloads);
+//            Log.v(TAG, "Queue Update. New count: " + sDownloadCount);
         }
 
         @Override
