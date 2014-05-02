@@ -93,7 +93,7 @@ public class CFRestClient {
                 Log.w(TAG, "NO INTERNET! GET: " + url + "?" + requestParams.toString());
                 responseHandler.onFailure(0, null, (String)null, new NetworkingUtils.NotConnectedException());
             } else {
-                Log.v(responseHandler.TAG, "GET: " + url + "?" + requestParams.toString());
+                Log.d(responseHandler.TAG, "GET: " + url + "?" + requestParams.toString());
                 CFAPIClient.client.get(url, requestParams, responseHandler);
             }
         }
@@ -236,8 +236,8 @@ public class CFRestClient {
                 Log.e(TAG, "Exception", e);
             }
             final StringEntity s = se;
-            Log.v(TAG, "POST: " + getAbsoluteUrl(url) + "?" + params.toString());
-            Log.v(TAG, "POST: " + jsonBody);
+            Log.d(TAG, "POST: " + getAbsoluteUrl(url) + "?" + params.toString());
+            Log.d(TAG, "POST: " + jsonBody);
             Runnable runnable = new Runnable() {
                 @Override
                 public void run() {
@@ -333,15 +333,15 @@ public class CFRestClient {
         }
 
 
-        @Override
-        public void onStart() {
-            Log.d(TAG, "onStart");
-        }
+//        @Override
+//        public void onStart() {
+//            Log.v(TAG, "onStart");
+//        }
 
-        @Override
-        public void onFinish() {
-            Log.d(TAG, "onFinish");
-        }
+//        @Override
+//        public void onFinish() {
+//            Log.v(TAG, "onFinish");
+//        }
 
         @Override
         public void onSuccess(final T response) {
