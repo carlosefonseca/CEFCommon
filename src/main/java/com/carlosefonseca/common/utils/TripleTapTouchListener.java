@@ -59,7 +59,7 @@ public class TripleTapTouchListener implements View.OnTouchListener {
         mTripleTapListener = tripleTapListener;
 
         final ViewConfiguration configuration = ViewConfiguration.get(context);
-        int touchSlop = configuration.getScaledTouchSlop();
+        int touchSlop = configuration.getScaledDoubleTapSlop();
         mTouchSlopSquare = touchSlop * touchSlop;
     }
 
@@ -91,7 +91,7 @@ public class TripleTapTouchListener implements View.OnTouchListener {
                     } else {
                         cancel();
                         mDowns[0] = MotionEvent.obtain(ev);
-                        mDownCount++;
+                        mDownCount = 1;
                     }
                 }
 
