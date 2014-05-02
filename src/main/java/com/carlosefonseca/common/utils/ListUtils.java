@@ -65,4 +65,8 @@ public final class ListUtils {
             }
         }
     }
+
+    public static <T> List<T> defaultIfNull(List<T> list) {
+        return list == null ? new ArrayList<T>() : list;
+    }
 }
