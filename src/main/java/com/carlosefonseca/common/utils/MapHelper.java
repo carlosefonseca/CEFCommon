@@ -12,7 +12,6 @@ import android.os.Handler;
 import android.os.SystemClock;
 import android.view.View;
 import android.view.ViewTreeObserver;
-import android.view.animation.LinearInterpolator;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -225,12 +224,13 @@ public class MapHelper {
             return;
         }
 
-        final LinearInterpolator interpolator = new LinearInterpolator();
+//        final LinearInterpolator interpolator = new LinearInterpolator();
         handler.post(new Runnable() {
             @Override
             public void run() {
                 long elapsed = SystemClock.uptimeMillis() - start;
-                float t = interpolator.getInterpolation((float) elapsed / duration);
+//                float t = interpolator.getInterpolation((float) elapsed / duration);
+                float t = Math.min(elapsed / duration, 1f);
                 double lng = t * target.longitude + (1 - t) * startLatLng.longitude;
                 double lat = t * target.latitude + (1 - t) * startLatLng.latitude;
                 myLocationMarker.setPosition(new LatLng(lat, lng));
