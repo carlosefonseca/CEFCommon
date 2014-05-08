@@ -23,6 +23,7 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 import com.carlosefonseca.common.CFApp;
 import org.jetbrains.annotations.Nullable;
 
@@ -344,5 +345,14 @@ public final class CodeUtils {
                 Log.e(TAG, "" + e.getMessage(), e);
             }
         }
+    }
+
+    public static void toast(final String message) {
+        new Handler(Looper.getMainLooper()).post(new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(CFApp.getContext(), message, Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 }
