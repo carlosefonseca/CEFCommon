@@ -98,6 +98,7 @@ public class AutoResizeTextView extends TextView {
         requestLayout();
     }
 
+    @Override
     public int getMaxLines() {
         return mMaxLines;
     }

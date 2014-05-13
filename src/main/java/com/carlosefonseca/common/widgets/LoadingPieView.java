@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.*;
 import android.util.AttributeSet;
 import android.widget.ImageView;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Image View that displays a "Pie" graphic.
@@ -87,7 +88,7 @@ public class LoadingPieView extends ImageView {
 
 
     @Override
-    protected void onDraw(Canvas canvas) {
+    protected void onDraw(@NotNull Canvas canvas) {
         super.onDraw(canvas);
 //        int width = (int) (canvas.getWidth() * ImageUtils.getDensity() - strokeW);
 //        int width = canvas.getWidth();

@@ -33,6 +33,7 @@ public class YesNoDialog extends DialogFragment {
         setStyle(STYLE_NO_TITLE, R.style.DialogTranslucent);
     }
 
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = inflater.inflate(com.carlosefonseca.common.R.layout.yes_no_popup, container, false);
 //            title = (TextView) v.findViewById(R.id.title);

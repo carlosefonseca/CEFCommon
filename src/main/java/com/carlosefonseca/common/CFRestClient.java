@@ -40,7 +40,7 @@ public class CFRestClient {
     protected static final String EMPTY_MESSAGE = "EMPTY";
     private static final String TAG = CodeUtils.getTag(CFRestClient.class);
 
-    protected static boolean offline = false;
+    public static boolean offline = false;
 
     /**
      * Convenience method to invoke the HttpClient's GET by passing only the elements that usually change.
@@ -67,12 +67,12 @@ public class CFRestClient {
      * @param offline       Set to true to force the use of the offline file. Set to false to obey global offline flag.
      *                      If true, everything will be synchronous so you can count on something being returned ASAP.
      */
-    protected static <T> void get(String url,
-                                  RequestParams requestParams,
-                                  String file,
-                                  Class<T> clazz,
-                                  DataHandler<T> handler,
-                                  boolean offline) {
+    public static <T> void get(String url,
+                               RequestParams requestParams,
+                               String file,
+                               Class<T> clazz,
+                               DataHandler<T> handler,
+                               boolean offline) {
 
         final ResponseHandler<T> responseHandler = new ResponseHandler<>(clazz, handler);
 
@@ -110,13 +110,13 @@ public class CFRestClient {
      * @param offline       Set to true to force the use of the offline file. Set to false to obey global offline flag.
      *                      If true, everything will be synchronous so you can count on something being returned ASAP.
      */
-    protected static <T> void post(@NotNull String url,
-                                   @Nullable RequestParams requestParams,
-                                   @Nullable String body,
-                                   @Nullable String file,
-                                   @NotNull Class<T> clazz,
-                                   @Nullable DataHandler<T> handler,
-                                   boolean offline) {
+    public static <T> void post(@NotNull String url,
+                                @Nullable RequestParams requestParams,
+                                @Nullable String body,
+                                @Nullable String file,
+                                @NotNull Class<T> clazz,
+                                @Nullable DataHandler<T> handler,
+                                boolean offline) {
 
         final ResponseHandler<T> responseHandler = new ResponseHandler<>(clazz, handler);
 

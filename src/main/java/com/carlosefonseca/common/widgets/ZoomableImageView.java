@@ -11,6 +11,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import com.carlosefonseca.common.utils.CodeUtils;
 import com.carlosefonseca.common.utils.Log;
+import org.jetbrains.annotations.NotNull;
 
 public class ZoomableImageView extends View {
     private static final String TAG = CodeUtils.getTag(ZoomableImageView.class);
@@ -249,7 +250,7 @@ public class ZoomableImageView extends View {
 
 
     @Override
-    public boolean onTouchEvent(MotionEvent event) {
+    public boolean onTouchEvent(@NotNull MotionEvent event) {
         if (gestureDetector.onTouchEvent(event)) {
             return true;
         }
@@ -425,6 +426,7 @@ public class ZoomableImageView extends View {
 
 
     private Runnable mUpdateImagePositionTask = new Runnable() {
+        @Override
         public void run() {
             float[] mvals;
 
@@ -466,6 +468,7 @@ public class ZoomableImageView extends View {
     };
 
     private Runnable mUpdateImageScale = new Runnable() {
+        @Override
         public void run() {
             float transitionalRatio = targetScale / currentScale;
             float dx;

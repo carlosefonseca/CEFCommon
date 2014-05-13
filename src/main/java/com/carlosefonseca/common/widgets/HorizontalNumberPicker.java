@@ -79,10 +79,12 @@ public class HorizontalNumberPicker extends LinearLayout {
         CONFIG
      */
 
+    @Override
     public int getId() {
         return id;
     }
 
+    @Override
     public void setId(int id) {
         this.id = id;
     }
@@ -224,6 +226,7 @@ public class HorizontalNumberPicker extends LinearLayout {
      */
 
     final InputFilter filter = new InputFilter() {
+        @Override
         @Nullable
         public CharSequence filter(CharSequence source, int start, int end, Spanned dest, int dstart, int dend) {
             for (int i = start; i < end; i++) {

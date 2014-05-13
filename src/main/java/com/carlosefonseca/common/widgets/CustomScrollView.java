@@ -6,6 +6,7 @@ import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ScrollView;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Scroll view that ignores gestures that are more on the X direction than on the Y direction.
@@ -22,12 +23,12 @@ public class CustomScrollView extends ScrollView {
     }
 
     @Override
-    public boolean onInterceptTouchEvent(MotionEvent ev) {
+    public boolean onInterceptTouchEvent(@NotNull MotionEvent ev) {
         return super.onInterceptTouchEvent(ev) && mGestureDetector.onTouchEvent(ev);
     }
 
     // Return false if we're scrolling in the x direction
-    class YScrollDetector extends GestureDetector.SimpleOnGestureListener {
+    static class YScrollDetector extends GestureDetector.SimpleOnGestureListener {
         @Override
         public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
             return Math.abs(distanceY) > Math.abs(distanceX);

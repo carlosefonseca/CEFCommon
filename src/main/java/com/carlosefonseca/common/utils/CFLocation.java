@@ -2,6 +2,7 @@ package com.carlosefonseca.common.utils;
 
 import android.location.Location;
 import android.util.Pair;
+import org.jetbrains.annotations.NotNull;
 
 import java.security.InvalidParameterException;
 import java.text.DecimalFormat;
@@ -84,7 +85,8 @@ public class CFLocation extends Location implements Comparable<CFLocation> {
         this.index = index;
     }
 
-    public int compareTo(CFLocation other) {
+    @Override
+    public int compareTo(@NotNull CFLocation other) {
         return (int) (this.distance - other.distance);
     }
 

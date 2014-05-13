@@ -71,10 +71,12 @@ public class NumberPicker extends LinearLayout {
         CONFIG
      */
 
+    @Override
     public int getId() {
         return id;
     }
 
+    @Override
     public void setId(int id) {
         this.id = id;
     }
@@ -216,6 +218,7 @@ public class NumberPicker extends LinearLayout {
      */
 
     final InputFilter filter = new InputFilter() {
+        @Override
         public CharSequence filter(CharSequence source, int start, int end, Spanned dest, int dstart, int dend) {
             for (int i = start; i < end; i++) {
                 if (!Character.isDigit(source.charAt(i))) {
