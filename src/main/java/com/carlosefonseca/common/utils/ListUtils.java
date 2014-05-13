@@ -4,6 +4,7 @@ import android.os.Build;
 import android.util.SparseArray;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -69,5 +70,33 @@ public final class ListUtils {
 
     public static <T> List<T> defaultIfNull(List<T> list) {
         return list == null ? new ArrayList<T>() : list;
+    }
+
+    public static class ListComparator<T> {
+        public final List<T> newObjects;  // to create
+        public final List<T> sameObjects; // to do nothing
+        public final List<T> oldObjects;  // to delete
+
+        ListComparator(List<T> newObjects, List<T> sameObjects, List<T> oldObjects) {
+            this.newObjects = newObjects;
+            this.sameObjects = sameObjects;
+            this.oldObjects = oldObjects;
+        }
+
+        public static <T> ListComparator<T> compute(Collection<T> existingStuff, Collection<T> newStuff) {
+            ArrayList<T> oldObjects = new ArrayList<>(existingStuff);
+            ArrayList<T> newObjects = new ArrayList<>();
+            ArrayList<T> sameObjects = new ArrayList<>();
+
+            for (T t : newStuff) {
+                final boolean removed = oldObjects.remove(t);
+                if (removed) {
+                    sameObjects.add(t);
+                } else {
+                    newObjects.add(t);
+                }
+            }
+            return new ListComparator<>(newObjects, sameObjects, oldObjects);
+        }
     }
 }
