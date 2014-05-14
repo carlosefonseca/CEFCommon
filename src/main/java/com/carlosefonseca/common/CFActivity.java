@@ -87,7 +87,8 @@ public class CFActivity extends FragmentActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        latestActivity = new WeakReference<CFActivity>(this);
+        //noinspection ObjectEquality
+        setLatestActivity();
         if (canRegisterRunnables && !registered) {
             EventBus.getDefault().registerSticky(this, RunnableOnActivity.class, RunnableOnActivityWrapper.class);
             registered = true;
@@ -98,6 +99,7 @@ public class CFActivity extends FragmentActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        setLatestActivity();
     }
 
     @Override
@@ -107,9 +109,12 @@ public class CFActivity extends FragmentActivity {
         clearLatestActivityIfSame();
     }
 
+    private void setLatestActivity() {
+        if (latestActivity == null || latestActivity.get() != this) latestActivity = new WeakReference<>(this);
+    }
+
     private void clearLatestActivityIfSame() {
-        final CFActivity activity = latestActivity != null ? latestActivity.get() : null;
-        if (activity != null && activity.equals(this)) latestActivity = null;
+        if (latestActivity != null && latestActivity.get() == this) latestActivity = null;
     }
 
     @Override
@@ -119,6 +124,7 @@ public class CFActivity extends FragmentActivity {
             EventBus.getDefault().unregister(this, RunnableOnActivity.class, RunnableOnActivityWrapper.class);
             registered = false;
         }
+        clearLatestActivityIfSame();
     }
 
     void onEventMainThread(RunnableOnActivity runnable) {
