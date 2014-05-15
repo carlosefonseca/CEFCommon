@@ -124,7 +124,7 @@ public class CFActivity extends FragmentActivity {
             EventBus.getDefault().unregister(this, RunnableOnActivity.class, RunnableOnActivityWrapper.class);
             registered = false;
         }
-        clearLatestActivityIfSame();
+//        clearLatestActivityIfSame();
     }
 
     void onEventMainThread(RunnableOnActivity runnable) {
