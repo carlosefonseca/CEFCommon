@@ -89,7 +89,7 @@ public final class Log {
         if (remoteLogger == null || priority < sRemoteMinPriority || !remoteLogger.log(priority, tag, msg, tr)) {
             // If no remoteLogger, too low to do remote log or if remote log didn't log to logcat: do android log
             if (consoleLogging) {
-                android.util.Log.println(priority, tag, msg);
+                android.util.Log.println(priority, tag, msg == null ? "<no message given>" : msg);
                 if (tr != null) android.util.Log.println(priority, tag, getStackTraceString(tr));
             }
         }
