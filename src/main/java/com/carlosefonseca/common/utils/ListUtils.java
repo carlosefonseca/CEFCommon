@@ -8,8 +8,12 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import static com.carlosefonseca.common.utils.CodeUtils.LONG_L;
+import static com.carlosefonseca.common.utils.CodeUtils.SIDE_T;
+
 @SuppressWarnings("UnusedDeclaration")
 public final class ListUtils {
+
     private ListUtils() {}
 
     public static <T> T first(List<T> list) {
@@ -97,6 +101,41 @@ public final class ListUtils {
                 }
             }
             return new ListComparator<>(newObjects, sameObjects, oldObjects);
+        }
+
+        /**
+         * Same as {@link #compute(java.util.Collection, java.util.Collection)} but on "sameObjects" the ones on the "existing
+         * stuff" list are returned.
+         */
+        public static <T> ListComparator<T> compute2(Collection<T> existingStuff, Collection<T> newStuff) {
+            ArrayList<T> oldObjects = new ArrayList<>(existingStuff);
+            ArrayList<T> newObjects = new ArrayList<>();
+            ArrayList<T> sameObjects = new ArrayList<>();
+
+            for (T t : newStuff) {
+                final int index = oldObjects.indexOf(t);
+                if (index >= 0) {
+                    sameObjects.add(oldObjects.remove(index));
+                } else {
+                    newObjects.add(t);
+                }
+            }
+            return new ListComparator<>(newObjects, sameObjects, oldObjects);
+        }
+
+        @Override
+        public String toString() {
+            return "ListComparator of " + getTypeName() + "\n" +
+                   SIDE_T + " NEW:  " + newObjects + "\n" +
+                   SIDE_T + " SAME: " + sameObjects + "\n" +
+                   LONG_L + " OLD:  " + oldObjects;
+        }
+
+        protected String getTypeName() {
+            final T instance = !newObjects.isEmpty()
+                               ? newObjects.get(0)
+                               : !oldObjects.isEmpty() ? oldObjects.get(0) : !sameObjects.isEmpty() ? sameObjects.get(0) : null;
+            return instance != null ? instance.getClass().getSimpleName() : "<Empty List?>";
         }
     }
 }

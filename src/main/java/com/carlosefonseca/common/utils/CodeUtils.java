@@ -36,6 +36,8 @@ public final class CodeUtils {
     //    public static final Pattern packageNameRegex = Pattern.compile(".+\\.([^.]+\\.).+");
     public static final Pattern packageNameRegex = Pattern.compile("\\.");
     private static final String TAG = CodeUtils.getTag(CodeUtils.class);
+    public static final String SIDE_T = "├─";
+    public static final String LONG_L = "└─";
 
     private CodeUtils() {}
 
