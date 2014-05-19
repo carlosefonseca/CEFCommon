@@ -106,11 +106,13 @@ public final class AppUpdater {
             if (latestVersions == null) {
                 Toast.makeText(activity, "Error :(", Toast.LENGTH_SHORT).show();
                 Log.w(TAG, new RuntimeException("No known update checked"));
+                return;
             } else if (latestVersions.containsKey(channel)) {
                 latestVersion = latestVersions.get(channel);
             } else {
                 Toast.makeText(activity, "Error :(", Toast.LENGTH_SHORT).show();
                 Log.w(TAG, new RuntimeException("No known update checked."));
+                return;
             }
         }
 

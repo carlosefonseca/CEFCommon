@@ -46,11 +46,11 @@ public class DownloadURL extends AsyncTask<String, Integer, String> {
     @Override
     protected String doInBackground(String... sUrl) {
         try {
-            URL possibilyShortenedURL = new URL(sUrl[0]);
+            URL possiblyShortenedURL = new URL(sUrl[0]);
             URL url;
             URLConnection connection;
 
-            HttpURLConnection ucon = (HttpURLConnection) possibilyShortenedURL.openConnection();
+            HttpURLConnection ucon = (HttpURLConnection) possiblyShortenedURL.openConnection();
             if (ucon.getResponseCode() != 200) {
                 // yep, shortened
                 ucon.setInstanceFollowRedirects(false);
@@ -59,7 +59,7 @@ public class DownloadURL extends AsyncTask<String, Integer, String> {
             } else {
                 // real url
                 connection = ucon;
-                url = possibilyShortenedURL;
+                url = possiblyShortenedURL;
             }
             connection.connect();
 
