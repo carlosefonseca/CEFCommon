@@ -117,6 +117,7 @@ public final class FileUtils {
         return true;
     }
 
+    @Nullable
     public static String StrFromFile(String file) {
         try {
             InputStream is;
@@ -135,6 +136,7 @@ public final class FileUtils {
         return null;
     }
 
+    @Nullable
     public static String StrFromFile(File file) {
         try {
             InputStream is;
@@ -158,10 +160,25 @@ public final class FileUtils {
         }
     }
 
+    @Nullable
     public static String StrFromFileInAssets(String file) {
         try {
             InputStream is;
             is = CFApp.getContext().getAssets().open(file);
+            return new Scanner(is, "UTF-8").useDelimiter("\\A").next();
+        } catch (FileNotFoundException e) {
+            Log.w(TAG, "File not found " + file);
+        } catch (IOException e) {
+            Log.e(TAG, "Error opening the file " + file, e);
+        }
+        return null;
+    }
+
+    @Nullable
+    public static String StrFromFileInAssets(Context context, String file) {
+        try {
+            InputStream is;
+            is = context.getAssets().open(file);
             return new Scanner(is, "UTF-8").useDelimiter("\\A").next();
         } catch (FileNotFoundException e) {
             Log.w(TAG, "File not found " + file);
