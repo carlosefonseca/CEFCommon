@@ -25,6 +25,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Type;
 import java.text.ParseException;
@@ -52,7 +53,7 @@ public class CFRestClient {
      * @param clazz         The class representing the JSON data to deserialize.
      * @param handler       The handler that will receive the deserialized object or the errors that might occur.
      */
-    protected static <T> void get(String url, RequestParams requestParams, String file, Class<T> clazz, DataHandler<T> handler) {
+    protected static <T> void get(String url, @Nullable RequestParams requestParams, @Nullable String file, Class<T> clazz, DataHandler<T> handler) {
         get(url, requestParams, file, clazz, handler, CFRestClient.offline);
     }
 
@@ -68,8 +69,8 @@ public class CFRestClient {
      *                      If true, everything will be synchronous so you can count on something being returned ASAP.
      */
     public static <T> void get(String url,
-                               RequestParams requestParams,
-                               String file,
+                               @Nullable RequestParams requestParams,
+                               @Nullable String file,
                                Class<T> clazz,
                                DataHandler<T> handler,
                                boolean offline) {
@@ -89,11 +90,12 @@ public class CFRestClient {
             url = CFAPIClient.getAbsoluteUrl(url);
 
             // ONLINE
+            final String fullUrl = "GET: " + url + (requestParams == null ? "" : "?" + requestParams.toString());
             if (!NetworkingUtils.hasInternet()) {
-                Log.w(TAG, "NO INTERNET! GET: " + url + "?" + requestParams.toString());
+                Log.w(TAG, "NO INTERNET! " + fullUrl);
                 responseHandler.onFailure(0, null, (String)null, new NetworkingUtils.NotConnectedException());
             } else {
-                Log.d(responseHandler.TAG, "GET: " + url + "?" + requestParams.toString());
+                Log.d(responseHandler.TAG, fullUrl);
                 CFAPIClient.client.get(url, requestParams, responseHandler);
             }
         }
@@ -197,11 +199,15 @@ public class CFRestClient {
             return URL + relativeUrl;
         }
 
-        public static void getOffline(final String file, final TextHttpResponseHandler responseHandler) {
+        public static void getOffline(@Nullable final String file, final TextHttpResponseHandler responseHandler) {
             getOffline(file, responseHandler, true);
         }
 
-        public static void getOffline(final String file, final TextHttpResponseHandler responseHandler, boolean async) {
+        public static void getOffline(@Nullable final String file, final TextHttpResponseHandler responseHandler, boolean async) {
+            if (file == null) {
+                responseHandler.onFailure(404, new Header[0], "", new IOException("Offline file not specified"));
+                return;
+            }
             try {
                 Log.v(TAG, "Reading local file " + file);
                 Runnable r = new Runnable() {
@@ -363,7 +369,7 @@ public class CFRestClient {
         }
 
         @Override
-        public void onFailure(int statusCode, Header[] headers, String responseBody, Throwable error) {
+        public void onFailure(int statusCode, @Nullable Header[] headers, @Nullable String responseBody, Throwable error) {
             try {
                 if (!(error instanceof NetworkingUtils.NotConnectedException)) {
                     Log.w(TAG, "Error! " + error.getMessage() + " — " + responseBody);
