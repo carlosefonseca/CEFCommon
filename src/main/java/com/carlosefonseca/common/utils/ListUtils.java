@@ -2,6 +2,7 @@ package com.carlosefonseca.common.utils;
 
 import android.os.Build;
 import android.util.SparseArray;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
@@ -40,10 +41,25 @@ public final class ListUtils {
         return list;
     }
 
+    /**
+     * Returns a list containing all objects.
+     * @see #list(java.util.List[])
+     */
     @SafeVarargs
     public static <T> ArrayList<T> list(T... objects) {
         ArrayList<T> list = new ArrayList<>();
         Collections.addAll(list, objects);
+        return list;
+    }
+
+    /**
+     * Merges elements of all lists into a single list.
+     * @see #list(Object[])
+     */
+    @SafeVarargs
+    public static <T, L extends List<T>> ArrayList<T> list(L... lists) {
+        ArrayList<T> list = new ArrayList<>();
+        for (L ts : lists) list.addAll(ts);
         return list;
     }
 
@@ -80,7 +96,7 @@ public final class ListUtils {
         }
     }
 
-    public static <T> List<T> defaultIfNull(List<T> list) {
+    public static <T> List<T> defaultIfNull(@Nullable List<T> list) {
         return list == null ? new ArrayList<T>() : list;
     }
 
@@ -89,10 +105,10 @@ public final class ListUtils {
 
         public final List<T> newObjects;  // to create
         public final List<T> sameObjects; // to do nothing
-        public final List<T> updatedObjects; // to do nothing
+        @Nullable public final List<T> updatedObjects; // to do nothing
         public final List<T> oldObjects;  // to delete
 
-        ListComparator(List<T> newObjects, List<T> sameObjects, List<T> oldObjects, List<T> updatedObjects) {
+        protected ListComparator(List<T> newObjects, List<T> sameObjects, List<T> oldObjects, @Nullable List<T> updatedObjects) {
             this.newObjects = newObjects;
             this.sameObjects = sameObjects;
             this.updatedObjects = updatedObjects;
@@ -130,6 +146,10 @@ public final class ListUtils {
                 }
             }
             return new ListComparator<>(newObjects, sameObjects, oldObjects, updatedObjects);
+        }
+
+        protected void handleEqualObjects(T oldT, T t) {
+            sameObjects.add(t);
         }
 
         /**
@@ -170,8 +190,74 @@ public final class ListUtils {
                     newObjects.add(t);
                 }
             }
-            return new ListComparator<>(newObjects, sameObjects, oldObjects);
+            return new ListComparator<>(newObjects, sameObjects, oldObjects, null);
         }
+
+        @Override
+        public String toString() {
+            return "ListComparator of " + getTypeName() + "\n" +
+                   SIDE_T + " NEW:  " + newObjects + "\n" +
+                   SIDE_T + " SAME: " + sameObjects + "\n" +
+                   LONG_L + " OLD:  " + oldObjects;
+        }
+
+        protected String getTypeName() {
+            final T instance = !newObjects.isEmpty()
+                               ? newObjects.get(0)
+                               : !oldObjects.isEmpty() ? oldObjects.get(0) : !sameObjects.isEmpty() ? sameObjects.get(0) : null;
+            return instance != null ? instance.getClass().getSimpleName() : "<Empty List?>";
+        }
+    }
+
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+
+    public static class ListComparator2<T extends Comparable<T>> {
+        private static final java.lang.String TAG = CodeUtils.getTag(ListComparator.class);
+
+        public final List<T> newObjects = new ArrayList<>();  // to create
+        public final List<T> sameObjects = new ArrayList<>(); // to do nothing
+        public final List<T> updatedObjects = new ArrayList<>(); // to do nothing
+        public final List<T> oldObjects;  // to delete
+
+        public ListComparator2(Collection<T> oldItems) {
+            oldObjects = new ArrayList<>(oldItems);
+        }
+
+        /**
+         * Processes two lists and separates the items only on the first, the items only on the second and items on both. If an
+         * item is on both, uses {@link java.lang.Comparable#compareTo(Object)} to check if the item on the second is greater
+         * than
+         * the one on the first list.
+         */
+        public ListComparator2<T> compare(Collection<T> newStuff) {
+            for (T t : newStuff) {
+                final int i = oldObjects.indexOf(t);
+                if (i < 0) {
+                    newObjects.add(t);
+                } else {
+                    // object already exists by equals()
+                    final T oldT = oldObjects.remove(i);
+                    final int compareTo = oldT.compareTo(t);
+                    if (compareTo == 0) {
+                        handleEqualObjects(oldT, t);
+                    } else if (compareTo > 0) {
+                        updatedObjects.add(t);
+                    } else {
+                        Log.w(TAG, "Existing object " + oldT + " is newer than 'new' object " + t);
+                    }
+                }
+            }
+            return this;
+        }
+
+        protected void handleEqualObjects(T oldT, T t) {
+            sameObjects.add(t);
+        }
+
 
         @Override
         public String toString() {
