@@ -376,9 +376,10 @@ public class CFArrayAdapter<T> extends BaseAdapter implements Filterable {
      */
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        return createViewFromResource(position, convertView, parent, mResource);
+        return createViewFromResource(position, convertView, parent, mResource, false);
     }
 
+/*
     private View createViewFromResource(int position, View convertView, ViewGroup parent, int resource) {
         View view;
         TextView text;
@@ -405,14 +406,11 @@ public class CFArrayAdapter<T> extends BaseAdapter implements Filterable {
         }
 
         T item = getItem(position);
-        if (item instanceof CharSequence) {
-            text.setText((CharSequence) item);
-        } else {
-            text.setText(getItemText(item));
-        }
+        text.setText(getItemText(item));
 
         return view;
     }
+*/
 
     private View createViewFromResource(int position, View convertView, ViewGroup parent, int resource, boolean isDropdown) {
         View view;
@@ -439,11 +437,7 @@ public class CFArrayAdapter<T> extends BaseAdapter implements Filterable {
         }
 
         T item = getItem(position);
-        if (item instanceof CharSequence) {
-            text.setText((CharSequence) item);
-        } else {
-            text.setText(isDropdown ? getItemTextDropdown(item) : getItemText(item));
-        }
+        text.setText(isDropdown ? getItemTextDropdown(item) : getItemText(item));
 
         return view;
     }
@@ -500,7 +494,7 @@ public class CFArrayAdapter<T> extends BaseAdapter implements Filterable {
      */
     @Override
     public View getDropDownView(int position, View convertView, ViewGroup parent) {
-        return createViewFromResource(position, convertView, parent, mDropDownResource);
+        return createViewFromResource(position, convertView, parent, mDropDownResource, true);
     }
 
 
