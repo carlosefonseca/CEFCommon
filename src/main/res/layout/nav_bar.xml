@@ -11,8 +11,6 @@
 
     <ImageButton
             android:id="@+id/back_bt"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
             style="?NavBarBack"
             />
             <!--android:background="@drawable/gray_btn_states"-->
@@ -20,8 +18,6 @@
             <!--android:contentDescription="@string/cd_back"-->
 
     <com.carlosefonseca.common.widgets.AutoResizeTextView
-            android:layout_width="0dp"
-            android:layout_height="50dp"
             android:layout_weight="1"
             tools:text="TEXT"
             android:lineSpacingMultiplier="1.1"

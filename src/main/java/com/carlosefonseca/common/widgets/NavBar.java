@@ -7,6 +7,7 @@ import android.content.res.TypedArray;
 import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.ShapeDrawable;
 import android.os.Build;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
@@ -52,6 +53,7 @@ public class NavBar extends LinearLayout {
 //    public static int DEFAULT_PRESSED_COLOR = R.color.DimGray;
 
     private static Drawable defaultBackDrawable;
+    private static Drawable defaultTitleDrawable;
     private static int defaultNormalColor = NO_COLOR;
     private static int defaultPressedColor = NO_COLOR;
     private static int defaultTextColor = NO_COLOR;
@@ -72,6 +74,7 @@ public class NavBar extends LinearLayout {
 
     private LinearLayout root;
     private Drawable backDrawable;
+    private Drawable titleDrawable;
 
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     public int getColorForStatusBar() {
@@ -87,6 +90,10 @@ public class NavBar extends LinearLayout {
             }
         }
         return 0;
+    }
+
+    public static void setDefaultTitleDrawable(Drawable t) {
+        defaultTitleDrawable = t;
     }
 
     /**
@@ -139,6 +146,7 @@ public class NavBar extends LinearLayout {
 
         backDrawable = a.getDrawable(R.styleable.NavBar_android_drawableLeft);
         if (backDrawable == null) backDrawable = defaultBackDrawable;
+//        if (defaultTitleDrawable != null) titleDrawable = defaultTitleDrawable;
         a.recycle();
     }
 
@@ -179,9 +187,17 @@ public class NavBar extends LinearLayout {
                 }
             });
         }
-        if (color != NO_COLOR || defaultNormalColor != NO_COLOR) {
+        if ((color != NO_COLOR || defaultNormalColor != NO_COLOR) && defaultTitleDrawable == null) {
+            setColor();
+        } else if (defaultTitleDrawable != null) {
+            setTitleDrawable(defaultTitleDrawable.getConstantState().newDrawable());
             setColor();
         }
+    }
+
+    private void setTitleDrawable(Drawable titleDrawable) {
+        this.titleDrawable = titleDrawable;
+        ResourceUtils.setBackground(titleView, this.titleDrawable);
     }
 
     public void setBackButtonDrawable(Drawable drawable) {backBt.setImageDrawable(drawable);}
@@ -235,7 +251,11 @@ public class NavBar extends LinearLayout {
         final int color1 = color != NO_COLOR ? color : defaultNormalColor;
         final int color2 = color != NO_COLOR ? pressedColor : defaultPressedColor;
 
-        titleView.setBackgroundColor(color1);
+        if (titleDrawable != null) {
+            if (titleDrawable instanceof ShapeDrawable) ((ShapeDrawable) titleDrawable).getPaint().setColor(color1);
+        } else {
+            titleView.setBackgroundColor(color1);
+        }
         ResourceUtils.setDualColorBackground(backBt, color1, color2, ResourceUtils.PRESSED);
 
         for (int i = 2; i < root.getChildCount(); i++) {

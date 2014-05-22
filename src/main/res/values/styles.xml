@@ -45,18 +45,22 @@
 
     <style name="NavBarBase">
         <item name="android:layout_marginBottom">1dp</item>
-        <item name="android:background">@color/White</item>
+        <!--<item name="android:background">@color/White</item>-->
     </style>
 
     <style name="NavBarTitle">
-        <item name="android:background">@color/DarkerGray</item>
+        <!--<item name="android:background">@color/DarkerGray</item>-->
         <item name="android:gravity">center_vertical|left</item>
         <item name="android:textColor">@color/White</item>
         <item name="android:layout_marginLeft">1dp</item>
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">50dp</item>
     </style>
 
     <style name="NavBarBack">
         <item name="android:src">@drawable/back_button</item>
         <item name="android:background">@drawable/gray_btn_states</item>
+        <item name="android:layout_width">50dp</item>
+        <item name="android:layout_height">50dp</item>
     </style>
 </resources>
