@@ -25,13 +25,13 @@ public class FoldedBoxShape extends Shape {
         path = new Path();
         path.moveTo(0, 0);
 
-        path.lineTo(width, 0);
-        path.lineTo(width, hb);
-        path.lineTo(height * 0.1f, hb);
-        path.lineTo(height * 0.1f, hb + point);
-        path.lineTo(height * .3f, hb + point);
-        path.lineTo(height * .3f, height);
-        path.lineTo(0, hb);
+        path.lineTo(width, 0);                  // right side
+        path.lineTo(width, hb);                 // right side down
+        path.lineTo(height * 0.1f, hb);         // middle top
+        path.lineTo(height * 0.1f, hb + point); // middle bottom
+        path.lineTo(height * .3f, hb + point);  // lower right top
+        path.lineTo(height * .3f, height);      // lower right bottom
+        path.lineTo(0, hb);                     // lower left
         path.close();
     }
 
