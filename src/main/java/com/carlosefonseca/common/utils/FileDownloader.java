@@ -2,7 +2,6 @@ package com.carlosefonseca.common.utils;
 
 import android.os.AsyncTask;
 import android.os.Build;
-import junit.framework.Assert;
 import org.apache.commons.collections4.CollectionUtils;
 
 import java.io.*;
@@ -35,7 +34,7 @@ public final class FileDownloader {
         int tries;
 
         public Download(String url, File file) {
-            Assert.assertTrue("" + url + " is not a URL", url.startsWith("http"));
+            if (!url.startsWith("http")) Log.w(TAG, new RuntimeException("" + url + " is not a URL."));
             this.url = url;
             this.file = file;
         }
