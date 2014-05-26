@@ -5,6 +5,7 @@ import android.app.Dialog;
 import android.content.Context;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Handler;
+import android.os.Looper;
 import android.view.View;
 import android.view.Window;
 import android.widget.ImageView;
@@ -46,7 +47,7 @@ public class LoadingDialog extends Dialog {
 
     private DialogType currentType;
     public final PieView pie;
-    protected Handler handler = new Handler();
+    protected Handler handler = new Handler(Looper.getMainLooper());
     private TextView message_tv;
     private ImageView image;
     private View progressView;
