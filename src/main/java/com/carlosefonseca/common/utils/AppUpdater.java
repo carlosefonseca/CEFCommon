@@ -1,5 +1,6 @@
 package com.carlosefonseca.common.utils;
 
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -166,6 +167,25 @@ public final class AppUpdater {
         downloadURL.execute(latestVersion.url);
     }
 
+    public static void checkForUpdatesAndAsk(final Context context) {
+        checkForUpdates(new CheckForUpdatesDelegate() {
+            @Override
+            public void newUpdateExists(String version) {
+                new AlertDialog.Builder(context).setMessage(
+                        "Version " + version + " is available for download. Do you want to update now?")
+                                                .setPositiveButton("Update", new DialogInterface.OnClickListener() {
+                                                    @Override
+                                                    public void onClick(DialogInterface dialog, int which) {
+                                                        updateApp(context);
+                                                    }
+                                                })
+                                                .setNegativeButton("Later", null)
+                                                .setCancelable(true)
+                                                .show();
+            }
+        });
+    }
+
     public static void configureButton(final Button button) {
         button.setVisibility(View.GONE);
         button.setOnClickListener(new View.OnClickListener() {
@@ -186,6 +206,11 @@ public final class AppUpdater {
     public static void setup(String url, String appname) {
         managerUrl = url;
         AppUpdater.appName = appname;
+    }
+
+    public static void setup(String url, String appname, String channel) {
+        setup(url, appname);
+        setChannel(channel);
     }
 
     public interface CheckForUpdatesDelegate {
