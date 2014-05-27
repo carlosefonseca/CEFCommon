@@ -1,6 +1,7 @@
 package com.carlosefonseca.common.utils;
 
 import android.widget.Toast;
+import com.carlosefonseca.common.BuildConfig;
 import com.carlosefonseca.common.CFApp;
 
 import java.util.regex.Pattern;
@@ -30,7 +31,7 @@ public final class Log {
 
     public static int sRemoteMinPriority = INFO;
 
-    private static boolean consoleLogging;
+    private static boolean consoleLogging = BuildConfig.DEBUG;
 
     public static boolean isConsoleLogging() {
         return consoleLogging;
