@@ -34,6 +34,7 @@ dependencies {
     compile 'com.google.android.gms:play-services:4.+'
     compile 'com.nineoldandroids:library:2.4.+'
     compile 'de.greenrobot:eventbus:2.0.+'
+    compile 'commons-io:commons-io:2.4'
     compile 'org.apache.commons:commons-lang3:3.+'
     compile 'org.apache.commons:commons-collections4:4.+'
     compile 'com.google.code.gson:gson:1.7.+'
@@ -45,6 +46,7 @@ dependencies {
 android {
     compileSdkVersion 19
     buildToolsVersion "19.1.0"
+    useOldManifestMerger false
 
     defaultConfig {
         minSdkVersion 9

@@ -2,13 +2,15 @@ package com.carlosefonseca.common.utils;
 
 import android.os.AsyncTask;
 import android.os.Build;
+import com.carlosefonseca.common.CFApp;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.io.IOUtils;
 
 import java.io.*;
 import java.net.SocketException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.List;
+import java.util.Collection;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -39,12 +41,16 @@ public final class FileDownloader {
             this.file = file;
         }
 
+        public Download(String url) {
+            this(url, new File(CFApp.getContext().getExternalCacheDir(), NetworkingUtils.getLastSegmentOfURL(url)));
+        }
+
         boolean canRetry() {
             return tries < 5;
         }
     }
 
-    public static void downloadFiles(List<Download> toDownload) {
+    public static void downloadFiles(Collection<Download> toDownload) {
         if (CollectionUtils.isEmpty(toDownload)) return;
 
         if (sDownloadCount.getAndAdd(toDownload.size()) == 0) {
@@ -56,6 +62,21 @@ public final class FileDownloader {
             for (Download download : toDownload) new Downloader().executeOnExecutor(sThreadPoolExecutor, download);
         } else {
             for (Download download : toDownload) new Downloader().execute(download);
+        }
+    }
+
+    public static void downloadUrls(Collection<String> toDownload) {
+        if (CollectionUtils.isEmpty(toDownload)) return;
+
+        if (sDownloadCount.getAndAdd(toDownload.size()) == 0) {
+            getNotifier().start(sDownloadCount.get());
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+            getThreadPoolExecutor();
+            for (String url : toDownload) new Downloader().executeOnExecutor(sThreadPoolExecutor, new Download(url));
+        } else {
+            for (String url : toDownload) new Downloader().execute(new Download(url));
         }
     }
 
@@ -114,19 +135,16 @@ public final class FileDownloader {
                 URLConnection urlConnection = url.openConnection();
                 urlConnection.setConnectTimeout(TIMEOUT_MILLIS);
                 urlConnection.setReadTimeout(TIMEOUT_MILLIS);
+
                 InputStream input = new BufferedInputStream(urlConnection.getInputStream());
-
                 OutputStream output = new FileOutputStream(tempPath);
-
-                byte data[] = new byte[1024 * 10];
-                int count;
-                while ((count = input.read(data)) != -1) {
-                    output.write(data, 0, count);
+                try {
+                    IOUtils.copy(input, output);
+                } finally {
+                    output.flush();
+                    output.close();
+                    input.close();
                 }
-
-                output.flush();
-                output.close();
-                input.close();
 
                 if (!tempPath.renameTo(path)) {
                     Log.w(TAG, new RuntimeException("RENAME FAILED " + tempPath.getName() + " -> " + path.getName()));
