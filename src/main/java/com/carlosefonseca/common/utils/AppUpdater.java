@@ -64,7 +64,7 @@ public final class AppUpdater {
                 try {
                     latestVersion = new Gson().fromJson(string, LatestVersionJSON.class);
 
-                    Log.v(TAG, "Current Version: " + CodeUtils.getAppVersionName() + " Latest Version " + latestVersion.version);
+                    Log.i(TAG, "Current Version: " + CodeUtils.getAppVersionName() + " Latest Version " + latestVersion.version);
 
                     existsNewVersion = latestVersion.version;
 

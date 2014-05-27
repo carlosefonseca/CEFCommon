@@ -31,12 +31,12 @@ public class DownloadURL extends AsyncTask<String, Integer, String> {
         public void onFail() {}
     }
 
-    ProgressDialog progressDialog;
+    @Nullable ProgressDialog progressDialog;
     boolean isFile;
     private final DownloadResult handler;
 
 
-    public DownloadURL(ProgressDialog pd, boolean isFile, DownloadResult handler) {
+    public DownloadURL(@Nullable ProgressDialog pd, boolean isFile, DownloadResult handler) {
         progressDialog = pd;
         this.isFile = isFile;
         this.handler = handler;
