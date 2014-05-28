@@ -16,13 +16,21 @@ import android.view.View;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.widget.ImageView;
+import bolts.Continuation;
+import bolts.Task;
 import com.carlosefonseca.common.CFApp;
+import junit.framework.Assert;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.security.InvalidParameterException;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.concurrent.Callable;
+import java.util.regex.Pattern;
 
 import static android.os.Build.VERSION.SDK_INT;
 import static android.os.Build.VERSION_CODES.ICE_CREAM_SANDWICH;
@@ -193,13 +201,17 @@ public final class ImageUtils {
     }
 
     private static Bitmap getPhotoFromFileOrAssets(File file, int widthDp, int heightDp) {
+        final Bitmap bitmap = tryPhotoFromFileOrAssets(file, widthDp, heightDp);
+        if (bitmap == null) Log.w(TAG, "IMAGE DOES NOT EXIST " + file);
+        return bitmap;
+    }
+
+    private static Bitmap tryPhotoFromFileOrAssets(File file, int widthDp, int heightDp) {
         Bitmap bitmap = null;
         if (file.exists()) {
             bitmap = getPhotoFromFile(file.getAbsolutePath(), widthDp, heightDp);
         } else if (getImagesOnAssets().contains(file.getName())) {
             bitmap = getPhotoFromAssets(file.getName(), widthDp, heightDp);
-        } else {
-            Log.w(TAG, "IMAGE DOES NOT EXIST " + file);
         }
         return bitmap;
     }
@@ -762,7 +774,9 @@ public final class ImageUtils {
             Matrix matrix = new Matrix();
             matrix.postRotate(orientation);
             // create a new bitmap from the original using the matrix to transform the result
-            bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
+            Bitmap bitmap1 = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
+            bitmap.recycle();
+            return bitmap1;
         }
         return bitmap;
     }
@@ -1088,6 +1102,132 @@ public final class ImageUtils {
 
         canvas.drawBitmap(bitmap, null, dst, paint);
         return newBitmap;
+    }
+
+    /**
+     * This class is basically a re-packaging of multiple Bitmap methods in ImageUtils, in an interface similar to
+     * Square's Picasso. It doesn't have half the features of Picasso but does what I need, which is downloading, caching and
+     * setting on ImageViews.
+     */
+    public static class Rembrandt {
+        private static final String TAG = CodeUtils.getTag(Rembrandt.class);
+        private final Context mContext;
+        private String mUrl;
+        private File mFile;
+        private int placeholder;
+
+        public Rembrandt(Context context) {
+            mContext = context;
+        }
+
+        public Rembrandt load(String url) {
+            mUrl = url;
+            mFile = null;
+            return this;
+        }
+
+        public Rembrandt load(File file) {
+            mFile = file;
+            mUrl = null;
+            return this;
+        }
+
+        public Rembrandt placeholder(int drawable) {
+            this.placeholder = drawable;
+            return this;
+        }
+
+        public Task<Void> into(final ImageView view) {
+            return run(view, mUrl, mFile, placeholder, true);
+        }
+
+        public Task<Void> into(final ImageView view, final boolean animated) {
+            final Task<Void> run = run(view, mUrl, mFile, placeholder, animated);
+            mUrl = null;
+            mFile = null;
+            placeholder = 0;
+            return run;
+        }
+
+        private static Task<Void> run(final ImageView view,
+                                      final String url,
+                                      final File file,
+                                      final int placeholder,
+                                      final boolean animated) {
+            Assert.assertTrue("URL and File are null!", url != null || file != null);
+            Assert.assertNotNull("ImageView is null!", view);
+
+            final String path = url != null ? url : file.getAbsolutePath();
+            if (path.equals(view.getTag())) return Task.forResult(null);
+            view.setImageBitmap(null);
+            view.setVisibility(View.INVISIBLE);
+
+            return Task.callInBackground(new Callable<Bitmap>() {
+                @Override
+                public Bitmap call() throws Exception {
+                    if (url != null) {
+                        if (!ImageUtils.isImage(url)) {
+                            throw new RuntimeException("Url is not an image: " + url);
+                        }
+                        if (url.startsWith("http://")) {
+                            final File fullPath = ResourceUtils.getFullPath(getLastSegmentOfURL(url));
+                            Bitmap cachedPhoto = tryPhotoFromFileOrAssets(fullPath, -1, -1);
+                            if (cachedPhoto != null) return cachedPhoto;
+                            Log.i(TAG, "Downloading image " + url);
+                            Bitmap bitmap = NetworkingUtils.loadBitmap(url);
+                            new ImageWriter(fullPath, bitmap).execute();
+                            return bitmap;
+                        } else {
+                            final File file = url.startsWith("/") ? new File(url) : ResourceUtils.getFullPath(url);
+                            return getCachedPhoto(file, 0, 0, null);
+                        }
+                    } else {
+                        return getCachedPhoto(file, 0, 0, null);
+                    }
+                }
+            }).continueWith(new Continuation<Bitmap, Void>() {
+                @Override
+                public Void then(Task<Bitmap> task) throws Exception {
+                    final Bitmap result = task.getResult();
+
+                    if (result == null || task.getError() != null) {
+                        if (placeholder != 0) view.setImageResource(placeholder);
+                        if (task.getError() != null) {
+                            Log.w(TAG, task.getError());
+                            throw task.getError();
+                        }
+                        return null;
+                    }
+
+                    view.setImageBitmap(result);
+                    if (animated) {
+                        AlphaAnimation alphaAnimation = new AlphaAnimation(0, 1);
+                        alphaAnimation.setDuration(100);
+                        Animation.AnimationListener listener = new Animation.AnimationListener() {
+                            @Override
+                            public void onAnimationStart(Animation animation) { }
+
+                            @Override
+                            public void onAnimationEnd(Animation animation) {
+                                view.setVisibility(View.VISIBLE);
+                            }
+
+                            @Override
+                            public void onAnimationRepeat(Animation animation) { }
+                        };
+                        alphaAnimation.setAnimationListener(listener);
+                        view.startAnimation(alphaAnimation);
+                    } else {
+                        view.setVisibility(View.VISIBLE);
+                    }
+                    return null;
+                }
+            }, Task.UI_THREAD_EXECUTOR).continueWith(TaskUtils.LogErrorContinuation);
+        }
+    }
+
+    private static boolean isImage(String path) {
+        return path != null && Pattern.compile(".+\\.(jpe?g|png|gif)", Pattern.CASE_INSENSITIVE).matcher(path).matches();
     }
 }
 
