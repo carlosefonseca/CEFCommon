@@ -2,7 +2,6 @@ package com.carlosefonseca.common.widgets;
 
 
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
@@ -11,8 +10,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import bolts.Continuation;
+import bolts.Task;
 import com.carlosefonseca.common.R;
 import com.carlosefonseca.common.utils.ImageUtils;
+import com.carlosefonseca.common.utils.TaskUtils;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -44,7 +47,12 @@ public class Gallery extends ViewPager {
     }
 
     public void setupWithImageList(List<File> imageList) {
-        setAdapter(new GalleryAdapter(imageList));
+        setAdapter(new GalleryAdapter().withFileList(imageList));
+        layoutInflater = LayoutInflater.from(getContext());
+    }
+
+    public void setupWithUrlList(List<String> imageList) {
+        setAdapter(new GalleryAdapter().withUrlList(imageList));
         layoutInflater = LayoutInflater.from(getContext());
     }
 
@@ -55,8 +63,8 @@ public class Gallery extends ViewPager {
     }
 
     @Override
-    public void setOnClickListener(OnClickListener l) {
-        clickListener = l;
+    public void setOnClickListener(OnClickListener listener) {
+        clickListener = listener;
     }
 
     public void setImageWidth(int width) {
@@ -66,16 +74,30 @@ public class Gallery extends ViewPager {
 
     class GalleryAdapter extends PagerAdapter {
 
-        private final List<File> imageList;
+        private final ImageUtils.Rembrandt rembrandt;
+        @Nullable private List<File> imageList;
+        @Nullable private ArrayList<String> urlList;
         private LinkedList<View> recycledViews = new LinkedList<View>();
 
-        GalleryAdapter(List<File> imageList) {
-            this.imageList = new ArrayList<File>(imageList);
+        GalleryAdapter() {
+            rembrandt = new ImageUtils.Rembrandt(getContext());
+        }
+
+        public GalleryAdapter withFileList(List<File> imageList) {
+            this.imageList = new ArrayList<>(imageList);
+            this.urlList = null;
+            return this;
+        }
+
+        public GalleryAdapter withUrlList(List<String> imageList) {
+            this.urlList = new ArrayList<>(imageList);
+            this.imageList = null;
+            return this;
         }
 
         @Override
         public int getCount() {
-            return imageList.size();
+            return imageList != null ? imageList.size() : urlList != null ? urlList.size() : 0;
         }
 
         @Override
@@ -88,34 +110,32 @@ public class Gallery extends ViewPager {
         public Object instantiateItem(ViewGroup container, int position) {
             View view = recycledViews.poll();
             if (view == null) {
-//                if (res != 0) {
-//                    view = layoutInflater.inflate(R.layout.gallery_styled_overlayed_image_view, null);
-//                } else
-                    view = layoutInflater.inflate(R.layout.gallery_styled_image_view, null);
+                view = layoutInflater.inflate(R.layout.gallery_styled_image_view, container, false);
             }
             if (view != null) {
-                ImageView imageView = (ImageView) view.findViewById(R.id.image);
-//                if (res != 0 && ((ImageViewWithOverlay)imageView).getOverlayImage() == 0) {
-//                    ((ImageViewWithOverlay)imageView).setOverlayImage(res);
-//                    ((ImageViewWithOverlay)imageView).setMarginsToBottomRightCorner(bottomMargin, rightMargin);
-//                }
+                final ImageView imageView = (ImageView) view.findViewById(R.id.image);
 
-
-                Bitmap photo = ImageUtils.getCachedPhoto(imageList.get(position), 500, 500, null);
-                    imageView.setImageBitmap(photo);
-                if (photo != null) {
-                    imageView.setBackgroundColor(Color.GRAY);
-                } else {
-                    imageView.setBackgroundColor(Color.TRANSPARENT);
+                if (urlList != null) {
+                    rembrandt.load(urlList.get(position));
+                } else if (imageList != null) {
+                    rembrandt.load(imageList.get(position));
                 }
+                rembrandt.into(imageView).continueWith(new Continuation<Void, Void>() {
+                    @Override
+                    public Void then(Task<Void> task) throws Exception {
+                        if (task.getError() != null) {
+                            imageView.setBackgroundColor(Color.GRAY);
+                        } else {
+                            imageView.setBackgroundColor(Color.TRANSPARENT);
+                        }
+                        return null;
+                    }
+                }, Task.UI_THREAD_EXECUTOR).continueWith(TaskUtils.LogErrorContinuation);
 
                 imageView.setTag(position);
-//                imageView.setAdjustViewBounds(true);
                 imageView.setOnClickListener(clickListener);
 
-//                imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
-//                imageView.getLayoutParams().width = width;
-                container.addView(view);//, new ViewGroup.LayoutParams(width, (int) (width / 2 + 24 * density)));
+                container.addView(view);
             }
 
             return view;
