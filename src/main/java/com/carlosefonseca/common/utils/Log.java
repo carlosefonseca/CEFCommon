@@ -53,37 +53,37 @@ public final class Log {
 
     public static void setUserEmail(String email) {
         if (remoteLogger != null) remoteLogger.setUserEmail(email);
-        android.util.Log.i(Thread.currentThread().getStackTrace()[1].getClassName(), "User Email: " + email);
+        android.util.Log.i(tag(1), "User Email: " + email);
     }
 
     public static void put(String key, boolean value) {
         if (remoteLogger != null) remoteLogger.put(key, value);
-        if (consoleLogging) android.util.Log.i(Thread.currentThread().getStackTrace()[1].getClassName(), key + ": " + value);
+        if (consoleLogging) android.util.Log.i(tag(1), key + ": " + value);
     }
 
     public static void put(String key, int value) {
         if (remoteLogger != null) remoteLogger.put(key, value);
-        if (consoleLogging) android.util.Log.i(Thread.currentThread().getStackTrace()[1].getClassName(), key + ": " + value);
+        if (consoleLogging) android.util.Log.i(tag(1), key + ": " + value);
     }
 
     public static void put(String key, long value) {
         if (remoteLogger != null) remoteLogger.put(key, value);
-        if (consoleLogging) android.util.Log.i(Thread.currentThread().getStackTrace()[1].getClassName(), key + ": " + value);
+        if (consoleLogging) android.util.Log.i(tag(1), key + ": " + value);
     }
 
     public static void put(String key, String value) {
         if (remoteLogger != null) remoteLogger.put(key, value);
-        if (consoleLogging) android.util.Log.i(Thread.currentThread().getStackTrace()[1].getClassName(), key + ": " + value);
+        if (consoleLogging) android.util.Log.i(tag(1), key + ": " + value);
     }
 
     public static void put(String key, float value) {
         if (remoteLogger != null) remoteLogger.put(key, value);
-        if (consoleLogging) android.util.Log.i(Thread.currentThread().getStackTrace()[1].getClassName(), key + ": " + value);
+        if (consoleLogging) android.util.Log.i(tag(1), key + ": " + value);
     }
 
     public static void put(String key, double value) {
         if (remoteLogger != null) remoteLogger.put(key, value);
-        if (consoleLogging) android.util.Log.i(Thread.currentThread().getStackTrace()[1].getClassName(), key + ": " + value);
+        if (consoleLogging) android.util.Log.i(tag(1), key + ": " + value);
     }
 
     private static int log(int priority, String tag, String msg, Throwable tr) {
@@ -206,7 +206,7 @@ public final class Log {
 
     public static void t(String message) {
         Toast.makeText(CFApp.getContext(), message, Toast.LENGTH_SHORT).show();
-        i(Thread.currentThread().getStackTrace()[1].getClassName(), message);
+        i(tag(1), message);
     }
 
 
