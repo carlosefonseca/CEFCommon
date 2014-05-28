@@ -52,8 +52,8 @@ public final class TaskUtils {
     public static <T> Continuation<T, T> getPassThruLogErrorContinuation() {
         return new Continuation<T, T>() {
             @Override
-            public T then(Task<T> voidTask) throws Exception {
-                final Exception error = voidTask.getError();
+            public T then(Task<T> task) throws Exception {
+                final Exception error = task.getError();
                 if (error != null) {
                     Log.w(TAG, "Errors during task execution", error);
                     if (error instanceof AggregateException) {
@@ -63,7 +63,7 @@ public final class TaskUtils {
                     }
                     throw error;
                 } else {
-                    return voidTask.getResult();
+                    return task.getResult();
                 }
             }
         };
