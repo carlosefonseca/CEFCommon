@@ -3,9 +3,6 @@ package com.carlosefonseca.common.utils;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.support.v4.util.LruCache;
-import android.view.View;
-import android.view.animation.AlphaAnimation;
-import android.view.animation.Animation;
 import android.widget.ImageView;
 import bolts.Continuation;
 import bolts.Task;
@@ -26,8 +23,14 @@ import static com.carlosefonseca.common.utils.NetworkingUtils.getLastSegmentOfUR
  */
 public class Rembrandt {
     private static final String TAG = CodeUtils.getTag(Rembrandt.class);
+    public static final int XFADE_MILLIS = 500;
+    private static final int FADE_MILLIS = 100;
 
     static LruCache<String, Bitmap> mCache = new ImageUtils.BitmapCache();
+
+    private static final short NOT_ANIMATED = 0;
+    private static final short FADE_IN = 1;
+    private static final short CROSS_FADE = 2;
 
     private final Context mContext;
     private String mUrl;
@@ -67,43 +70,50 @@ public class Rembrandt {
             Log.w(TAG, "No url or file specified for Rembrandt to load.");
             return Task.cancelled();
         }
-        return run(view, mUrl, mFile, placeholder, true);
+        return run(view, mUrl, mFile, placeholder, NOT_ANIMATED);
     }
 
-    public Task<Void> into(final ImageView view, final boolean animated) {
+    public Task<Void> fadeIn(final ImageView view) {
         if (null == mUrl && null == mFile) {
             Log.w(tag(1), "No url or file specified for Rembrandt to load.");
             return Task.cancelled();
         }
 
-        final Task<Void> run = run(view, mUrl, mFile, placeholder, animated);
+        final Task<Void> run = run(view, mUrl, mFile, placeholder, FADE_IN);
         mUrl = null;
         mFile = null;
         placeholder = 0;
         return run;
     }
 
+    public Task<Void> xFade(final ImageView view) {
+        if (null == mUrl && null == mFile) {
+            return Task.cancelled();
+        }
+        return run(view, mUrl, mFile, placeholder, CROSS_FADE);
+    }
+
     private static Task<Void> run(final ImageView view,
                                   final String url,
                                   final File file,
-                                  final int placeholder,
-                                  final boolean animated) {
+                                  final int placeholder, final short animation) {
         Assert.assertTrue("URL and File are null!", url != null || file != null);
         Assert.assertNotNull("ImageView is null!", view);
 
 
         final String path = url != null ? url : file.getAbsolutePath();
         if (path.equals(view.getTag())) return Task.forResult(null);
-        view.setVisibility(View.INVISIBLE);
+        if (animation == NOT_ANIMATED || animation == FADE_IN) {
+            view.setImageBitmap(null);
+        }
         view.setTag(path);
 
         final Bitmap bitmap = mCache.get(path);
         if (bitmap != null) {
-            setImageBitmapOnView(bitmap, view, false);
+            setImageBitmapOnView(bitmap, view, animation == FADE_IN ? NOT_ANIMATED : animation);
             return Task.forResult(null);
         }
 
-        view.setImageBitmap(null);
 
         return Task.callInBackground(new Callable<Bitmap>() {
             @Override
@@ -118,7 +128,7 @@ public class Rembrandt {
                         throw new RuntimeException("Url is not an image: " + url);
                     }
                     if (url.startsWith("http://")) {
-                        bitmap = bitmapFromUrl(url, path);
+                        bitmap = bitmapFromUrl(url);
                     } else {
                         bitmap = bitmapFromFile(url);
                     }
@@ -146,7 +156,7 @@ public class Rembrandt {
                     return null;
                 }
 
-                setImageBitmapOnView(result, view, animated);
+                setImageBitmapOnView(result, view, animation);
                 return null;
             }
         }, Task.UI_THREAD_EXECUTOR).continueWith(TaskUtils.LogErrorContinuation);
@@ -157,7 +167,7 @@ public class Rembrandt {
         return ImageUtils.getCachedPhoto(file1, 0, 0, null);
     }
 
-    private static Bitmap bitmapFromUrl(String url, String path) throws IOException {
+    private static Bitmap bitmapFromUrl(String url) throws IOException {
         final File fullPath = ResourceUtils.getFullPath(getLastSegmentOfURL(url));
         Bitmap cachedPhoto = ImageUtils.tryPhotoFromFileOrAssets(fullPath, -1, -1);
         if (cachedPhoto != null) return cachedPhoto;
@@ -167,21 +177,21 @@ public class Rembrandt {
         return bitmap;
     }
 
-    private static void setImageBitmapOnView(@NotNull Bitmap result, final ImageView view, boolean animated) {
-        view.setImageBitmap(result);
-        if (!animated) {
-            view.setVisibility(View.VISIBLE);
-            return;
-        }
+    private static void setImageBitmapOnView(@NotNull Bitmap result, final ImageView view, short animated) {
+        switch (animated) {
 
-        AlphaAnimation alphaAnimation = new AlphaAnimation(0, 1);
-        alphaAnimation.setDuration(100);
-        alphaAnimation.setAnimationListener(new AnimationUtils.AnimationListenerImpl() {
-            @Override
-            public void onAnimationEnd(Animation animation) {
-                    view.setVisibility(View.VISIBLE);
-                }
-        });
-        view.startAnimation(alphaAnimation);
+            case FADE_IN:
+                AnimationUtils.setImageBitmapWithXFade(view, result, FADE_MILLIS);
+                break;
+
+            case CROSS_FADE:
+                AnimationUtils.setImageBitmapWithXFade(view, result, XFADE_MILLIS);
+                break;
+
+            case NOT_ANIMATED:
+            default:
+                view.setImageBitmap(result);
+                break;
+        }
     }
 }
