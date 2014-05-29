@@ -1,6 +1,11 @@
 package com.carlosefonseca.common.utils;
 
+import android.animation.AnimatorListenerAdapter;
+import android.annotation.TargetApi;
+import android.os.Build;
 import android.view.View;
+import android.view.ViewPropertyAnimator;
+import android.view.animation.Animation;
 import com.nineoldandroids.animation.Animator;
 import com.nineoldandroids.animation.ValueAnimator;
 import org.jetbrains.annotations.Nullable;
@@ -62,6 +67,22 @@ public final class AnimationUtils {
         };
     }
 
+
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
+    public static ViewPropertyAnimator fade(final boolean becomeVisible, final View view, int millis) {
+        return view.animate().alpha(becomeVisible ? 1 : 0).setDuration(millis).setListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationStart(android.animation.Animator animation) {
+                if (view.getVisibility() != View.VISIBLE) view.setVisibility(View.VISIBLE);
+            }
+
+            @Override
+            public void onAnimationEnd(android.animation.Animator animation) {
+                if (!becomeVisible) view.setVisibility(View.GONE);
+            }
+        });
+    }
+
     public enum Parameter {
         HEIGHT, WIDTH, PADLEFT
     }
@@ -95,5 +116,23 @@ public final class AnimationUtils {
             }
         });
         return va;
+    }
+
+    public static class AnimationListenerImpl implements Animation.AnimationListener {
+
+        @Override
+        public void onAnimationStart(Animation animation) {
+
+        }
+
+        @Override
+        public void onAnimationEnd(Animation animation) {
+
+        }
+
+        @Override
+        public void onAnimationRepeat(Animation animation) {
+
+        }
     }
 }
