@@ -2,15 +2,24 @@ package com.carlosefonseca.common.utils;
 
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
+import android.graphics.Bitmap;
+import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.TransitionDrawable;
 import android.os.Build;
 import android.view.View;
 import android.view.ViewPropertyAnimator;
 import android.view.animation.Animation;
+import android.widget.ImageView;
 import com.nineoldandroids.animation.Animator;
 import com.nineoldandroids.animation.ValueAnimator;
 import org.jetbrains.annotations.Nullable;
 
 public final class AnimationUtils {
+
+    private static final java.lang.String TAG = CodeUtils.getTag(AnimationUtils.class);
 
     private AnimationUtils() {}
 
@@ -56,14 +65,11 @@ public final class AnimationUtils {
             }
 
             @Override
-            public void onAnimationCancel(Animator animator) {
+            public void onAnimationCancel(Animator animator) { }
 
-            }
 
             @Override
-            public void onAnimationRepeat(Animator animator) {
-
-            }
+            public void onAnimationRepeat(Animator animator) { }
         };
     }
 
@@ -81,6 +87,25 @@ public final class AnimationUtils {
                 if (!becomeVisible) view.setVisibility(View.GONE);
             }
         });
+    }
+
+    public static void setImageBitmapWithXFade(final ImageView imageView, final Bitmap bitmap, int millis) {
+        setImageDrawableWithXFade(imageView, new BitmapDrawable(imageView.getResources(), bitmap), millis);
+    }
+
+    public static void setImageDrawableWithXFade(final ImageView imageView, final Drawable drawable, int millis) {
+        Drawable currentDrawable = imageView.getDrawable();
+        if (currentDrawable == null) {
+            Log.w(TAG, "currentDrawable IS NULL");
+            currentDrawable = new ColorDrawable(Color.TRANSPARENT);
+        }
+        Drawable[] arrayDrawable = new Drawable[2];
+        arrayDrawable[0] = currentDrawable;
+        arrayDrawable[1] = drawable;
+        TransitionDrawable transitionDrawable = new TransitionDrawable(arrayDrawable);
+        transitionDrawable.setCrossFadeEnabled(true);
+        imageView.setImageDrawable(transitionDrawable);
+        transitionDrawable.startTransition(millis);
     }
 
     public enum Parameter {
@@ -121,18 +146,12 @@ public final class AnimationUtils {
     public static class AnimationListenerImpl implements Animation.AnimationListener {
 
         @Override
-        public void onAnimationStart(Animation animation) {
-
-        }
+        public void onAnimationStart(Animation animation) { }
 
         @Override
-        public void onAnimationEnd(Animation animation) {
-
-        }
+        public void onAnimationEnd(Animation animation) { }
 
         @Override
-        public void onAnimationRepeat(Animation animation) {
-
-        }
+        public void onAnimationRepeat(Animation animation) { }
     }
 }
