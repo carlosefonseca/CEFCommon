@@ -244,7 +244,7 @@ public final class ListUtils {
                     final int compareTo = oldT.compareTo(t);
                     if (compareTo == 0) {
                         handleEqualObjects(oldT, t);
-                    } else if (compareTo > 0) {
+                    } else if (compareTo < 0) { // oldT is less than (new) t
                         updatedObjects.add(t);
                     } else {
                         Log.w(TAG, "Existing object " + oldT + " is newer than 'new' object " + t);
