@@ -2,6 +2,7 @@ package com.carlosefonseca.common.utils;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.support.v4.util.LruCache;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
@@ -9,10 +10,13 @@ import android.widget.ImageView;
 import bolts.Continuation;
 import bolts.Task;
 import junit.framework.Assert;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.concurrent.Callable;
 
+import static com.carlosefonseca.common.utils.Log.tag;
 import static com.carlosefonseca.common.utils.NetworkingUtils.getLastSegmentOfURL;
 
 /**
@@ -22,6 +26,9 @@ import static com.carlosefonseca.common.utils.NetworkingUtils.getLastSegmentOfUR
  */
 public class Rembrandt {
     private static final String TAG = CodeUtils.getTag(Rembrandt.class);
+
+    static LruCache<String, Bitmap> mCache = new ImageUtils.BitmapCache();
+
     private final Context mContext;
     private String mUrl;
     private File mFile;
@@ -56,10 +63,19 @@ public class Rembrandt {
     }
 
     public Task<Void> into(final ImageView view) {
+        if (null == mUrl && null == mFile) {
+            Log.w(TAG, "No url or file specified for Rembrandt to load.");
+            return Task.cancelled();
+        }
         return run(view, mUrl, mFile, placeholder, true);
     }
 
     public Task<Void> into(final ImageView view, final boolean animated) {
+        if (null == mUrl && null == mFile) {
+            Log.w(tag(1), "No url or file specified for Rembrandt to load.");
+            return Task.cancelled();
+        }
+
         final Task<Void> run = run(view, mUrl, mFile, placeholder, animated);
         mUrl = null;
         mFile = null;
@@ -75,71 +91,97 @@ public class Rembrandt {
         Assert.assertTrue("URL and File are null!", url != null || file != null);
         Assert.assertNotNull("ImageView is null!", view);
 
+
         final String path = url != null ? url : file.getAbsolutePath();
         if (path.equals(view.getTag())) return Task.forResult(null);
-        view.setImageBitmap(null);
         view.setVisibility(View.INVISIBLE);
+        view.setTag(path);
+
+        final Bitmap bitmap = mCache.get(path);
+        if (bitmap != null) {
+            setImageBitmapOnView(bitmap, view, false);
+            return Task.forResult(null);
+        }
+
+        view.setImageBitmap(null);
 
         return Task.callInBackground(new Callable<Bitmap>() {
             @Override
             public Bitmap call() throws Exception {
+                if (!view.getTag().equals(path)) {
+                    Log.v(TAG, "CANCELED Image loading of " + url);
+                    return null;
+                }
+                Bitmap bitmap;
                 if (url != null) {
                     if (!ImageUtils.isImage(url)) {
                         throw new RuntimeException("Url is not an image: " + url);
                     }
                     if (url.startsWith("http://")) {
-                        final File fullPath = ResourceUtils.getFullPath(getLastSegmentOfURL(url));
-                        Bitmap cachedPhoto = ImageUtils.tryPhotoFromFileOrAssets(fullPath, -1, -1);
-                        if (cachedPhoto != null) return cachedPhoto;
-                        Log.i(TAG, "Downloading image " + url);
-                        Bitmap bitmap = NetworkingUtils.loadBitmap(url);
-                        new ImageUtils.ImageWriter(fullPath, bitmap).execute();
-                        return bitmap;
+                        bitmap = bitmapFromUrl(url, path);
                     } else {
-                        final File file = url.startsWith("/") ? new File(url) : ResourceUtils.getFullPath(url);
-                        return ImageUtils.getCachedPhoto(file, 0, 0, null);
+                        bitmap = bitmapFromFile(url);
                     }
                 } else {
-                    return ImageUtils.getCachedPhoto(file, 0, 0, null);
+                    bitmap = ImageUtils.getCachedPhoto(file, 0, 0, null);
                 }
+                mCache.put(path, bitmap);
+                return bitmap;
             }
         }).continueWith(new Continuation<Bitmap, Void>() {
             @Override
-            public Void then(Task<Bitmap> task) throws Exception {
-                final Bitmap result = task.getResult();
+            public Void then(Task<Bitmap> bitmapTask) throws Exception {
+                if (!view.getTag().equals(path)) {
+                    Log.v(TAG, "CANCELED Image loading of " + url);
+                    return null;
+                }
+                final Bitmap result = bitmapTask.getResult();
 
-                if (result == null || task.getError() != null) {
+                if (result == null || bitmapTask.getError() != null) {
                     if (placeholder != 0) view.setImageResource(placeholder);
-                    if (task.getError() != null) {
-                        Log.w(TAG, task.getError());
-                        throw task.getError();
+                    if (bitmapTask.getError() != null) {
+                        Log.w(TAG, bitmapTask.getError());
+                        throw bitmapTask.getError();
                     }
                     return null;
                 }
 
-                view.setImageBitmap(result);
-                if (animated) {
-                    AlphaAnimation alphaAnimation = new AlphaAnimation(0, 1);
-                    alphaAnimation.setDuration(100);
-                    Animation.AnimationListener listener = new Animation.AnimationListener() {
-                        @Override
-                        public void onAnimationStart(Animation animation) { }
-
-                        @Override
-                        public void onAnimationEnd(Animation animation) {
-                            view.setVisibility(View.VISIBLE);
-                        }
-
-                        @Override
-                        public void onAnimationRepeat(Animation animation) { }
-                    };
-                    alphaAnimation.setAnimationListener(listener);
-                    view.startAnimation(alphaAnimation);
-                } else {
-                    view.setVisibility(View.VISIBLE);
-                }
+                setImageBitmapOnView(result, view, animated);
                 return null;
             }
         }, Task.UI_THREAD_EXECUTOR).continueWith(TaskUtils.LogErrorContinuation);
+    }
+
+    private static Bitmap bitmapFromFile(String url) {
+        final File file1 = url.startsWith("/") ? new File(url) : ResourceUtils.getFullPath(url);
+        return ImageUtils.getCachedPhoto(file1, 0, 0, null);
+    }
+
+    private static Bitmap bitmapFromUrl(String url, String path) throws IOException {
+        final File fullPath = ResourceUtils.getFullPath(getLastSegmentOfURL(url));
+        Bitmap cachedPhoto = ImageUtils.tryPhotoFromFileOrAssets(fullPath, -1, -1);
+        if (cachedPhoto != null) return cachedPhoto;
+        Log.i(TAG, "Downloading image " + url);
+        Bitmap bitmap = NetworkingUtils.loadBitmap(url);
+        new ImageUtils.ImageWriter(fullPath, bitmap).execute();
+        return bitmap;
+    }
+
+    private static void setImageBitmapOnView(@NotNull Bitmap result, final ImageView view, boolean animated) {
+        view.setImageBitmap(result);
+        if (!animated) {
+            view.setVisibility(View.VISIBLE);
+            return;
+        }
+
+        AlphaAnimation alphaAnimation = new AlphaAnimation(0, 1);
+        alphaAnimation.setDuration(100);
+        alphaAnimation.setAnimationListener(new AnimationUtils.AnimationListenerImpl() {
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                    view.setVisibility(View.VISIBLE);
+                }
+        });
+        view.startAnimation(alphaAnimation);
     }
 }
