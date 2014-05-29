@@ -7,6 +7,7 @@ import android.graphics.*;
 import android.graphics.drawable.BitmapDrawable;
 import android.media.ExifInterface;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.support.v4.util.LruCache;
 import android.text.Layout;
 import android.text.StaticLayout;
@@ -1062,6 +1063,36 @@ public final class ImageUtils {
             return getCachedPhoto(key, width, height);
         }
     }
+
+    /**
+     * Note: In this example, one eighth of the application memory is allocated for our cache. On a normal/hdpi device this is a
+     * minimum of around 4MB (32/8). A full screen GridView filled with images on a device with 800x480 resolution would use
+     * around 1.5MB (800*480*4 bytes), so this would cache a minimum of around 2.5 pages of images in memory.
+     */
+
+    public static class BitmapCache extends LruCache<String, Bitmap> {
+
+        public BitmapCache() {
+            // Get max available VM memory, exceeding this amount will throw an
+            // OutOfMemory exception. Stored in kilobytes as LruCache takes an
+            // int in its constructor.
+            // Use 1/6th of the available memory for this memory cache.
+            super((int) (Runtime.getRuntime().maxMemory() / 1024 / 6));
+        }
+
+        @Override
+        protected int sizeOf(String key, Bitmap bitmap) {
+            // The cache size will be measured in kilobytes rather than
+            // number of items.
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                return bitmap.getAllocationByteCount();
+            }
+
+            return bitmap.getRowBytes() * bitmap.getHeight() / 1024;
+        }
+    }
+
 
     /**
      * Redraws the bitmap in a new size. Scales the bitmap keeping the aspect ratio.
