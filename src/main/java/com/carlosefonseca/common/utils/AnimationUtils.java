@@ -96,7 +96,6 @@ public final class AnimationUtils {
     public static void setImageDrawableWithXFade(final ImageView imageView, final Drawable drawable, int millis) {
         Drawable currentDrawable = imageView.getDrawable();
         if (currentDrawable == null) {
-            Log.w(TAG, "currentDrawable IS NULL");
             currentDrawable = new ColorDrawable(Color.TRANSPARENT);
         }
         Drawable[] arrayDrawable = new Drawable[2];
