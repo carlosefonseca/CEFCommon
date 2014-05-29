@@ -29,6 +29,11 @@ public class ActivityStateListener {
         mListeners.remove(listener);
     }
 
+    public void removeAndStopListener(Interface listener) {
+        listener.onStop(true);
+        mListeners.remove(listener);
+    }
+
     public void onStart() {
         if (!mRunning) {
             mRunning = true;

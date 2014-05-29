@@ -32,6 +32,11 @@ public class RepeatWhileOnActivity implements ActivityStateListener.Interface {
             mRunning = false;
             unschedule();
         }
+        if (isFinishing) {
+            unschedule();
+            mRunnable = null;
+            mHandler = null;
+        }
     }
 
     private void unschedule() {
