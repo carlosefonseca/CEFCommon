@@ -120,7 +120,7 @@ public class Gallery extends ViewPager {
                 } else if (imageList != null) {
                     rembrandt.load(imageList.get(position));
                 }
-                rembrandt.into(imageView).continueWith(new Continuation<Void, Void>() {
+                rembrandt.fadeIn(imageView).continueWith(new Continuation<Void, Void>() {
                     @Override
                     public Void then(Task<Void> task) throws Exception {
                         if (task.getError() != null) {
