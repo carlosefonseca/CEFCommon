@@ -13,7 +13,7 @@ import android.widget.ImageView;
 import bolts.Continuation;
 import bolts.Task;
 import com.carlosefonseca.common.R;
-import com.carlosefonseca.common.utils.ImageUtils;
+import com.carlosefonseca.common.utils.Rembrandt;
 import com.carlosefonseca.common.utils.TaskUtils;
 import org.jetbrains.annotations.Nullable;
 
@@ -74,13 +74,13 @@ public class Gallery extends ViewPager {
 
     class GalleryAdapter extends PagerAdapter {
 
-        private final ImageUtils.Rembrandt rembrandt;
+        private final Rembrandt rembrandt;
         @Nullable private List<File> imageList;
         @Nullable private ArrayList<String> urlList;
         private LinkedList<View> recycledViews = new LinkedList<View>();
 
         GalleryAdapter() {
-            rembrandt = new ImageUtils.Rembrandt(getContext());
+            rembrandt = new Rembrandt(getContext());
         }
 
         public GalleryAdapter withFileList(List<File> imageList) {
