@@ -270,7 +270,7 @@ public class MSDrawable {
             return mFinal[state];
         }
 
-        if (mBitmaps[state] == null && mBitmapDrawables == null) {
+        if (mBitmaps[state] == null && mBitmapDrawables[state] == null) {
             if (mShapeDrawables[state] != null) { // shape
                 return recolorShape(state);
             } else { // nothing O.o
