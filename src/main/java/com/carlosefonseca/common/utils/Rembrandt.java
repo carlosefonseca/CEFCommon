@@ -11,9 +11,9 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.concurrent.Callable;
 
-import static com.carlosefonseca.common.utils.Log.tag;
 import static com.carlosefonseca.common.utils.NetworkingUtils.getLastSegmentOfURL;
 
 /**
@@ -36,6 +36,8 @@ public class Rembrandt {
     private String mUrl;
     private File mFile;
     private int placeholder;
+
+    private HashMap<ImageView, String> mMapping = new HashMap<>();
 
     public Rembrandt(Context context) {
         mContext = context;
@@ -66,37 +68,38 @@ public class Rembrandt {
     }
 
     public Task<Void> into(final ImageView view) {
-        if (null == mUrl && null == mFile) {
-            Log.w(TAG, "No url or file specified for Rembrandt to load.");
-            return Task.cancelled();
-        }
-        return run(view, mUrl, mFile, placeholder, NOT_ANIMATED);
+        return into(view, NOT_ANIMATED);
     }
 
     public Task<Void> fadeIn(final ImageView view) {
-        if (null == mUrl && null == mFile) {
-            Log.w(tag(1), "No url or file specified for Rembrandt to load.");
-            return Task.cancelled();
-        }
+        return into(view, FADE_IN);
+    }
 
-        final Task<Void> run = run(view, mUrl, mFile, placeholder, FADE_IN);
+    public Task<Void> xFade(final ImageView view) {
+        return into(view, CROSS_FADE);
+    }
+
+    public Task<Void> into(final ImageView view, short animation) {
+        final Task<Void> run;
+        if (null == mUrl && null == mFile) {
+            view.setImageBitmap(null);
+            mMapping.remove(view);
+            run = Task.forResult(null);
+        } else {
+            run = run(view, mUrl, mFile, placeholder, animation, mMapping);
+        }
         mUrl = null;
         mFile = null;
         placeholder = 0;
         return run;
     }
 
-    public Task<Void> xFade(final ImageView view) {
-        if (null == mUrl && null == mFile) {
-            return Task.cancelled();
-        }
-        return run(view, mUrl, mFile, placeholder, CROSS_FADE);
-    }
-
     private static Task<Void> run(final ImageView view,
                                   final String url,
                                   final File file,
-                                  final int placeholder, final short animation) {
+                                  final int placeholder,
+                                  final short animation,
+                                  final HashMap<ImageView, String> mapping) {
         Assert.assertTrue("URL and File are null!", url != null || file != null);
         Assert.assertNotNull("ImageView is null!", view);
 
@@ -106,7 +109,8 @@ public class Rembrandt {
         if (animation == NOT_ANIMATED || animation == FADE_IN) {
             view.setImageBitmap(null);
         }
-        view.setTag(path);
+//        view.setTag(path);
+        mapping.put(view, path);
 
         final Bitmap bitmap = mCache.get(path);
         if (bitmap != null) {
@@ -118,7 +122,7 @@ public class Rembrandt {
         return Task.callInBackground(new Callable<Bitmap>() {
             @Override
             public Bitmap call() throws Exception {
-                if (!view.getTag().equals(path)) {
+                if (!path.equals(mapping.get(view))) {
                     Log.v(TAG, "CANCELED Image loading of " + url);
                     return null;
                 }
@@ -141,7 +145,7 @@ public class Rembrandt {
         }).continueWith(new Continuation<Bitmap, Void>() {
             @Override
             public Void then(Task<Bitmap> bitmapTask) throws Exception {
-                if (!view.getTag().equals(path)) {
+                if (!path.equals(mapping.get(view))) {
                     Log.v(TAG, "CANCELED Image loading of " + url);
                     return null;
                 }
@@ -157,6 +161,7 @@ public class Rembrandt {
                 }
 
                 setImageBitmapOnView(result, view, animation);
+                mapping.remove(view);
                 return null;
             }
         }, Task.UI_THREAD_EXECUTOR).continueWith(TaskUtils.LogErrorContinuation);
