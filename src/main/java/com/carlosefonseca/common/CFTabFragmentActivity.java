@@ -6,6 +6,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.view.View;
 import android.widget.TabHost;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 
@@ -18,7 +19,7 @@ public class CFTabFragmentActivity extends CFActivity implements TabHost.OnTabCh
     private int realtabcontent;
     protected TabHost mTabHost;
     private HashMap<String, TabInfo> mapTabInfo = new HashMap<String, TabInfo>();
-    private TabInfo mLastTab = null;
+    @Nullable private TabInfo mLastTab = null;
 
     public static class TabInfo {
         private String tag;
@@ -32,6 +33,9 @@ public class CFTabFragmentActivity extends CFActivity implements TabHost.OnTabCh
             this.args = args;
         }
 
+        public String getTag() {
+            return tag;
+        }
     }
 
     static class TabFactory implements TabHost.TabContentFactory {
@@ -122,7 +126,7 @@ public class CFTabFragmentActivity extends CFActivity implements TabHost.OnTabCh
      * @param oldTab The tab that will be hidden.
      * @param newTab The tab that will be displayed.
      */
-    protected void onChangingTab(TabInfo oldTab, TabInfo newTab) {}
+    protected void onChangingTab(@Nullable TabInfo oldTab, TabInfo newTab) {}
 
     protected TabInfo getTabByTag(String tag) {
         return this.mapTabInfo.get(tag);
