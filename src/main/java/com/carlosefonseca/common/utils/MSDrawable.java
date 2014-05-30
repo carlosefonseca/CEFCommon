@@ -2,10 +2,8 @@ package com.carlosefonseca.common.utils;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.Drawable;
-import android.graphics.drawable.StateListDrawable;
+import android.graphics.drawable.*;
+import android.graphics.drawable.shapes.Shape;
 import android.util.StateSet;
 
 /**
@@ -14,9 +12,14 @@ import android.util.StateSet;
  * Use {@link #icon(android.graphics.Bitmap)} to set the icon for all states. You can then set colors with {@link
  * #normalColor(int)} and friends.
  * <p/>
- * Use {@link #normal(android.graphics.drawable.BitmapDrawable)} and friends to use different drawables for each state.
+ * Use {@link #normal(android.graphics.drawable.BitmapDrawable)} and friends to use different bitmap drawables for each state.
  * <p/>
- * Use {@link #normal(android.graphics.drawable.BitmapDrawable)} and friends to use different drawables for each state and also
+ * Use {@link #normal(android.graphics.drawable.BitmapDrawable, int)} and friends to use different bitmap drawables for each state and also
+ * tint them.
+ * <p/>
+ * Use {@link #normal(android.graphics.drawable.shapes.Shape)} and friends to use different shape drawables for each state.
+ * <p/>
+ * Use {@link #normal(android.graphics.drawable.shapes.Shape, int)} and friends to use different shape drawables for each state and also
  * tint them.
  * <p/>
  * Use {@link #normalColor(int)} (without using {@link #icon(android.graphics.Bitmap)}) to only do colors.
@@ -39,8 +42,11 @@ public class MSDrawable {
     Mode mMode = Mode.COLORS;
 
     Bitmap mIcon;
+    Shape mShape;
     int[] mColors = new int[3];
-    BitmapDrawable[] mDrawables = new BitmapDrawable[3];
+    BitmapDrawable[] mBitmapDrawables = new BitmapDrawable[3];
+//    Shape[] mShapes = new Shape[3];
+    ShapeDrawable[] mShapeDrawables = new ShapeDrawable[3];
     Bitmap[] mBitmaps = new Bitmap[3];
     Drawable[] mFinal = new Drawable[3];
 
@@ -79,6 +85,17 @@ public class MSDrawable {
         return this;
     }
 
+    /**
+     * Sets the icon for all states. Tint it by calling {@link #normalColor(int)} and sibling methods.
+     *
+     * @param icon A drawable from where to grab the bitmap.
+     */
+    public MSDrawable icon(Shape icon) {
+        mMode = Mode.SINGLE_ICON;
+        mShape = icon;
+        return this;
+    }
+
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -89,6 +106,11 @@ public class MSDrawable {
 
     public MSDrawable normal(BitmapDrawable drawable) {
         set(drawable, 0, NORMAL);
+        return this;
+    }
+
+    public MSDrawable normal(Shape shape) {
+        set(shape, 0, NORMAL);
         return this;
     }
 
@@ -104,6 +126,11 @@ public class MSDrawable {
 
     public MSDrawable normal(BitmapDrawable drawable, int color) {
         set(drawable, color, NORMAL);
+        return this;
+    }
+
+    public MSDrawable normal(Shape shape, int color) {
+        set(shape, color, NORMAL);
         return this;
     }
 
@@ -125,6 +152,11 @@ public class MSDrawable {
         return this;
     }
 
+    public MSDrawable pressed(Shape shape) {
+        set(shape, 0, PRESSED);
+        return this;
+    }
+
     public MSDrawable pressedRes(int res) {
         set((BitmapDrawable) mContext.getResources().getDrawable(res), 0, PRESSED);
         return this;
@@ -137,6 +169,11 @@ public class MSDrawable {
 
     public MSDrawable pressed(BitmapDrawable drawable, int color) {
         set(drawable, color, PRESSED);
+        return this;
+    }
+
+    public MSDrawable pressed(Shape shape, int color) {
+        set(shape, color, PRESSED);
         return this;
     }
 
@@ -157,6 +194,11 @@ public class MSDrawable {
         return this;
     }
 
+    public MSDrawable selected(Shape shape) {
+        set(shape, 0, SELECTED);
+        return this;
+    }
+
     public MSDrawable selectedRes(int res) {
         set((BitmapDrawable) mContext.getResources().getDrawable(res), 0, SELECTED);
         return this;
@@ -169,6 +211,11 @@ public class MSDrawable {
 
     public MSDrawable selected(BitmapDrawable drawable, int color) {
         set(drawable, color, SELECTED);
+        return this;
+    }
+
+    public MSDrawable selected(Shape shape, int color) {
+        set(shape, color, SELECTED);
         return this;
     }
 
@@ -189,7 +236,7 @@ public class MSDrawable {
             case SINGLE_ICON:
                 return createFromDrawables(recolorIcon(NORMAL), recolorIcon(PRESSED), recolorIcon(SELECTED));
             case MULTI_ICON:
-                return createFromDrawables(recolorBitmap(NORMAL), recolorBitmap(PRESSED), recolorBitmap(SELECTED));
+                return createFromDrawables(recolorDrawable(NORMAL), recolorDrawable(PRESSED), recolorDrawable(SELECTED));
         }
         return null;
     }
@@ -202,11 +249,38 @@ public class MSDrawable {
                : mColors[state] != 0 ? new ColorDrawable(mColors[state]) : null;
     }
 
-    private BitmapDrawable recolorIcon(int state) {
-        return mFinal[state] != null
-               ? (BitmapDrawable) mFinal[state]
-               : mColors[state] != 0 ? ImageUtils.createRecoloredDrawable(mContext, mIcon, mColors[state]) : null;
+    private Drawable recolorIcon(int state) {
+        if (mFinal[state] != null) {
+            return mFinal[state];
+        }
+
+        if (mColors[state] != 0) {
+            if (mIcon != null) {
+                mFinal[state] = ImageUtils.createRecoloredDrawable(mContext, mIcon, mColors[state]);
+            } else if (mShape != null) {
+                mFinal[state] = recoloredShape(new ShapeDrawable(mShape), mColors[state]);
+            }
+        }
+
+        return mFinal[state];
     }
+
+    private Drawable recolorDrawable(int state) {
+        if (mFinal[state] != null) {
+            return mFinal[state];
+        }
+
+        if (mBitmaps[state] == null && mBitmapDrawables == null) {
+            if (mShapeDrawables[state] != null) { // shape
+                return recolorShape(state);
+            } else { // nothing O.o
+                throw new RuntimeException("No Shape or Bitmap set");
+            }
+        } else { // bitmap
+            return recolorBitmap(state);
+        }
+    }
+
 
     private BitmapDrawable recolorBitmap(int state) {
         return mFinal[state] != null
@@ -214,6 +288,18 @@ public class MSDrawable {
                : mColors[state] != 0
                  ? ImageUtils.createRecoloredDrawable(mContext, getBitmap(state), mColors[state])
                  : getDrawable(state);
+    }
+
+    private Drawable recolorShape(int state) {
+        if (mFinal[state] == null) {
+            mFinal[state] = recoloredShape(mShapeDrawables[state], mColors[state]);
+        }
+        return mFinal[state];
+    }
+
+    private ShapeDrawable recoloredShape(ShapeDrawable shapeDrawable, int color) {
+        shapeDrawable.getPaint().setColor(color);
+        return shapeDrawable;
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -229,32 +315,40 @@ public class MSDrawable {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     private void set(BitmapDrawable drawable, int color, int state) {
-        set(drawable, null, color, state);
+        set(drawable, null, null, state, color);
+    }
+
+    private void set(Shape shape, int color, int state) {
+        set(null, null, shape, state, color);
     }
 
     private void set(Bitmap bitmap, int color, int state) {
-        set(null, bitmap, color, state);
+        set(null, bitmap, null, state, color);
     }
 
     private void set(int color, int state) {
-        set(null, null, color, state);
+        set(null, null, null, state, color);
     }
 
-    private void set(BitmapDrawable bitmapDrawable, Bitmap bitmap, int color, int state) {
-        if (bitmapDrawable != null || bitmap != null) {
+    private void set(BitmapDrawable bitmapDrawable, Bitmap bitmap, Shape shape, int state, int color) {
+        if (bitmapDrawable != null || bitmap != null || shape != null) {
             mMode = Mode.MULTI_ICON;
         }
         mColors[state] = color;
-        mDrawables[state] = bitmapDrawable;
+        mBitmapDrawables[state] = bitmapDrawable;
         mBitmaps[state] = bitmap;
+//        mShapes[state] = shape;
+        mShapeDrawables[state] = new ShapeDrawable(shape);
         mFinal[state] = null;
     }
 
     private Bitmap getBitmap(int state) {
-        return mBitmaps[state] != null ? mBitmaps[state] : mDrawables[state].getBitmap();
+        return mBitmaps[state] != null ? mBitmaps[state] : mBitmapDrawables[state].getBitmap();
     }
 
     private BitmapDrawable getDrawable(int state) {
-        return mDrawables[state] != null ? mDrawables[state] : new BitmapDrawable(mContext.getResources(), mBitmaps[state]);
+        return mBitmapDrawables[state] != null
+               ? mBitmapDrawables[state]
+               : new BitmapDrawable(mContext.getResources(), mBitmaps[state]);
     }
 }
