@@ -15,7 +15,7 @@ public class TriangleShape extends Shape {
 
     /**
      * Creates a Triangle Shape
-     * @param pointing Eigher {@link #UP}, {@link #RIGHT}, {@link #DOWN} or {@link #LEFT}
+     * @param pointing Either {@link #UP}, {@link #RIGHT}, {@link #DOWN} or {@link #LEFT}
      */
     public TriangleShape(int pointing) {
         this.pointing = pointing;
