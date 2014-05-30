@@ -8,17 +8,32 @@ import com.carlosefonseca.common.utils.Rembrandt;
 
 public class RembrandtView extends ImageView {
     private static final java.lang.String TAG = CodeUtils.getTag(RembrandtView.class);
+    private Rembrandt mRembrandt;
 
     public RembrandtView(Context context) {
+        this(context, new Rembrandt(context));
+    }
+
+    public RembrandtView(Context context, Rembrandt rembrandt) {
         super(context);
+        this.mRembrandt = rembrandt;
     }
 
     public RembrandtView(Context context, AttributeSet attrs) {
         super(context, attrs);
+
     }
 
     public RembrandtView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
+    }
+
+    public Rembrandt getRembrandt() {
+        return mRembrandt;
+    }
+
+    public void setRembrandt(Rembrandt mRembrandt) {
+        this.mRembrandt = mRembrandt;
     }
 
     public RembrandtView setImageUrl(String url) {
