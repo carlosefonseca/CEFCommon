@@ -47,9 +47,8 @@ public class ActivityStateListener {
         if (mRunning) {
             mRunning = false;
             final boolean finishing = mActivity.isFinishing();
-            for (Interface mListener : mListeners) {
-                mListener.onStop(finishing);
-            }
+            for (Interface mListener : mListeners) mListener.onStop(finishing);
+            if (finishing) mListeners.clear();
         }
     }
 
