@@ -15,21 +15,23 @@ public class FoldedBoxShape extends Shape {
     private final short mOption;
     private Path path;
 
-    public static final short FOLD_DOWN = 0;
-    public static final short FOLD_UP = 1;
-    public static final short FOLD_DOWN_BOX_ONLY = 2;
-    public static final short FOLD_UP_BOX_ONLY = 3;
+    public static final short BL = 0;
+    public static final short TR = 1;
+    public static final short BR = 2;
+    public static final short TL = 3;
+    public static final short BOX_BOTTOM = 4;
+    public static final short BOX_TOP = 5;
 
-    public FoldedBoxShape() { this(FOLD_DOWN); }
+    public FoldedBoxShape() { this(BL); }
 
     public FoldedBoxShape(short option) { mOption = option;}
 
     //  All percentages are relative to the total height of the canvas.
 
-    //  ####################      |
-    //  ####################      |
-    //  ####################      |
-    //  ####################      |
+    //  #################### |    |
+    //  #################### |hb  |
+    //  #################### |    |
+    //  #################### |    |
     //   ##   |1dp                |height (100%)
     //    ##########  |           |
     //      ########  |           |
@@ -41,48 +43,45 @@ public class FoldedBoxShape extends Shape {
 
     @Override
     protected void onResize(float width, float height) {
-        if (mOption == FOLD_DOWN || mOption == FOLD_DOWN_BOX_ONLY) {
-            int point = dp2px(1);
-            int h1 = (int) (height * 0.25);
-            int hb = (int) (height - h1 - point);
+        int point = dp2px(1);
+        int hb = (int) (height * 0.75 - point); // box height
 
-            path = new Path();
-            path.moveTo(0, 0);
+        boolean boxOnly = mOption == BOX_BOTTOM || mOption == BOX_TOP;
 
-            path.lineTo(width, 0);                  // right side
-            path.lineTo(width, hb);                 // right side down
-            if (mOption == FOLD_DOWN) {
-                path.lineTo(height * 0.1f, hb);         // middle top
-                path.lineTo(height * 0.1f, hb + point); // middle bottom
-                path.lineTo(height * .3f, hb + point);  // lower right top
-                path.lineTo(height * .3f, height);      // lower right bottom
-            }
-            path.lineTo(0, hb);                     // lower left
-            path.close();
-        } else {
-            int point = dp2px(1);
-            int h1 = (int) (height * 0.25);
-            int hb = (int) (height - h1 - point);
+        boolean flipH = false;
+        boolean flipV = false;
 
-            //noinspection UnnecessaryLocalVariable
-            float iWidth = width;
-            //noinspection UnnecessaryLocalVariable
-            float iHeight = height;
-
-            path = new Path();
-            path.moveTo(iWidth - 0, iHeight - 0);
-
-            path.lineTo(iWidth - width, iHeight - 0);                  // right side
-            path.lineTo(iWidth - width, iHeight - hb);                 // right side down
-            if (mOption == FOLD_UP) {
-                path.lineTo(iWidth - height * 0.1f, iHeight - hb);         // middle top
-                path.lineTo(iWidth - height * 0.1f, iHeight - (hb + point)); // middle bottom
-                path.lineTo(iWidth - height * .3f, iHeight - (hb + point));  // lower right top
-                path.lineTo(iWidth - height * .3f, iHeight - height);      // lower right bottom
-            }
-            path.lineTo(iWidth - 0, iHeight - hb);                     // lower left
-            path.close();
+        switch (mOption) {
+            case BR:
+                flipH = true;
+                break;
+            case TR:
+                flipH = true;
+                flipV = true;
+                break;
+            case TL:
+            case BOX_TOP:
+                flipV = true;
+                break;
+            case BL:
+            default:
         }
+
+        path = new Path();
+        path.moveTo(flipH ? width - 0 : 0, flipV ? height - 0 : 0);
+
+        // @formatter:off
+        path.lineTo(flipH ? width - width : width, flipV ? height - 0 : 0);     // right side
+        path.lineTo(flipH ? width - width : width, flipV ? height - hb : hb);   // right side down
+        if (!boxOnly) {
+            path.lineTo(flipH ? width - height * 0.1f : height * 0.1f, flipV ? height - hb : hb);                     // middle top
+            path.lineTo(flipH ? width - height * 0.1f : height * 0.1f, flipV ? height - (hb + point) : (hb + point)); // middle bottom
+            path.lineTo(flipH ? width - height * .30f : height * .30f, flipV ? height - (hb + point) : (hb + point)); // lower right top
+            path.lineTo(flipH ? width - height * .30f : height * .30f, flipV ? height - height : height);             // lower right bottom
+        }
+        path.lineTo(flipH ? width - 0 : 0, flipV ? height - hb : hb);               // lower left
+        path.close();
+        // @formatter:on
     }
 
     @Override
