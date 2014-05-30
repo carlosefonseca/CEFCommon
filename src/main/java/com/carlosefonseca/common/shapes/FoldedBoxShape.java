@@ -17,6 +17,8 @@ public class FoldedBoxShape extends Shape {
 
     public static final short FOLD_DOWN = 0;
     public static final short FOLD_UP = 1;
+    public static final short FOLD_DOWN_BOX_ONLY = 2;
+    public static final short FOLD_UP_BOX_ONLY = 3;
 
     public FoldedBoxShape() { this(FOLD_DOWN); }
 
@@ -39,7 +41,7 @@ public class FoldedBoxShape extends Shape {
 
     @Override
     protected void onResize(float width, float height) {
-        if (mOption == FOLD_DOWN) {
+        if (mOption == FOLD_DOWN || mOption == FOLD_DOWN_BOX_ONLY) {
             int point = dp2px(1);
             int h1 = (int) (height * 0.25);
             int hb = (int) (height - h1 - point);
@@ -49,10 +51,12 @@ public class FoldedBoxShape extends Shape {
 
             path.lineTo(width, 0);                  // right side
             path.lineTo(width, hb);                 // right side down
-            path.lineTo(height * 0.1f, hb);         // middle top
-            path.lineTo(height * 0.1f, hb + point); // middle bottom
-            path.lineTo(height * .3f, hb + point);  // lower right top
-            path.lineTo(height * .3f, height);      // lower right bottom
+            if (mOption == FOLD_DOWN) {
+                path.lineTo(height * 0.1f, hb);         // middle top
+                path.lineTo(height * 0.1f, hb + point); // middle bottom
+                path.lineTo(height * .3f, hb + point);  // lower right top
+                path.lineTo(height * .3f, height);      // lower right bottom
+            }
             path.lineTo(0, hb);                     // lower left
             path.close();
         } else {
@@ -60,19 +64,23 @@ public class FoldedBoxShape extends Shape {
             int h1 = (int) (height * 0.25);
             int hb = (int) (height - h1 - point);
 
-            float iwidth = mOption == FOLD_UP ? width : 0;
-            float iheight = mOption == FOLD_UP ? height : 0;
+            //noinspection UnnecessaryLocalVariable
+            float iWidth = width;
+            //noinspection UnnecessaryLocalVariable
+            float iHeight = height;
 
             path = new Path();
-            path.moveTo(iwidth - 0, iheight - 0);
+            path.moveTo(iWidth - 0, iHeight - 0);
 
-            path.lineTo(iwidth - width, iheight - 0);                  // right side
-            path.lineTo(iwidth - width, iheight - hb);                 // right side down
-            path.lineTo(iwidth - height * 0.1f, iheight - hb);         // middle top
-            path.lineTo(iwidth - height * 0.1f, iheight - (hb + point)); // middle bottom
-            path.lineTo(iwidth - height * .3f, iheight - (hb + point));  // lower right top
-            path.lineTo(iwidth - height * .3f, iheight - height);      // lower right bottom
-            path.lineTo(iwidth - 0, iheight - hb);                     // lower left
+            path.lineTo(iWidth - width, iHeight - 0);                  // right side
+            path.lineTo(iWidth - width, iHeight - hb);                 // right side down
+            if (mOption == FOLD_UP) {
+                path.lineTo(iWidth - height * 0.1f, iHeight - hb);         // middle top
+                path.lineTo(iWidth - height * 0.1f, iHeight - (hb + point)); // middle bottom
+                path.lineTo(iWidth - height * .3f, iHeight - (hb + point));  // lower right top
+                path.lineTo(iWidth - height * .3f, iHeight - height);      // lower right bottom
+            }
+            path.lineTo(iWidth - 0, iHeight - hb);                     // lower left
             path.close();
         }
     }
