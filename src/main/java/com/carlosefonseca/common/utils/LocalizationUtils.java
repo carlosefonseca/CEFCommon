@@ -33,4 +33,13 @@ public final class LocalizationUtils {
         Configuration cf = CFApp.getContext().getResources().getConfiguration();
         return cf.locale.getLanguage();
     }
+
+    /**
+     * Returns the name of the language, as it is in its own language. (Português, English,…)
+     * @param languageCode "pt", "en",…
+     */
+    public static String languageOwnName(String languageCode) {
+        final Locale locale = new Locale(languageCode);
+        return locale.getDisplayLanguage(locale);
+    }
 }
