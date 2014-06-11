@@ -31,17 +31,6 @@ public final class ListUtils {
     }
 
     /**
-     * @deprecated Use {@link #list(Object[])}
-     */
-    @SafeVarargs
-    @Deprecated
-    public static <T> ArrayList<T> arrayListWithObjects(T... objects) {
-        ArrayList<T> list = new ArrayList<>();
-        Collections.addAll(list, objects);
-        return list;
-    }
-
-    /**
      * Returns a list containing all objects.
      * @see #list(java.util.List[])
      */
@@ -60,6 +49,16 @@ public final class ListUtils {
     public static <T, L extends List<T>> ArrayList<T> list(L... lists) {
         ArrayList<T> list = new ArrayList<>();
         for (L ts : lists) list.addAll(ts);
+        return list;
+    }
+
+    /**
+     * Returns a copy of the specified list with object appended to it.
+     */
+    @SafeVarargs
+    public static <T> List<T> add(List<T> list, T... objects) {
+        list = new ArrayList<>(list);
+        list.addAll(Arrays.asList(objects));
         return list;
     }
 
