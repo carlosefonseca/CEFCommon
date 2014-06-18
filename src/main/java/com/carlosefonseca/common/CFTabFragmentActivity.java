@@ -99,7 +99,8 @@ public class CFTabFragmentActivity extends CFActivity implements TabHost.OnTabCh
             FragmentTransaction ft = this.getSupportFragmentManager().beginTransaction();
             if (mLastTab != null) {
                 if (mLastTab.fragment != null) {
-                    ft.detach(mLastTab.fragment);
+//                    ft.detach(mLastTab.fragment);
+                    ft.hide(mLastTab.fragment);
                 }
             }
             if (newTab != null) {
@@ -107,7 +108,8 @@ public class CFTabFragmentActivity extends CFActivity implements TabHost.OnTabCh
                     newTab.fragment = Fragment.instantiate(this, newTab.clss.getName(), newTab.args);
                     ft.add(realtabcontent, newTab.fragment, newTab.tag);
                 } else {
-                    ft.attach(newTab.fragment);
+                    ft.show(newTab.fragment);
+//                    ft.attach(newTab.fragment);
                 }
             }
 
