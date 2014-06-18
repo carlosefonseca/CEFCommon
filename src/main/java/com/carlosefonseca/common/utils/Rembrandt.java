@@ -129,7 +129,9 @@ public class Rembrandt {
                 Bitmap bitmap;
                 if (url != null) {
                     if (!ImageUtils.isImage(url)) {
-                        throw new RuntimeException("Url is not an image: " + url);
+//                        throw new RuntimeException("Url is not an image: " + url);
+                        Log.w(TAG, "Url is not an image: " + url);
+                        return null;
                     }
                     if (url.startsWith("http://")) {
                         bitmap = bitmapFromUrl(url);

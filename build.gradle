@@ -52,8 +52,6 @@ android {
     compileSdkVersion rootProject.ext.compileSdkVersion
     buildToolsVersion rootProject.ext.buildToolsVersion
 
-    useOldManifestMerger false
-
     defaultConfig {
         minSdkVersion 9
         targetSdkVersion rootProject.ext.compileSdkVersion
