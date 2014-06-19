@@ -89,7 +89,22 @@ public class FoldedBoxShape extends Shape {
         canvas.drawPath(path, paint);
     }
 
+    /**
+     * Calculates the padding needed to use so that the contents are correctly placed inside of the box.
+     *
+     * @param height The total height of the folded box view
+     */
     public static int getPaddingForHeight(float height) {
         return (int) (height * 0.25) + dp2px(1);
+    }
+
+    /**
+     * Calculates the height of the box, for use in sibling elements, for instance.
+     *
+     * @param height The total height of the folded box view
+     * @return Height of the box part
+     */
+    public static int getBoxHeight(float height) {
+        return (int) (height - (height * 0.25 + dp2px(1)));
     }
 }
