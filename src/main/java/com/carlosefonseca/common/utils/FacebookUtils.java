@@ -5,8 +5,10 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import com.carlosefonseca.common.CFApp;
+import com.carlosefonseca.common.widgets.LoadingDialog;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.AsyncHttpResponseHandler;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Header;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -22,9 +24,9 @@ public final class FacebookUtils {
     private FacebookUtils() {}
 
     public static String getFacebookNameFromURL(String url) {
-        Matcher matcher = Pattern.compile("(https://)?(www\\.)?facebook\\.com/(.*)").matcher(url);
+        Matcher matcher = Pattern.compile("^(?:https://)?(?:www\\.)?facebook\\.com/(?:([^/]*)|pages(?:.*)/(\\d+))/?$").matcher(url);
         if (matcher.find()) {
-            return matcher.group(3);
+            return StringUtils.defaultString(matcher.group(1), matcher.group(2));
         }
         return null;
     }
@@ -45,7 +47,7 @@ public final class FacebookUtils {
             context.getPackageManager().getPackageInfo(FB_PACKAGE_NAME, 0);
 
             // Check ID cache
-            String fbid = CFApp.getUserPreferences(FB_PREFS).getString(text, null);
+            String fbid = StringUtils.isNumeric(text) ? text : CFApp.getUserPreferences(FB_PREFS).getString(text, null);
 
             // Fetch ID
             if (fbid == null) {
@@ -86,4 +88,20 @@ public final class FacebookUtils {
             runnable.run(new Intent(Intent.ACTION_VIEW, Uri.parse("https://www.facebook.com/" + text)));
         }
     }
+
+    /* EXAMPLE USAGE */
+    public static boolean checkFacebook(Context context, String url) {
+        String facebookName = FacebookUtils.getFacebookNameFromURL(url);
+        if (facebookName != null) {
+            try {
+                FacebookUtils.openFacebookPage(context, facebookName);
+            } catch (NetworkingUtils.NotConnectedException e) {
+                LoadingDialog.ErrorDialog(context, "NO INTERNET");
+            }
+            return true;    // No further action needed
+        } else {
+            return false;   // You should do something else with your URL
+        }
+    }
+
 }
