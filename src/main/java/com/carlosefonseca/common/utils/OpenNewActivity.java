@@ -101,7 +101,7 @@ public class OpenNewActivity implements View.OnClickListener {
      * @param activity The current activity.
      * @param aClass   The class of the new activity.
      */
-    public OpenNewActivity(Activity activity, Class aClass, Test test) {
+    public OpenNewActivity(@Nullable Activity activity, Class aClass, @Nullable Test test) {
         this.activity = activity;
         this.aClass = aClass;
         this.test = test;
@@ -169,7 +169,7 @@ public class OpenNewActivity implements View.OnClickListener {
 
 
     @Override
-    public void onClick(View view) {
+    public void onClick(@Nullable View view) {
         if (activity == null && view != null && view.getContext() != null) {
             context = view.getContext();
         } else {

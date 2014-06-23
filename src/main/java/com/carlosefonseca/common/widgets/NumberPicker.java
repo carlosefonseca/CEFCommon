@@ -16,6 +16,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import com.carlosefonseca.common.R;
+import org.jetbrains.annotations.Nullable;
 
 public class NumberPicker extends LinearLayout {
 
@@ -36,7 +37,7 @@ public class NumberPicker extends LinearLayout {
         this(context, null);
     }
 
-    public NumberPicker(Context context, AttributeSet attrs) {
+    public NumberPicker(Context context, @Nullable AttributeSet attrs) {
         this(context, attrs, 0);
     }
 
@@ -218,6 +219,7 @@ public class NumberPicker extends LinearLayout {
      */
 
     final InputFilter filter = new InputFilter() {
+        @Nullable
         @Override
         public CharSequence filter(CharSequence source, int start, int end, Spanned dest, int dstart, int dend) {
             for (int i = start; i < end; i++) {

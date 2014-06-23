@@ -52,8 +52,8 @@ public class PieView extends ImageView {
         if (a != null) {
             setColor(a.getColor(R.styleable.PieView_android_color, Color.BLACK));
             setStrokeWidth(a.getDimension(R.styleable.PieView_pieStrokeWidth, 2));
+            a.recycle();
         }
-        a.recycle();
     }
 
     protected void createView() {
@@ -73,7 +73,7 @@ public class PieView extends ImageView {
     }
 
     protected void setStrokeWidth(float dimension) {
-        if (isInEditMode()) strokeWidthDp = (int) (dimension / (isInEditMode() ? 1 : ImageUtils.getDensity()));
+        if (isInEditMode()) strokeWidthDp = (int) (dimension / 1);
         strokeW = dimension;
         p.setStrokeWidth(dimension);
     }

@@ -26,6 +26,7 @@ import android.text.TextPaint;
 import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.widget.TextView;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Text view that auto adjusts text size to fit within the view.
@@ -78,12 +79,12 @@ public class AutoResizeTextViewOld extends TextView {
     }
 
     // Default constructor when inflating from XML file
-    public AutoResizeTextViewOld(Context context, AttributeSet attrs) {
+    public AutoResizeTextViewOld(Context context, @Nullable AttributeSet attrs) {
         this(context, attrs, 0);
     }
 
     // Default constructor override
-    public AutoResizeTextViewOld(Context context, AttributeSet attrs, int defStyle) {
+    public AutoResizeTextViewOld(Context context, @Nullable AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
         mTextSize = getTextSize();
     }
@@ -110,7 +111,6 @@ public class AutoResizeTextViewOld extends TextView {
 
     /**
      * Register listener to receive resize notifications
-     * @param listener
      */
     public void setOnResizeListener(OnTextResizeListener listener) {
         mTextResizeListener = listener;

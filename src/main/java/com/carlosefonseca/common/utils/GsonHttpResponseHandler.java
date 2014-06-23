@@ -6,6 +6,7 @@ import com.loopj.android.http.TextHttpResponseHandler;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Header;
 import org.apache.http.HttpStatus;
+import org.jetbrains.annotations.Nullable;
 
 import static com.carlosefonseca.common.utils.CodeUtils.isMainThread;
 
@@ -33,7 +34,7 @@ public abstract class GsonHttpResponseHandler<T> extends TextHttpResponseHandler
      * Creates a new JsonHttpResponseHandler
      */
 
-    public GsonHttpResponseHandler(Class<T> clazz, Gson gson) {
+    public GsonHttpResponseHandler(Class<T> clazz, @Nullable Gson gson) {
         super(AsyncHttpResponseHandler.DEFAULT_CHARSET);
         this.clazz = clazz;
         this.gson = gson != null ? gson : new Gson();
@@ -63,7 +64,7 @@ public abstract class GsonHttpResponseHandler<T> extends TextHttpResponseHandler
      * @param headers    the headers of the HTTP response
      * @param response   the parsed json object found in the server response (if any)
      */
-    public void onSuccess(int statusCode, Header[] headers, T response) {
+    public void onSuccess(int statusCode, Header[] headers, @Nullable T response) {
         onSuccess(response);
     }
 

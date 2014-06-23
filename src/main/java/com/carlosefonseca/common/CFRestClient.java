@@ -232,7 +232,7 @@ public class CFRestClient {
             client.post(getAbsoluteUrl(url), params, responseHandler);
         }
 
-        public static void post(final String url, final RequestParams params,
+        public static void post(final String url, @Nullable final RequestParams params,
                                 @Nullable String jsonBody, final AsyncHttpResponseHandler responseHandler) {
             StringEntity se = null;
             try {
@@ -242,12 +242,13 @@ public class CFRestClient {
                 Log.e(TAG, "Exception", e);
             }
             final StringEntity s = se;
-            Log.d(TAG, "POST: " + getAbsoluteUrl(url) + "?" + params.toString());
+            final String url1 = getAbsoluteUrl(url) + (params != null ? "?" + params : "");
+            Log.d(TAG, "POST: " + url1);
             Log.d(TAG, "POST: " + jsonBody);
             Runnable runnable = new Runnable() {
                 @Override
                 public void run() {
-                    client.post(context, getAbsoluteUrl(url) + "?" + params.toString(), s, "application/json", responseHandler);
+                    client.post(context, url1, s, "application/json", responseHandler);
                 }
             };
             if (!isMainThread()) {
@@ -257,7 +258,9 @@ public class CFRestClient {
             }
         }
 
-        public static void post(final String url, final File file, final TextHttpResponseHandler responseHandler) {
+        public static void post(@NotNull final String url,
+                                final File file,
+                                final TextHttpResponseHandler responseHandler) {
 
             new AsyncTask<String, Void, Void>() {
 

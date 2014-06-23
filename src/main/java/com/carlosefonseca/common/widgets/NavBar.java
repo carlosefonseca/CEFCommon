@@ -21,6 +21,7 @@ import com.carlosefonseca.common.utils.CodeUtils;
 import com.carlosefonseca.common.utils.Log;
 import com.carlosefonseca.common.utils.ResourceUtils;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * The Navigation Bar for MySight.
@@ -116,7 +117,7 @@ public class NavBar extends LinearLayout {
     }
 
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
-    public NavBar(Context context, AttributeSet attrs, int defStyle) {
+    public NavBar(Context context, @Nullable AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
         if (attrs != null) getXmlProperties(attrs);
         viewSetup(context);

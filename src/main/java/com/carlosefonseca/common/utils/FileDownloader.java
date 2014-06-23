@@ -5,6 +5,7 @@ import android.os.Build;
 import com.carlosefonseca.common.CFApp;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.IOUtils;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.*;
 import java.net.SocketException;
@@ -110,6 +111,7 @@ public final class FileDownloader {
         public static final int TIMEOUT_MILLIS = 15 * 1000;
         private static final String TAG = CodeUtils.getTag(Downloader.class);
 
+        @Nullable
         @Override
         protected final String doInBackground(Download... params) {
             final Download download = params[0];

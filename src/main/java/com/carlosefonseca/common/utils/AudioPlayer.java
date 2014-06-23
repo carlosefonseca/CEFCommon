@@ -30,8 +30,8 @@ public class AudioPlayer {
 
     @Deprecated
     public interface AudioPlayerListener {
-        void onAudioStart(MediaPlayer mediaPlayer, File file);
-        void onAudioStop(MediaPlayer mediaPlayer, File file);
+        void onAudioStart(MediaPlayer mediaPlayer, @Nullable File file);
+        void onAudioStop(MediaPlayer mediaPlayer, @Nullable File file);
     }
 
     public static class AudioPlayerNotification {
@@ -40,12 +40,12 @@ public class AudioPlayer {
 
         public enum Status { PLAY, PAUSE, STOP}
 
-        public AudioPlayerNotification(Status status, File file) {
+        public AudioPlayerNotification(Status status, @Nullable File file) {
             this.status = status;
             this.file = file;
         }
 
-        public static void PostStart(File file) {
+        public static void PostStart(@Nullable File file) {
             EventBus.getDefault().postSticky(new AudioPlayerNotification(Status.PLAY, file));
         }
         public static void PostPause(File file) {
@@ -76,8 +76,6 @@ public class AudioPlayer {
 
     /**
      * THE PLAY METHOD
-     * @param mediaPlayer
-     * @param file
      */
     private static void play(@NotNull MediaPlayer mediaPlayer, @Nullable File file) {
         stop();
@@ -125,8 +123,6 @@ public class AudioPlayer {
 
     /**
      * Adds the file to the queue or simply plays the file is nothing is playing
-     *
-     * @param audioFile
      */
     public static void queueFile(@NotNull File audioFile) {
         if (!isPlaying()) {
@@ -155,6 +151,7 @@ public class AudioPlayer {
         playerListeners.remove(l);
     }
 
+    @Nullable
     public static MediaPlayerWrapper getWrappedMediaPlayerForFile(Context c, File audioFile) {
         if (!audioFile.exists()) {
             Log.i(TAG, "" + audioFile + " doesn't exist.");
@@ -248,7 +245,7 @@ public class AudioPlayer {
         MediaPlayer mediaPlayer;
         File file;
 
-        MediaPlayerWrapper(MediaPlayer mediaPlayer, File file) {
+        MediaPlayerWrapper(@Nullable MediaPlayer mediaPlayer, File file) {
             this.mediaPlayer = mediaPlayer;
             this.file = file;
         }

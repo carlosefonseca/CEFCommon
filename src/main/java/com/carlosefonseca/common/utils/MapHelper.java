@@ -124,8 +124,14 @@ public class MapHelper {
     @Nullable
     public CameraUpdate getCameraUpdateWithAllPoints(boolean force) {
         if (layoutOccurred && (cameraUpdateWithAllPoints == null || force)) {
-            if (force) latLngBounds = null;
-            if (getLatLngBounds() != null) {
+            if (force || latLngBounds == null) {
+                try {
+                    latLngBounds = latLngBoundsBuilder.build();
+                } catch (Exception e) {
+                    Log.e(TAG, "" + e.getMessage(), e);
+                }
+            }
+            if (latLngBounds != null) {
                 if (latLngBounds.northeast.equals(latLngBounds.southwest)) {
                     cameraUpdateWithAllPoints = CameraUpdateFactory.newLatLngZoom(latLngBounds.getCenter(), 18);
                 } else {
@@ -139,11 +145,7 @@ public class MapHelper {
 
     @Nullable
     public LatLngBounds getLatLngBounds() {
-        if (latLngBounds == null) try {
-            latLngBounds = latLngBoundsBuilder.build();
-        } catch (Exception e) {
-            Log.e(TAG, e.getMessage());
-        }
+        if (latLngBounds == null) latLngBounds = latLngBoundsBuilder.build();
         return latLngBounds;
     }
 
@@ -175,13 +177,19 @@ public class MapHelper {
     };
 
     private void panZoomTo(@NotNull LatLng location) {
-        if (gMap.getCameraPosition().zoom < USER_ZOOM) gMap.animateCamera(CameraUpdateFactory.newLatLngZoom(location, USER_ZOOM));
-        else panTo(location);
+        if (gMap != null) {
+            if (gMap.getCameraPosition().zoom < USER_ZOOM) {
+                gMap.animateCamera(CameraUpdateFactory.newLatLngZoom(location, USER_ZOOM));
+            } else {
+                panTo(location);
+            }
+        }
     }
 
 
     protected void updateMyLocation(@NotNull Location location) {
         userLocation = LL(location);
+        if (gMap == null) return;
         if (myLocationMarker != null) {
             updateMyLocationMarkerAnimated(userLocation);
             myLocationMarker.showInfoWindow();
@@ -202,10 +210,12 @@ public class MapHelper {
     }
 
     private void panTo(@NotNull LatLng location) {
+        if (gMap == null) return;
         gMap.animateCamera(CameraUpdateFactory.newLatLng(location));
     }
 
     void updateMyLocationMarkerAnimated(@NotNull final LatLng target) {
+        if (gMap == null) return;
         final long duration = 250;
         handler = new Handler();
         final long start = SystemClock.uptimeMillis();

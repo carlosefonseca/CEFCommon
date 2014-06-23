@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.*;
 import android.graphics.drawable.shapes.Shape;
 import android.util.StateSet;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * MultiStateDrawable: A StateListDrawable builder!
@@ -243,6 +244,7 @@ public class MSDrawable {
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+    @Nullable
     private ColorDrawable getColor(int state) {
         return mFinal[state] != null
                ? (ColorDrawable) mFinal[state]
@@ -297,14 +299,14 @@ public class MSDrawable {
         return mFinal[state];
     }
 
-    private ShapeDrawable recoloredShape(ShapeDrawable shapeDrawable, int color) {
+    private static ShapeDrawable recoloredShape(ShapeDrawable shapeDrawable, int color) {
         shapeDrawable.getPaint().setColor(color);
         return shapeDrawable;
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    public static StateListDrawable createFromDrawables(Drawable normal, Drawable pressed, Drawable selected) {
+    public static StateListDrawable createFromDrawables(@Nullable Drawable normal, @Nullable Drawable pressed, @Nullable Drawable selected) {
         StateListDrawable stateListDrawable = new StateListDrawable();
         if (selected != null) stateListDrawable.addState(new int[]{android.R.attr.state_selected}, selected);
         if (pressed != null) stateListDrawable.addState(new int[]{android.R.attr.state_pressed}, pressed);
@@ -330,7 +332,7 @@ public class MSDrawable {
         set(null, null, null, state, color);
     }
 
-    private void set(BitmapDrawable bitmapDrawable, Bitmap bitmap, Shape shape, int state, int color) {
+    private void set(@Nullable BitmapDrawable bitmapDrawable, @Nullable Bitmap bitmap, @Nullable Shape shape, int state, int color) {
         if (bitmapDrawable != null || bitmap != null || shape != null) {
             mMode = Mode.MULTI_ICON;
         }

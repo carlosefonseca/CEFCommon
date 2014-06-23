@@ -6,6 +6,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.view.View;
 import android.widget.TabHost;
+import junit.framework.Assert;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
@@ -27,7 +28,7 @@ public class CFTabFragmentActivity extends CFActivity implements TabHost.OnTabCh
         private Bundle args;
         public Fragment fragment;
 
-        public TabInfo(String tag, Class clazz, Bundle args) {
+        public TabInfo(String tag, Class clazz, @Nullable Bundle args) {
             this.tag = tag;
             this.clss = clazz;
             this.args = args;
@@ -95,6 +96,7 @@ public class CFTabFragmentActivity extends CFActivity implements TabHost.OnTabCh
     @Override
     public void onTabChanged(String tag) {
         TabInfo newTab = this.mapTabInfo.get(tag);
+        Assert.assertNotNull(newTab);
         if (mLastTab != newTab) {
             FragmentTransaction ft = this.getSupportFragmentManager().beginTransaction();
             if (mLastTab != null) {
@@ -103,14 +105,12 @@ public class CFTabFragmentActivity extends CFActivity implements TabHost.OnTabCh
                     ft.hide(mLastTab.fragment);
                 }
             }
-            if (newTab != null) {
-                if (newTab.fragment == null) {
-                    newTab.fragment = Fragment.instantiate(this, newTab.clss.getName(), newTab.args);
-                    ft.add(realtabcontent, newTab.fragment, newTab.tag);
-                } else {
-                    ft.show(newTab.fragment);
+            if (newTab.fragment == null) {
+                newTab.fragment = Fragment.instantiate(this, newTab.clss.getName(), newTab.args);
+                ft.add(realtabcontent, newTab.fragment, newTab.tag);
+            } else {
+                ft.show(newTab.fragment);
 //                    ft.attach(newTab.fragment);
-                }
             }
 
             onChangingTab(mLastTab, newTab);
@@ -118,7 +118,7 @@ public class CFTabFragmentActivity extends CFActivity implements TabHost.OnTabCh
             this.getSupportFragmentManager().executePendingTransactions();
             if (mLastTab != null) mLastTab.fragment.setUserVisibleHint(false);
             mLastTab = newTab;
-            if (newTab != null && newTab.fragment.getView() != null) newTab.fragment.setUserVisibleHint(true);
+            if (newTab.fragment.getView() != null) newTab.fragment.setUserVisibleHint(true);
         }
     }
 
@@ -134,6 +134,7 @@ public class CFTabFragmentActivity extends CFActivity implements TabHost.OnTabCh
         return this.mapTabInfo.get(tag);
     }
 
+    @Nullable
     protected TabInfo getCurrentTabInfo() {
         return mLastTab;
     }

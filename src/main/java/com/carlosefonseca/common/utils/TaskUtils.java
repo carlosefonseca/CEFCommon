@@ -5,6 +5,7 @@ import android.os.Looper;
 import bolts.AggregateException;
 import bolts.Continuation;
 import bolts.Task;
+import org.jetbrains.annotations.Nullable;
 
 public final class TaskUtils {
     private static final String TAG = CodeUtils.getTag(TaskUtils.class);
@@ -39,6 +40,7 @@ public final class TaskUtils {
         }, timeout);
 
         t.continueWith(new Continuation<T, Object>() {
+            @Nullable
             @Override
             public T then(Task<T> task) throws Exception {
                 taskCompletionSource.setResult(task.getResult());

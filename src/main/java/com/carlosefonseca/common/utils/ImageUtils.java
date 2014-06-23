@@ -18,6 +18,7 @@ import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.widget.ImageView;
 import com.carlosefonseca.common.CFApp;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
@@ -139,6 +140,7 @@ public final class ImageUtils {
         return bitmap;
     }
 
+    @Nullable
     private static Bitmap getPhotoFromAssets(String path) {
         try {
             InputStream stream = CFApp.getContext().getAssets().open(path);
@@ -152,6 +154,7 @@ public final class ImageUtils {
     }
 
 
+    @Nullable
     public static Bitmap decodeSampledBitmapFromFile(File path, int reqWidth, int reqHeight) {
         if (path == null) return null;
         return decodeSampledBitmapFromFile(path.getAbsolutePath(), reqWidth, reqHeight);
@@ -170,9 +173,9 @@ public final class ImageUtils {
      * @see #getPhotoFromFile
      */
     @Nullable
-    public static Bitmap getCachedPhoto(File file, int widthDp, int heightDp, @Nullable String sizeName) {
+    public static Bitmap getCachedPhoto(@Nullable File file, int widthDp, int heightDp, @Nullable String sizeName) {
         Bitmap bitmap = null;
-        if (file == null || file.getName() == null) return null;
+        if (file == null) return null;
         String name = file.getName();
         String cacheName;
         File cacheFile = null;
@@ -197,12 +200,14 @@ public final class ImageUtils {
         return bitmap;
     }
 
+    @Nullable
     private static Bitmap getPhotoFromFileOrAssets(File file, int widthDp, int heightDp) {
         final Bitmap bitmap = tryPhotoFromFileOrAssets(file, widthDp, heightDp);
         if (bitmap == null) Log.w(TAG, "IMAGE DOES NOT EXIST " + file);
         return bitmap;
     }
 
+    @Nullable
     static Bitmap tryPhotoFromFileOrAssets(File file, int widthDp, int heightDp) {
         Bitmap bitmap = null;
         if (file.exists()) {
@@ -213,6 +218,7 @@ public final class ImageUtils {
         return bitmap;
     }
 
+    @Nullable
     public static Bitmap getPhotoFromFileOrAssets(File file) {
         return getPhotoFromFileOrAssets(file, -1, -1);
     }
@@ -226,6 +232,7 @@ public final class ImageUtils {
                                            final int heightDp,
                                            final RunnableWithBitmap runnable) {
         new AsyncTask<Void, Void, Bitmap>() {
+            @Nullable
             @Override
             protected Bitmap doInBackground(Void... params) {
                 return getCachedPhoto(file, widthDp, heightDp, null);
@@ -238,12 +245,14 @@ public final class ImageUtils {
         }.execute();
     }
 
+    @Nullable
     public static AsyncTask<Void, Void, Bitmap> getCachedPhotoAsync(final String filenameOrUrl,
                                                                     final int widthDp,
                                                                     final int heightDp,
                                                                     final RunnableWithBitmap runnable) {
         if (filenameOrUrl.startsWith("http://")) {
             return new AsyncTask<Void, Void, Bitmap>() {
+                @Nullable
                 @Override
                 protected Bitmap doInBackground(Void... params) {
                     File fullPath = ResourceUtils.getFullPath(getLastSegmentOfURL(filenameOrUrl));
@@ -271,6 +280,7 @@ public final class ImageUtils {
         return null;
     }
 
+    @Nullable
     public static Bitmap getPhotoFromFileOrAssets(String filenameOrUrl) {
         if (filenameOrUrl == null) return null;
         return getPhotoFromFileOrAssets(convertSomeFileReferenceToFile(filenameOrUrl), -1, -1);
@@ -292,6 +302,7 @@ public final class ImageUtils {
      *
      * @param filenameOrUrl File "reference".
      */
+    @Nullable
     public static Bitmap getCachedPhoto(String filenameOrUrl) {
         return getCachedPhoto(filenameOrUrl, -1, -1);
     }
@@ -312,6 +323,7 @@ public final class ImageUtils {
      * @param widthDp       Desired width.
      * @param heightDp      Desired height.
      */
+    @Nullable
     public static Bitmap getCachedPhoto(final String filenameOrUrl, final int widthDp, final int heightDp) {
         if (filenameOrUrl == null) return null;
         return getCachedPhoto(convertSomeFileReferenceToFile(filenameOrUrl), widthDp, heightDp, null);
@@ -333,6 +345,7 @@ public final class ImageUtils {
      * @param heightDp      Desired height.
      */
 
+    @Nullable
     public static Bitmap getResizedIcon(final String filenameOrUrl, final int widthDp, final int heightDp) {
         if (filenameOrUrl == null) return null;
         return getResizedIcon(convertSomeFileReferenceToFile(filenameOrUrl), widthDp, heightDp);
@@ -350,7 +363,7 @@ public final class ImageUtils {
      *
      * @param filenameOrUrl File object pointing to
      */
-    public static File convertSomeFileReferenceToFile(String filenameOrUrl) {
+    public static File convertSomeFileReferenceToFile(@NotNull String filenameOrUrl) {
         File file;
         if (filenameOrUrl.startsWith("http://")) {
             file = ResourceUtils.getFullPath(getLastSegmentOfURL(filenameOrUrl));
@@ -381,9 +394,9 @@ public final class ImageUtils {
      * @see #getPhotoFromFile
      */
     @Nullable
-    public static Bitmap getResizedIcon(File file, final int widthDp, final int heightDp) {
+    public static Bitmap getResizedIcon(@Nullable File file, final int widthDp, final int heightDp) {
         Bitmap bitmap = null;
-        if (file == null || file.getName() == null) return null;
+        if (file == null) return null;
         String name = file.getName();
         String cacheName;
 
@@ -493,10 +506,9 @@ public final class ImageUtils {
         protected Void doInBackground(Void... voids) {
             try {
                 FileOutputStream out = new FileOutputStream(file);
-//                bitmap.compress(Bitmap.CompressFormat.JPEG, 80, out);
                 bitmap.compress(Bitmap.CompressFormat.PNG, 0, out);
             } catch (Exception e) {
-                Log.e(TAG, "Bitmap: " + bitmap + " file:" + file, e);
+                Log.e(TAG, "Bitmap file:" + file, e);
             }
             return null;
         }
@@ -622,6 +634,7 @@ public final class ImageUtils {
      * @return Image
      * @see #getSquareThumbnail(android.content.Context, String, int) Non-cached version.
      */
+    @Nullable
     @Deprecated
     public static Bitmap getCachedSquareThumbnail(Context c, String path, int side) {
         Bitmap bitmap;
@@ -655,8 +668,7 @@ public final class ImageUtils {
      * @param side The side of the final image.
      * @see #getCachedSquareThumbnail(android.content.Context, String, int) Disk-cached version.
      */
-    @Deprecated
-    public static Bitmap getSquareThumbnail(Context c, String path, int side) {
+    private static Bitmap getSquareThumbnail(Context c, String path, int side) {
         Bitmap bitmap = decodeSampledBitmapFromFile(path, side, side);
         bitmap = cropSquare(bitmap);
         bitmap = Bitmap.createScaledBitmap(bitmap, side, side, true);
@@ -670,7 +682,6 @@ public final class ImageUtils {
      * @param bitmap Source bitmap.
      * @return New image.
      */
-    @Deprecated
     public static Bitmap cropSquare(Bitmap bitmap) {
         int originalWidth = bitmap.getWidth();
         int originalHeight = bitmap.getHeight();
@@ -960,6 +971,7 @@ public final class ImageUtils {
      *                    example).
      * @param placeholder A placeholder that will be set in case there is no bitmap to place.
      */
+    @Nullable
     public static AsyncTask<Void, Void, Bitmap> setImageAsyncFadeIn(final String file,
                                                                     final ImageView view,
                                                                     final LruCache<String, Bitmap> cache,
@@ -980,8 +992,8 @@ public final class ImageUtils {
      *                     an
      *                     example).
      * @param placeholder  A placeholder that will be set in case there is no bitmap to place.
-     * @param toBackground
      */
+    @Nullable
     public static AsyncTask<Void, Void, Bitmap> setImageAsyncFadeIn(final String file,
                                                                     final View view,
                                                                     final LruCache<String, Bitmap> cache,
@@ -992,6 +1004,7 @@ public final class ImageUtils {
         }
         view.setVisibility(View.INVISIBLE);
         return new AsyncTask<Void, Void, Bitmap>() {
+            @Nullable
             @Override
             protected Bitmap doInBackground(Void... params) {
                 return file != null ? cache.get(file) : null;
@@ -1058,6 +1071,7 @@ public final class ImageUtils {
             this(maxSize, imageSizeDP, imageSizeDP);
         }
 
+        @Nullable
         @Override
         protected Bitmap create(String key) {
             return getCachedPhoto(key, width, height);
@@ -1096,10 +1110,6 @@ public final class ImageUtils {
 
     /**
      * Redraws the bitmap in a new size. Scales the bitmap keeping the aspect ratio.
-     *
-     * @param bitmap
-     * @param desiredWidth
-     * @param desiredHeight
      */
     public static Bitmap resizeBitmapCanvas(Bitmap bitmap, int desiredWidth, int desiredHeight) {
         if (bitmap.getWidth() == desiredWidth && bitmap.getHeight() == desiredHeight) return bitmap;

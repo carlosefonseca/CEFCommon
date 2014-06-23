@@ -3,6 +3,7 @@ package com.carlosefonseca.common.utils;
 import android.location.Location;
 import android.util.Pair;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.security.InvalidParameterException;
 import java.text.DecimalFormat;
@@ -31,7 +32,7 @@ public class CFLocation extends Location implements Comparable<CFLocation> {
      * @param locationToDistance The location to calculated a distance from.
      * @param index              An index.
      */
-    public CFLocation(String coordinateString, CFLocation locationToDistance, int index) {
+    public CFLocation(String coordinateString, @Nullable CFLocation locationToDistance, int index) {
         super("");
         String[] split1 = coordinateString.split(LINE_COORDINATE_PART_SPLITTER);
         double latitude = Double.parseDouble(split1[1]);
@@ -77,7 +78,7 @@ public class CFLocation extends Location implements Comparable<CFLocation> {
         this.index = index;
     }
 
-    public CFLocation(double lat, double lng, Location locationToDistance, int index) {
+    public CFLocation(double lat, double lng, @Nullable Location locationToDistance, int index) {
         super("");
         setLatitude(lat);
         setLongitude(lng);

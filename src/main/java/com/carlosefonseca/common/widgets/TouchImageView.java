@@ -13,11 +13,6 @@
 
 package com.carlosefonseca.common.widgets;
 
-import static com.carlosefonseca.common.widgets.TouchImageView.State.ANIMATE_ZOOM;
-import static com.carlosefonseca.common.widgets.TouchImageView.State.DRAG;
-import static com.carlosefonseca.common.widgets.TouchImageView.State.FLING;
-import static com.carlosefonseca.common.widgets.TouchImageView.State.NONE;
-import static com.carlosefonseca.common.widgets.TouchImageView.State.ZOOM;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -39,6 +34,9 @@ import android.view.View;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.ImageView;
 import android.widget.Scroller;
+import org.jetbrains.annotations.Nullable;
+
+import static com.carlosefonseca.common.widgets.TouchImageView.State.*;
 
 public class TouchImageView extends ImageView {
 
@@ -131,7 +129,7 @@ public class TouchImageView extends ImageView {
     }
 
     @Override
-    public void setImageBitmap(Bitmap bm) {
+    public void setImageBitmap(@Nullable Bitmap bm) {
         super.setImageBitmap(bm);
         savePreviousImageValues();
     }

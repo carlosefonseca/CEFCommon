@@ -359,7 +359,7 @@ public class LoadingDialog extends Dialog {
      * @param percentage The new percentage.
      * @param message    The new text.
      */
-    public void updatePie(double percentage, String message) {
+    public void updatePie(double percentage, @Nullable String message) {
         pie.updateTo(percentage);
         if (message != null) {
             message_tv.setText(message);

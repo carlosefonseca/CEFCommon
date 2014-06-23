@@ -3,6 +3,7 @@ package com.carlosefonseca.common.utils;
 import android.widget.Toast;
 import com.carlosefonseca.common.BuildConfig;
 import com.carlosefonseca.common.CFApp;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.regex.Pattern;
 
@@ -24,7 +25,7 @@ public final class Log {
 
         public void put(String key, int value);
 
-        public boolean log(int priority, String tag, String message, Throwable tr);
+        public boolean log(int priority, String tag, String message, @Nullable Throwable tr);
     }
 
     private static RemoteLogger remoteLogger;
@@ -86,7 +87,7 @@ public final class Log {
         if (consoleLogging) android.util.Log.i(tag(1), key + ": " + value);
     }
 
-    private static int log(int priority, String tag, String msg, Throwable tr) {
+    private static int log(int priority, String tag, String msg, @Nullable Throwable tr) {
         if (remoteLogger == null || priority < sRemoteMinPriority || !remoteLogger.log(priority, tag, msg, tr)) {
             // If no remoteLogger, too low to do remote log or if remote log didn't log to logcat: do android log
             if (consoleLogging || priority >= android.util.Log.ERROR) {
@@ -136,7 +137,7 @@ public final class Log {
         return v(tag, msg, null);
     }
 
-    public static int v(String tag, String msg, Throwable tr) {
+    public static int v(String tag, String msg, @Nullable Throwable tr) {
         return log(VERBOSE, tag, msg, tr);
     }
 
@@ -144,7 +145,7 @@ public final class Log {
         return log(DEBUG, tag, msg, null);
     }
 
-    public static int d(String tag, String msg, Throwable tr) {
+    public static int d(String tag, String msg, @Nullable Throwable tr) {
         return log(DEBUG, tag, msg, tr);
     }
 
@@ -152,7 +153,7 @@ public final class Log {
         return log(INFO, tag, msg, null);
     }
 
-    public static int i(String tag, String msg, Throwable tr) {
+    public static int i(String tag, String msg, @Nullable Throwable tr) {
         return log(INFO, tag, msg, tr);
     }
 
@@ -160,7 +161,7 @@ public final class Log {
         return log(WARN, tag, msg, null);
     }
 
-    public static int w(String tag, String msg, Throwable tr) {
+    public static int w(String tag, String msg, @Nullable Throwable tr) {
         return log(WARN, tag, msg, tr);
     }
 
@@ -172,7 +173,7 @@ public final class Log {
         return log(ERROR, tag, "", new RuntimeException(msg));
     }
 
-    public static int e(String tag, String msg, Throwable tr) {
+    public static int e(String tag, String msg, @Nullable Throwable tr) {
         return log(ERROR, tag, msg, tr);
     }
 
@@ -184,7 +185,7 @@ public final class Log {
         return log(ASSERT, tag, msg, null);
     }
 
-    public static int wtf(String tag, String msg, Throwable tr) {
+    public static int wtf(String tag, String msg, @Nullable Throwable tr) {
         return log(ASSERT, tag, msg, tr);
     }
 

@@ -8,6 +8,7 @@ import bolts.Continuation;
 import bolts.Task;
 import junit.framework.Assert;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.IOException;
@@ -95,7 +96,7 @@ public class Rembrandt {
     }
 
     private static Task<Void> run(final ImageView view,
-                                  final String url,
+                                  @Nullable final String url,
                                   final File file,
                                   final int placeholder,
                                   final short animation,
@@ -120,6 +121,7 @@ public class Rembrandt {
 
 
         return Task.callInBackground(new Callable<Bitmap>() {
+            @Nullable
             @Override
             public Bitmap call() throws Exception {
                 if (!path.equals(mapping.get(view))) {
@@ -169,6 +171,7 @@ public class Rembrandt {
         }, Task.UI_THREAD_EXECUTOR).continueWith(TaskUtils.LogErrorContinuation);
     }
 
+    @Nullable
     private static Bitmap bitmapFromFile(String url) {
         final File file1 = url.startsWith("/") ? new File(url) : ResourceUtils.getFullPath(url);
         return ImageUtils.getCachedPhoto(file1, 0, 0, null);
