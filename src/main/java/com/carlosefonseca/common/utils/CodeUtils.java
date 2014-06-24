@@ -148,7 +148,6 @@ public final class CodeUtils {
 
 
     @SuppressLint("InlinedApi")
-    @Deprecated
     public static void setupNumericEditText(final EditText editText, @Nullable final DialogInterface.OnClickListener onDone) {
         editText.setImeOptions(EditorInfo.IME_ACTION_DONE);
         editText.setInputType(InputType.TYPE_CLASS_PHONE | InputType.TYPE_NUMBER_VARIATION_PASSWORD);
