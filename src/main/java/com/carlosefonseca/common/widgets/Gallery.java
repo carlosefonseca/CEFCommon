@@ -31,6 +31,7 @@ public class Gallery extends ViewPager {
     private OnClickListener clickListener;
     private int width;
     private float density;
+    private boolean scaling;
 
     public Gallery(Context context) {
         super(context);
@@ -44,6 +45,14 @@ public class Gallery extends ViewPager {
 
     private void init() {
         density = getResources().getDisplayMetrics().density;
+    }
+
+    public boolean isScaling() {
+        return scaling;
+    }
+
+    public void setScaling(boolean scaling) {
+        this.scaling = scaling;
     }
 
     public void setupWithImageList(List<File> imageList) {
@@ -111,6 +120,9 @@ public class Gallery extends ViewPager {
             View view = recycledViews.poll();
             if (view == null) {
                 view = layoutInflater.inflate(R.layout.gallery_styled_image_view, container, false);
+                if (scaling) {
+                    ((ImageView) ((ViewGroup) view).getChildAt(0)).setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+                }
             }
             if (view != null) {
                 final ImageView imageView = (ImageView) view.findViewById(R.id.image);
@@ -149,4 +161,19 @@ public class Gallery extends ViewPager {
     }
 
 
+    public interface OnItemClickListener<T> {
+        void onClick(T item);
+    }
+
+    public <T> void setupWithUrlsForObjects(List<String> urls,
+                                            final List<T> objects,
+                                            final OnItemClickListener<T> clickListener) {
+        setupWithUrlList(urls);
+        setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                clickListener.onClick(objects.get((Integer) v.getTag()));
+            }
+        });
+    }
 }
