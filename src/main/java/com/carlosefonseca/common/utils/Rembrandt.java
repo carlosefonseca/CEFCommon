@@ -104,8 +104,8 @@ public class Rembrandt {
                                   final int placeholder,
                                   final short animation,
                                   final HashMap<ImageView, String> mapping,
-                                  @Nullable final Transform mTransform,
-                                  @Nullable final OnBitmap mNotify) {
+                                  @Nullable final Transform transform,
+                                  @Nullable final OnBitmap notify) {
 
         Assert.assertTrue("URL and File are null!", url != null || file != null);
         Assert.assertNotNull("ImageView is null!", view);
@@ -120,7 +120,7 @@ public class Rembrandt {
 
         Bitmap bitmap = mCache.get(path);
         if (bitmap != null) {
-            if (mNotify != null) mNotify.bitmap(bitmap);
+            if (notify != null) notify.bitmap(bitmap);
             setImageBitmapOnView(bitmap, view, animation == FADE_IN ? NOT_ANIMATED : animation);
             return Task.forResult(null);
         }
@@ -150,8 +150,8 @@ public class Rembrandt {
                     bitmap = ImageUtils.getCachedPhoto(file, 0, 0, null);
                 }
                 mCache.put(path, bitmap);
-                if (mTransform != null) bitmap = mTransform.bitmap(bitmap);
-                if (mNotify != null) mNotify.bitmap(bitmap);
+                if (transform != null) bitmap = transform.bitmap(bitmap);
+                if (notify != null) notify.bitmap(bitmap);
                 return bitmap;
             }
         }).continueWith(new Continuation<Bitmap, Void>() {
