@@ -417,6 +417,15 @@ public class LoadingDialog extends Dialog {
         handler.postDelayed(timeoutRunnable, millis);
     }
 
+    public void cancelTimeout() {
+        handler.removeCallbacks(timeoutRunnable);
+        timeoutRunnable = null;
+    }
+
+    public boolean hasTimeout() {
+        return timeoutRunnable != null;
+    }
+
     public static enum DialogType {
         LOADING, PIE_LOADING, ERROR, COMPLETED
     }
