@@ -39,6 +39,7 @@ public class Rembrandt {
     private int placeholder;
 
     private HashMap<ImageView, String> mMapping = new HashMap<>();
+    private Transform mTransform;
 
     public Rembrandt(Context context) {
         mContext = context;
@@ -87,7 +88,7 @@ public class Rembrandt {
             mMapping.remove(view);
             run = Task.forResult(null);
         } else {
-            run = run(view, mUrl, mFile, placeholder, animation, mMapping);
+            run = run(view, mUrl, mFile, placeholder, animation, mMapping, mTransform);
         }
         mUrl = null;
         mFile = null;
@@ -100,7 +101,8 @@ public class Rembrandt {
                                   final File file,
                                   final int placeholder,
                                   final short animation,
-                                  final HashMap<ImageView, String> mapping) {
+                                  final HashMap<ImageView, String> mapping,
+                                  final Transform mTransform) {
         Assert.assertTrue("URL and File are null!", url != null || file != null);
         Assert.assertNotNull("ImageView is null!", view);
 
@@ -144,6 +146,7 @@ public class Rembrandt {
                     bitmap = ImageUtils.getCachedPhoto(file, 0, 0, null);
                 }
                 mCache.put(path, bitmap);
+                if (mTransform != null) return mTransform.bitmap(bitmap);
                 return bitmap;
             }
         }).continueWith(new Continuation<Bitmap, Void>() {
@@ -203,5 +206,14 @@ public class Rembrandt {
                 view.setImageBitmap(result);
                 break;
         }
+    }
+
+    public interface Transform {
+        Bitmap bitmap(Bitmap bitmap);
+    }
+
+    public Rembrandt transform(Transform transform) {
+        this.mTransform = transform;
+        return this;
     }
 }
