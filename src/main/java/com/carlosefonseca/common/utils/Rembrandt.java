@@ -7,6 +7,7 @@ import android.widget.ImageView;
 import bolts.Continuation;
 import bolts.Task;
 import junit.framework.Assert;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -40,6 +41,7 @@ public class Rembrandt {
 
     private HashMap<ImageView, String> mMapping = new HashMap<>();
     private Transform mTransform;
+    private OnBitmap mNotify;
 
     public Rembrandt(Context context) {
         mContext = context;
@@ -53,7 +55,7 @@ public class Rembrandt {
     }
 
     public Rembrandt load(String url) {
-        mUrl = url;
+        mUrl = StringUtils.stripToNull(url);
         mFile = null;
         return this;
     }
@@ -88,7 +90,7 @@ public class Rembrandt {
             mMapping.remove(view);
             run = Task.forResult(null);
         } else {
-            run = run(view, mUrl, mFile, placeholder, animation, mMapping, mTransform);
+            run = run(view, mUrl, mFile, placeholder, animation, mMapping, mTransform, mNotify);
         }
         mUrl = null;
         mFile = null;
@@ -102,10 +104,11 @@ public class Rembrandt {
                                   final int placeholder,
                                   final short animation,
                                   final HashMap<ImageView, String> mapping,
-                                  final Transform mTransform) {
+                                  @Nullable final Transform mTransform,
+                                  @Nullable final OnBitmap mNotify) {
+
         Assert.assertTrue("URL and File are null!", url != null || file != null);
         Assert.assertNotNull("ImageView is null!", view);
-
 
         final String path = url != null ? url : file.getAbsolutePath();
         if (path.equals(view.getTag())) return Task.forResult(null);
@@ -115,8 +118,9 @@ public class Rembrandt {
 //        view.setTag(path);
         mapping.put(view, path);
 
-        final Bitmap bitmap = mCache.get(path);
+        Bitmap bitmap = mCache.get(path);
         if (bitmap != null) {
+            if (mNotify != null) mNotify.bitmap(bitmap);
             setImageBitmapOnView(bitmap, view, animation == FADE_IN ? NOT_ANIMATED : animation);
             return Task.forResult(null);
         }
@@ -146,7 +150,8 @@ public class Rembrandt {
                     bitmap = ImageUtils.getCachedPhoto(file, 0, 0, null);
                 }
                 mCache.put(path, bitmap);
-                if (mTransform != null) return mTransform.bitmap(bitmap);
+                if (mTransform != null) bitmap = mTransform.bitmap(bitmap);
+                if (mNotify != null) mNotify.bitmap(bitmap);
                 return bitmap;
             }
         }).continueWith(new Continuation<Bitmap, Void>() {
@@ -212,8 +217,26 @@ public class Rembrandt {
         Bitmap bitmap(Bitmap bitmap);
     }
 
+    /**
+     * Allows modification of the bitmap, after being loaded. This modified bitmap will be cached and this code will
+     * not be run again when loading from cache.
+     * @see #notify(com.carlosefonseca.common.utils.Rembrandt.OnBitmap)
+     */
     public Rembrandt transform(Transform transform) {
         this.mTransform = transform;
+        return this;
+    }
+
+    public interface OnBitmap {
+        void bitmap(Bitmap bitmap);
+    }
+
+    /**
+     * Allows something to be run after the bitmap is loaded, either from cache or from the source.
+     * @see #transform(com.carlosefonseca.common.utils.Rembrandt.Transform)
+     */
+    public Rembrandt notify(OnBitmap listener) {
+        this.mNotify = listener;
         return this;
     }
 }
