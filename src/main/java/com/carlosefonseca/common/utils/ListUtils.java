@@ -31,6 +31,16 @@ public final class ListUtils {
     }
 
     /**
+     * Moves an element to the index 0. If the element doesn't exist or already is at index 0,
+     * nothing is done to the list.
+     * Rotates right a subset of the list from index 0 to the element.
+     */
+    public static <T> void moveToTop(List<T> list, T element) {
+        final int i = list.indexOf(element);
+        if (i > 0) Collections.rotate(list.subList(0, i + 1), 1);
+    }
+
+    /**
      * Returns a list containing all objects.
      * @see #list(java.util.List[])
      */
