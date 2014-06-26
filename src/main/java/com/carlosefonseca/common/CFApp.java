@@ -20,6 +20,7 @@ import static com.carlosefonseca.common.utils.CodeUtils.runOnBackground;
 
 public class CFApp extends Application {
     private static final String TAG = getTag(CFApp.class);
+    public static final String VERSION_KEY = "VERSION";
 
     protected static String TEST_DEVICE_WIFI_MAC_ADDRESS = null;
 
@@ -47,11 +48,13 @@ public class CFApp extends Application {
     }
 
     private void checkAppVersion() {
-        final int stored = getSharedPreferences(getPackageName(), MODE_PRIVATE).getInt("VERSION", -1);
+        final SharedPreferences sharedPreferences = getSharedPreferences(getPackageName(), MODE_PRIVATE);
+        final int stored = sharedPreferences.getInt(VERSION_KEY, -1);
         final int current = CodeUtils.getAppVersionCode();
         if (stored != current) {
             Log.put("App Update", "" + stored + " -> " + current);
             appUpdated(stored, current);
+            sharedPreferences.edit().putInt(VERSION_KEY, current).commit();
         }
     }
 
@@ -71,6 +74,9 @@ public class CFApp extends Application {
         return context;
     }
 
+    /**
+     * You should override this and return com.yourapp.BuildConfig.DEBUG
+     */
     protected boolean isTest() {
         return test;
     }
