@@ -72,6 +72,22 @@ public class CFTabFragmentActivity extends CFActivity implements TabHost.OnTabCh
         mTabHost.setOnTabChangedListener(this);
     }
 
+
+    protected void addTab(String text, @Nullable View view, Class fragmentClass, @Nullable Bundle args) {
+        if (mTabHost == null) throw new RuntimeException("TabHost not initialized. Call initialiseTabHost first.");
+        if (view == null) {
+            addTab(this,
+                   mTabHost,
+                   mTabHost.newTabSpec(text).setIndicator(text),
+                   new TabInfo(text, fragmentClass, args));
+        } else {
+            addTab(this,
+                   mTabHost,
+                   mTabHost.newTabSpec(text).setIndicator(view),
+                   new TabInfo(text, fragmentClass, args));
+        }
+    }
+
     protected void addTab(CFTabFragmentActivity activity, TabHost tabHost, TabHost.TabSpec tabSpec, TabInfo tabInfo) {
         // Attach a Tab view factory to the spec
         tabSpec.setContent(new TabFactory(activity));
