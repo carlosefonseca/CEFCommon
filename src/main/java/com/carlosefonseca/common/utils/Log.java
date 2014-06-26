@@ -8,6 +8,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.regex.Pattern;
 
 import static android.util.Log.*;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 @SuppressWarnings("UnusedDeclaration")
 public final class Log {
@@ -87,6 +88,7 @@ public final class Log {
         if (consoleLogging) android.util.Log.i(tag(1), key + ": " + value);
     }
 
+/*
     private static int log(int priority, String tag, String msg, @Nullable Throwable tr) {
         if (remoteLogger == null || priority < sRemoteMinPriority || !remoteLogger.log(priority, tag, msg, tr)) {
             // If no remoteLogger, too low to do remote log or if remote log didn't log to logcat: do android log
@@ -97,72 +99,98 @@ public final class Log {
         }
         return priority;
     }
+*/
+
+    private static int log(int priority, String tag, String frm, @Nullable Object... args) {
+        String msg = null;
+        boolean logged = false;
+
+        Throwable tr = ((args != null) && (args.length > 0) && (args[args.length - 1] instanceof Throwable))
+                       ? (Throwable) args[args.length - 1]
+                       : null;
+
+        if (remoteLogger != null && priority >= sRemoteMinPriority) {
+            msg = isEmpty(frm) ? "<no message given>" : String.format(frm, args);
+            logged = remoteLogger.log(priority, tag, msg, tr);
+        }
+
+        if (!logged && (consoleLogging || priority >= android.util.Log.ERROR)) {
+            if (msg == null) msg = isEmpty(frm) ? "<no message given>" : String.format(frm, args);
+            android.util.Log.println(priority, tag, msg == null ? "<no message given>" : frm);
+            if (tr != null) android.util.Log.println(priority, tag, getStackTraceString(tr));
+        }
+        return priority;
+    }
 
     // AUTO TAGGED
 
     public static int v() {
-        return sRemoteMinPriority <= VERBOSE || consoleLogging ? v(tagP(), "<-", null) : -1;
+        return sRemoteMinPriority <= VERBOSE || consoleLogging ? v(tagP(), "<-") : -1;
     }
     public static int v(String msg) {
-        return sRemoteMinPriority <= VERBOSE || consoleLogging ? v(tagP(), msg, null) : -1;
+        return sRemoteMinPriority <= VERBOSE || consoleLogging ? v(tagP(), msg) : -1;
     }
 
     public static int d() {
-        return sRemoteMinPriority <= DEBUG || consoleLogging ? d(tagP(), "<-", null) : -1;
+        return sRemoteMinPriority <= DEBUG || consoleLogging ? d(tagP(), "<-") : -1;
     }
 
     public static int d(String msg) {
-        return sRemoteMinPriority <= DEBUG || consoleLogging ? d(tagP(), msg, null) : -1;
+        return sRemoteMinPriority <= DEBUG || consoleLogging ? d(tagP(), msg) : -1;
     }
 
     public static int i(String msg) {
-        return sRemoteMinPriority <= INFO || consoleLogging ? i(tagP(), msg, null) : -1;
+        return sRemoteMinPriority <= INFO || consoleLogging ? i(tagP(), msg) : -1;
     }
 
     public static int w(String msg) {
-        return sRemoteMinPriority <= WARN || consoleLogging ? w(tagP(), msg, null) : -1;
+        return sRemoteMinPriority <= WARN || consoleLogging ? w(tagP(), msg) : -1;
     }
 
     public static int e(String msg) {
-        return sRemoteMinPriority <= ERROR || consoleLogging ? e(tagP(), msg, null) : -1;
+        return sRemoteMinPriority <= ERROR || consoleLogging ? e(tagP(), msg) : -1;
     }
 
     public static int wtf(String msg) {
-        return sRemoteMinPriority <= ASSERT || consoleLogging ? wtf(tagP(), msg, null) : -1;
+        return sRemoteMinPriority <= ASSERT || consoleLogging ? wtf(tagP(), msg) : -1;
     }
 
     // TAG GIVEN
 
     public static int v(String tag, String msg) {
-        return v(tag, msg, null);
+        return v(tag, msg, (Object[]) null);
     }
 
-    public static int v(String tag, String msg, @Nullable Throwable tr) {
-        return log(VERBOSE, tag, msg, tr);
+//    public static int v(String tag, String msg, @Nullable Throwable tr) {
+//        return log(VERBOSE, tag, msg, tr);
+//    }
+
+    public static int v(String tag, String f, Object... args) {
+        return log(VERBOSE, tag, f, args);
     }
 
     public static int d(String tag, String msg) {
-        return log(DEBUG, tag, msg, null);
+        return log(DEBUG, tag, msg, (Object[]) null);
     }
 
-    public static int d(String tag, String msg, @Nullable Throwable tr) {
-        return log(DEBUG, tag, msg, tr);
+    public static int d(String tag, String msg, Object... args) {
+        return log(DEBUG, tag, msg, args);
     }
 
     public static int i(String tag, String msg) {
-        return log(INFO, tag, msg, null);
+        return log(INFO, tag, msg, (Object[]) null);
     }
 
-    public static int i(String tag, String msg, @Nullable Throwable tr) {
-        return log(INFO, tag, msg, tr);
+    public static int i(String tag, String msg, Object... args) {
+        return log(INFO, tag, msg, args);
     }
 
     public static int w(String tag, String msg) {
-        return log(WARN, tag, msg, null);
+        return log(WARN, tag, msg, (Object[]) null);
     }
 
-    public static int w(String tag, String msg, @Nullable Throwable tr) {
-        return log(WARN, tag, msg, tr);
+    public static int w(String tag, String msg, Object... args) {
+        return log(WARN, tag, msg, args);
     }
 
     public static int w(String tag, Throwable tr) {
@@ -173,8 +201,8 @@ public final class Log {
         return log(ERROR, tag, "", new RuntimeException(msg));
     }
 
-    public static int e(String tag, String msg, @Nullable Throwable tr) {
-        return log(ERROR, tag, msg, tr);
+    public static int e(String tag, String msg, Object... args) {
+        return log(ERROR, tag, msg, args);
     }
 
     public static int e(String tag, Throwable tr) {
@@ -182,11 +210,11 @@ public final class Log {
     }
 
     public static int wtf(String tag, String msg) {
-        return log(ASSERT, tag, msg, null);
+        return log(ASSERT, tag, msg, (Object[]) null);
     }
 
-    public static int wtf(String tag, String msg, @Nullable Throwable tr) {
-        return log(ASSERT, tag, msg, tr);
+    public static int wtf(String tag, String msg, Object... args) {
+        return log(ASSERT, tag, msg, args);
     }
 
     public static int wtf(String tag, Throwable tr) {
