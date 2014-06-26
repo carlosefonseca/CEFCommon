@@ -23,7 +23,7 @@ public class CFApp extends Application {
 
     protected static String TEST_DEVICE_WIFI_MAC_ADDRESS = null;
 
-    public static Application context;
+    public static Context context;
     public static boolean test;
     private static final boolean ALLOW_TEST_DEVICE = true;
 
