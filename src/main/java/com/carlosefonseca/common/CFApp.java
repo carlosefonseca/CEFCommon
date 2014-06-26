@@ -5,6 +5,7 @@ import android.app.Application;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Build;
+import com.carlosefonseca.common.utils.CodeUtils;
 import com.carlosefonseca.common.utils.Log;
 import com.carlosefonseca.common.utils.NetworkingUtils;
 
@@ -22,7 +23,7 @@ public class CFApp extends Application {
 
     protected static String TEST_DEVICE_WIFI_MAC_ADDRESS = null;
 
-    public static Context context;
+    public static Application context;
     public static boolean test;
     private static final boolean ALLOW_TEST_DEVICE = true;
 
@@ -31,7 +32,7 @@ public class CFApp extends Application {
         super.onCreate();
         context = this;
 
-        setTestDevice(test);
+        setTestDevice(isTest());
 
         runOnBackground(new Runnable() {
             @Override
@@ -39,7 +40,25 @@ public class CFApp extends Application {
                 availableMemory();
             }
         });
+
+        init();
+
+        checkAppVersion();
     }
+
+    private void checkAppVersion() {
+        final int stored = getSharedPreferences(getPackageName(), MODE_PRIVATE).getInt("VERSION", -1);
+        final int current = CodeUtils.getAppVersionCode();
+        if (stored != current) {
+            Log.put("App Update", "" + stored + " -> " + current);
+            appUpdated(stored, current);
+        }
+    }
+
+
+    protected void init() { }
+
+    protected void appUpdated(int stored, int current) { }
 
     public static boolean testIfTestDevice() {
         return Build.FINGERPRINT.startsWith("generic") // Emulador
@@ -50,6 +69,10 @@ public class CFApp extends Application {
     public static Context getContext() {
         if (context == null) Log.w(TAG, "Please setup a CFApp subclass!");
         return context;
+    }
+
+    protected boolean isTest() {
+        return test;
     }
 
     public static boolean isTestDevice() {

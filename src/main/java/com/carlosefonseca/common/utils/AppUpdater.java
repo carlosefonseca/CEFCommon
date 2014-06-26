@@ -167,6 +167,12 @@ public final class AppUpdater {
         downloadURL.execute(latestVersion.url);
     }
 
+    public static void tryOnceCheckForUpdatesAndAsk(final Context context) {
+        if (appName != null && StringUtils.isEmpty(existsNewVersion)) {
+            checkForUpdatesAndAsk(context);
+        }
+    }
+
     public static void checkForUpdatesAndAsk(final Context context) {
         checkForUpdates(new CheckForUpdatesDelegate() {
             @Override
