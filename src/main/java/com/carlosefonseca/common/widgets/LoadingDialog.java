@@ -244,8 +244,8 @@ public class LoadingDialog extends Dialog {
     }
 
     private void setupOverlayDialog(String message, DialogType dialogType) {
-        if (currentType != dialogType) {
             timeoutCounting = null;
+        if (currentType != dialogType) {
             currentType = dialogType;
             switch (dialogType) {
                 case COMPLETED:
