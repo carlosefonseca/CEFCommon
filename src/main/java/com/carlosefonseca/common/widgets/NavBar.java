@@ -191,7 +191,11 @@ public class NavBar extends LinearLayout {
         if ((color != NO_COLOR || defaultNormalColor != NO_COLOR) && defaultTitleDrawable == null) {
             setColor();
         } else if (defaultTitleDrawable != null) {
-            setTitleDrawable(defaultTitleDrawable.getConstantState().newDrawable());
+            if (defaultBackDrawable instanceof ShapeDrawable) {
+                setTitleDrawable(new ShapeDrawable(((ShapeDrawable) defaultBackDrawable).getShape()));
+            } else {
+                setTitleDrawable(defaultTitleDrawable.getConstantState().newDrawable());
+            }
             setColor();
         }
     }
@@ -327,7 +331,6 @@ public class NavBar extends LinearLayout {
      */
     public NavBar setTitle(CharSequence title) {
         if (titleView != null) titleView.setText(title == null ? "" : title);
-
         return this;
     }
 
