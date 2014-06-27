@@ -12,6 +12,12 @@ import android.util.AttributeSet;
 import android.util.SparseIntArray;
 import android.util.TypedValue;
 import android.widget.TextView;
+import bolts.Continuation;
+import bolts.Task;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 
 /**
  * from http://stackoverflow.com/a/17782522/1069444
@@ -19,6 +25,46 @@ import android.widget.TextView;
 @SuppressWarnings("UnusedDeclaration")
 public class AutoResizeTextView extends TextView {
     private boolean mNeedsResize = true;
+
+    public static void makeSameSizeOnNextResize(final AutoResizeTextView... textViews) {
+        final Float[] sizes = new Float[textViews.length];
+
+        final ArrayList<Task<Void>.TaskCompletionSource> tasks = new ArrayList<>();
+        for (AutoResizeTextView ignored : textViews) {
+            tasks.add(Task.<Void>create());
+        }
+
+        for (int i = 0; i < textViews.length; i++) {
+            final AutoResizeTextView button = textViews[i];
+            final int finalI = i;
+            button.setListener(new OnSizeCalculated() {
+                @Override
+                public void onSizeCalculated(float newSize) {
+                    sizes[finalI] = newSize;
+                    tasks.get(finalI).setResult(null);
+                    textViews[finalI].setListener(null);
+                }
+            });
+        }
+
+
+        final ArrayList<Task<Void>> tasks2 = new ArrayList<>();
+        for (Task<Void>.TaskCompletionSource task : tasks) tasks2.add(task.getTask());
+
+        Task.whenAll(tasks2).continueWith(new Continuation<Void, Void>() {
+            @Override
+            public Void then(Task<Void> task) throws Exception {
+                final float min = Collections.min(Arrays.asList(sizes));
+                for (int i = 0; i < sizes.length; i++) {
+                    textViews[i].setListener(null);
+                    if (sizes[i] != min) {
+                        textViews[i].setTextSize(min);
+                    }
+                }
+                return null;
+            }
+        });
+    }
 
     private interface SizeTester {
         /**
@@ -30,6 +76,12 @@ public class AutoResizeTextView extends TextView {
          */
         public int onTestSize(int suggestedSize, RectF availableSpace);
     }
+
+    public interface OnSizeCalculated {
+        void onSizeCalculated(float newSize);
+    }
+
+    private OnSizeCalculated mListener;
 
     private RectF mTextRect = new RectF();
 
@@ -186,8 +238,9 @@ public class AutoResizeTextView extends TextView {
         mWidthLimit = getMeasuredWidth() - getCompoundPaddingLeft() - getCompoundPaddingRight();
         mAvailableSpaceRect.right = mWidthLimit;
         mAvailableSpaceRect.bottom = heightLimit;
-        super.setTextSize(TypedValue.COMPLEX_UNIT_PX,
-                          efficientTextSizeSearch(startSize, (int) mMaxTextSize, mSizeTester, mAvailableSpaceRect));
+        final int size = efficientTextSizeSearch(startSize, (int) mMaxTextSize, mSizeTester, mAvailableSpaceRect);
+        super.setTextSize(TypedValue.COMPLEX_UNIT_PX, size);
+        if (mListener != null) mListener.onSizeCalculated(size);
     }
 
     private final SizeTester mSizeTester = new SizeTester() {
@@ -296,5 +349,13 @@ public class AutoResizeTextView extends TextView {
         if (width != oldwidth || height != oldheight) {
             reAdjust();
         }
+    }
+
+    public OnSizeCalculated getListener() {
+        return mListener;
+    }
+
+    public void setListener(OnSizeCalculated mListener) {
+        this.mListener = mListener;
     }
 }
