@@ -159,6 +159,14 @@ public class AutoResizeTextView extends TextView {
         requestLayout();
     }
 
+    public void setMinTextSize(int unit, float size) {
+        Context c = getContext();
+        Resources r = c == null ? Resources.getSystem() : c.getResources();
+        assert r != null;
+        setMinTextSize(TypedValue.applyDimension(unit, size, r.getDisplayMetrics()));
+    }
+
+
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         if (changed || mNeedsResize) reAdjust();
