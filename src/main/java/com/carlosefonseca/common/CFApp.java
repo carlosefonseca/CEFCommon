@@ -10,7 +10,6 @@ import com.carlosefonseca.common.utils.Log;
 import com.carlosefonseca.common.utils.NetworkingUtils;
 
 import static com.carlosefonseca.common.utils.CodeUtils.getTag;
-import static com.carlosefonseca.common.utils.CodeUtils.runOnBackground;
 
 /**
  * Base Class for the Application class.
@@ -35,33 +34,19 @@ public class CFApp extends Application {
 
         setTestDevice(isTest());
 
-        runOnBackground(new Runnable() {
-            @Override
-            public void run() {
-                availableMemory();
-            }
-        });
-
-        init();
-
-        checkAppVersion();
-    }
-
-    private void checkAppVersion() {
         final SharedPreferences sharedPreferences = getSharedPreferences(getPackageName(), MODE_PRIVATE);
         final int stored = sharedPreferences.getInt(VERSION_KEY, -1);
         final int current = CodeUtils.getAppVersionCode();
         if (stored != current) {
             Log.put("App Update", "" + stored + " -> " + current);
-            appUpdated(stored, current);
             sharedPreferences.edit().putInt(VERSION_KEY, current).commit();
         }
+
+        init(current, stored);
     }
 
+    protected void init(int currentVersion, int previousVersion) {}
 
-    protected void init() { }
-
-    protected void appUpdated(int stored, int current) { }
 
     public static boolean testIfTestDevice() {
         return Build.FINGERPRINT.startsWith("generic") // Emulador
