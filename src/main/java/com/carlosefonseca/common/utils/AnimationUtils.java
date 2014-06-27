@@ -97,6 +97,8 @@ public final class AnimationUtils {
         Drawable currentDrawable = imageView.getDrawable();
         if (currentDrawable == null) {
             currentDrawable = new ColorDrawable(Color.TRANSPARENT);
+        } else if (currentDrawable instanceof TransitionDrawable) {
+            currentDrawable = ((TransitionDrawable) currentDrawable).getDrawable(1);
         }
         Drawable[] arrayDrawable = new Drawable[2];
         arrayDrawable[0] = currentDrawable;
