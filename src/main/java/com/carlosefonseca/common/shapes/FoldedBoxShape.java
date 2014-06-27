@@ -1,5 +1,6 @@
 package com.carlosefonseca.common.shapes;
 
+import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Path;
@@ -21,10 +22,20 @@ public class FoldedBoxShape extends Shape {
     public static final short TL = 3;
     public static final short BOX_BOTTOM = 4;
     public static final short BOX_TOP = 5;
+    private float density = 1;
 
-    public FoldedBoxShape() { this(BL); }
+    public FoldedBoxShape() { this(Resources.getSystem(), BL); }
 
-    public FoldedBoxShape(short option) { mOption = option;}
+    public FoldedBoxShape(short option) { this(Resources.getSystem(), option);}
+
+    public FoldedBoxShape(Resources resources) {
+        this(resources, BL);
+    }
+
+    public FoldedBoxShape(Resources res, short option) {
+        mOption = option;
+        density = res != null ? res.getDisplayMetrics().density : 1;
+    }
 
     //  All percentages are relative to the total height of the canvas.
 
@@ -43,7 +54,7 @@ public class FoldedBoxShape extends Shape {
 
     @Override
     protected void onResize(float width, float height) {
-        int point = dp2px(1);
+        int point = Math.round(density);
         int hb = (int) (height * 0.75 - point); // box height
 
         boolean boxOnly = mOption == BOX_BOTTOM || mOption == BOX_TOP;
