@@ -149,8 +149,8 @@ public class Rembrandt {
                 } else {
                     bitmap = ImageUtils.getCachedPhoto(file, 0, 0, null);
                 }
-                mCache.put(path, bitmap);
                 if (transform != null) bitmap = transform.bitmap(bitmap);
+                mCache.put(path, bitmap);
                 if (notify != null) notify.bitmap(bitmap);
                 return bitmap;
             }
