@@ -174,7 +174,7 @@ public class CFRestClient {
 
         static {
             client = new AsyncHttpClient();
-            client.setTimeout(30 * 1000);
+            client.setTimeout(60 * 1000);
             client.setMaxRetriesAndTimeout(5, 2000);
 //            client.setMaxConnections(2);
         }
