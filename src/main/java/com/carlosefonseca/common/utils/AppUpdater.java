@@ -68,7 +68,7 @@ public final class AppUpdater {
 
                     existsNewVersion = latestVersion.version;
 
-                    if (CodeUtils.getAppVersionCode() != latestVersion.getVersionCode()) {
+                    if (CodeUtils.getAppVersionCode() < latestVersion.getVersionCode()) {
                         delegate.newUpdateExists(existsNewVersion);
                     }
                 } catch (JsonSyntaxException e) {
