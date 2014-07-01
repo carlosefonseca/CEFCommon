@@ -28,13 +28,13 @@ public class Rembrandt {
     public static final int XFADE_MILLIS = 500;
     private static final int FADE_MILLIS = 100;
 
-    static LruCache<String, Bitmap> mCache = new ImageUtils.BitmapCache();
+    LruCache<String, Bitmap> mCache = new ImageUtils.BitmapCache();
 
     private static final short NOT_ANIMATED = 0;
     private static final short FADE_IN = 1;
     private static final short CROSS_FADE = 2;
 
-    private final Context mContext;
+//    private final Context mContext;
     private String mUrl;
     private File mFile;
     private int placeholder;
@@ -44,7 +44,7 @@ public class Rembrandt {
     private OnBitmap mNotify;
 
     public Rembrandt(Context context) {
-        mContext = context;
+        /*mContext = context*/;
     }
 
     /**
@@ -90,7 +90,7 @@ public class Rembrandt {
             mMapping.remove(view);
             run = Task.forResult(null);
         } else {
-            run = run(view, mUrl, mFile, placeholder, animation, mMapping, mTransform, mNotify);
+            run = run(view, mUrl, mFile, placeholder, animation, mMapping, mTransform, mNotify, mCache);
         }
         mUrl = null;
         mFile = null;
@@ -105,7 +105,8 @@ public class Rembrandt {
                                   final short animation,
                                   final HashMap<ImageView, String> mapping,
                                   @Nullable final Transform transform,
-                                  @Nullable final OnBitmap notify) {
+                                  @Nullable final OnBitmap notify,
+                                  final LruCache<String, Bitmap> cache) {
 
         Assert.assertTrue("URL and File are null!", url != null || file != null);
         Assert.assertNotNull("ImageView is null!", view);
@@ -118,7 +119,7 @@ public class Rembrandt {
 //        view.setTag(path);
         mapping.put(view, path);
 
-        Bitmap bitmap = mCache.get(path);
+        Bitmap bitmap = cache.get(path);
         if (bitmap != null) {
             if (notify != null) notify.bitmap(bitmap);
             setImageBitmapOnView(bitmap, view, animation == FADE_IN ? NOT_ANIMATED : animation);
@@ -150,7 +151,7 @@ public class Rembrandt {
                     bitmap = ImageUtils.getCachedPhoto(file, 0, 0, null);
                 }
                 if (transform != null) bitmap = transform.bitmap(bitmap);
-                mCache.put(path, bitmap);
+                cache.put(path, bitmap);
                 if (notify != null) notify.bitmap(bitmap);
                 return bitmap;
             }
