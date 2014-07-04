@@ -100,6 +100,7 @@ public class MapHelper {
                             Log.i(TAG, "Animating Camera");
                             gMap.animateCamera(cameraUpdateWithAllPoints1);
                             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
+                                //noinspection deprecation
                                 parentView.getViewTreeObserver().removeGlobalOnLayoutListener(this);
                             } else {
                                 parentView.getViewTreeObserver().removeOnGlobalLayoutListener(this);

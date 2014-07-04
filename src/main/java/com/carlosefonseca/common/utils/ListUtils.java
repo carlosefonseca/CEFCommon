@@ -46,9 +46,7 @@ public final class ListUtils {
      */
     @SafeVarargs
     public static <T> ArrayList<T> list(T... objects) {
-        ArrayList<T> list = new ArrayList<>();
-        Collections.addAll(list, objects);
-        return list;
+        return (ArrayList<T>) Arrays.asList(objects);
     }
 
     /**
@@ -56,9 +54,9 @@ public final class ListUtils {
      * @see #list(Object[])
      */
     @SafeVarargs
-    public static <T, L extends List<T>> ArrayList<T> list(L... lists) {
+    public static <T> ArrayList<T> list(Collection<T>... lists) {
         ArrayList<T> list = new ArrayList<>();
-        for (L ts : lists) list.addAll(ts);
+        for (Collection<T> ts : lists) list.addAll(ts);
         return list;
     }
 
@@ -285,7 +283,7 @@ public final class ListUtils {
     }
 
     public interface Id {
-        int getId();
+        Integer getId();
     }
 
     public static ArrayList<Integer> getIds(Iterable<? extends Id> list) {

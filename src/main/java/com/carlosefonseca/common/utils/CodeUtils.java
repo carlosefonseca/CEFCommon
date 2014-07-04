@@ -76,6 +76,15 @@ public final class CodeUtils {
         }
     }
 
+    public static int hashCode(int seed, Object... objects) {
+            if (objects == null) return seed;
+            int hashCode = seed;
+            for (Object element : objects) {
+                hashCode = 31 * hashCode + (element == null ? 0 : element.hashCode());
+            }
+            return hashCode;
+        }
+
     public interface RunnableWithView<T extends View> {
         void run(T view);
     }
