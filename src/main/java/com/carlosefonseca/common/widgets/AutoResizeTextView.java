@@ -105,7 +105,7 @@ public class AutoResizeTextView extends TextView {
     private int mMaxLines;
 
     private boolean mEnableSizeCache = true;
-    private boolean mInitiallized;
+    private boolean mInitialized;
 
     public AutoResizeTextView(Context context) {
         super(context);
@@ -131,11 +131,12 @@ public class AutoResizeTextView extends TextView {
             // no value was assigned during construction
             mMaxLines = NO_LINE_LIMIT;
         }
-        mInitiallized = true;
+        mInitialized = true;
     }
 
     @Override
     public void setTextSize(float size) {
+        if (mMaxTextSize == size) return;
         mMaxTextSize = size;
         mTextCachedSizes.clear();
         mNeedsResize = true;
@@ -144,10 +145,10 @@ public class AutoResizeTextView extends TextView {
 
     @Override
     public void setMaxLines(int maxlines) {
-        super.setMaxLines(maxlines);
         mMaxLines = maxlines;
         mNeedsResize = true;
-        requestLayout();
+        super.setMaxLines(maxlines);
+//        requestLayout();
     }
 
     @Override
@@ -164,6 +165,7 @@ public class AutoResizeTextView extends TextView {
     @Override
     public void setSingleLine(boolean singleLine) {
         super.setSingleLine(singleLine);
+        if (mMaxLines == 1) return;
         if (singleLine) {
             mMaxLines = 1;
         } else {
@@ -175,10 +177,11 @@ public class AutoResizeTextView extends TextView {
 
     @Override
     public void setLines(int lines) {
-        super.setLines(lines);
+        if (mMaxLines == lines) return;
         mMaxLines = lines;
         mNeedsResize = true;
-        requestLayout();
+        super.setLines(lines);
+//        requestLayout();
     }
 
     @Override
@@ -189,7 +192,9 @@ public class AutoResizeTextView extends TextView {
         if (c == null) r = Resources.getSystem();
         else r = c.getResources();
         assert r != null;
-        mMaxTextSize = TypedValue.applyDimension(unit, size, r.getDisplayMetrics());
+        final float v = TypedValue.applyDimension(unit, size, r.getDisplayMetrics());
+        if (v == mMaxTextSize) return;
+        mMaxTextSize = v;
         mTextCachedSizes.clear();
         mNeedsResize = true;
         requestLayout();
@@ -206,6 +211,7 @@ public class AutoResizeTextView extends TextView {
      * Set the lower text size limit and invalidate the view
      */
     public void setMinTextSize(float minTextSize) {
+        if (mMinTextSize == minTextSize) return;
         mMinTextSize = minTextSize;
         mNeedsResize = true;
         requestLayout();
@@ -230,7 +236,7 @@ public class AutoResizeTextView extends TextView {
     }
 
     private void adjustTextSize(String string) {
-        if (!mInitiallized) {
+        if (!mInitialized) {
             return;
         }
         int startSize = (int) mMinTextSize;
