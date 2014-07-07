@@ -46,7 +46,9 @@ public final class ListUtils {
      */
     @SafeVarargs
     public static <T> ArrayList<T> list(T... objects) {
-        return (ArrayList<T>) Arrays.asList(objects);
+        ArrayList<T> list = new ArrayList<>();
+        Collections.addAll(list, objects);
+        return list;
     }
 
     /**
@@ -105,6 +107,12 @@ public final class ListUtils {
 
     public static <T> List<T> defaultIfNull(@Nullable List<T> list) {
         return list == null ? new ArrayList<T>() : list;
+    }
+
+    public static <T, C extends Collection<T>> ArrayList<T> flatten(Collection<C> listOfLists) {
+        final ArrayList<T> list = new ArrayList<>();
+        for (Collection<T> listOfT : listOfLists) list.addAll(listOfT);
+        return list;
     }
 
     public static class ListComparator<T> {
