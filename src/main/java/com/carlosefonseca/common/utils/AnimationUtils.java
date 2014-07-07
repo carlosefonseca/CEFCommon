@@ -17,6 +17,8 @@ import com.nineoldandroids.animation.Animator;
 import com.nineoldandroids.animation.ValueAnimator;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
+
 public final class AnimationUtils {
 
     private static final java.lang.String TAG = CodeUtils.getTag(AnimationUtils.class);
@@ -164,5 +166,13 @@ public final class AnimationUtils {
 
         @Override
         public void onAnimationRepeat(Animation animation) { }
+    }
+
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
+    public static void setScale(List<View> views, int scale) {
+        for (View view : views) {
+            view.setScaleX(scale);
+            view.setScaleY(scale);
+        }
     }
 }
