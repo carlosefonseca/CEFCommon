@@ -76,15 +76,25 @@ public final class AnimationUtils {
 
     @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
     public static ViewPropertyAnimator fade(final boolean becomeVisible, final View view, int millis) {
+        return fade(becomeVisible, view, millis, null);
+    }
+
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR1)
+    public static ViewPropertyAnimator fade(final boolean becomeVisible,
+                                            final View view,
+                                            int millis,
+                                            @Nullable final AnimatorListenerAdapter listener) {
         return view.animate().alpha(becomeVisible ? 1 : 0).setDuration(millis).setListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationStart(android.animation.Animator animation) {
                 if (view.getVisibility() != View.VISIBLE) view.setVisibility(View.VISIBLE);
+                if (listener != null) listener.onAnimationStart(animation);
             }
 
             @Override
             public void onAnimationEnd(android.animation.Animator animation) {
                 if (!becomeVisible) view.setVisibility(View.GONE);
+                if (listener != null) listener.onAnimationEnd(animation);
             }
         });
     }
