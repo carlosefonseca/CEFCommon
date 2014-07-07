@@ -168,7 +168,7 @@ public class Rembrandt {
                     if (placeholder != 0) view.setImageResource(placeholder);
                     if (bitmapTask.getError() != null) {
                         Log.w(TAG, bitmapTask.getError());
-                        throw bitmapTask.getError();
+//                        throw bitmapTask.getError();
                     }
                     return null;
                 }

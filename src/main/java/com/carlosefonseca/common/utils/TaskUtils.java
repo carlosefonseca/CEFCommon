@@ -65,6 +65,7 @@ public final class TaskUtils {
                     if (error instanceof AggregateException) {
                         for (Exception exception : ((AggregateException) error).getErrors()) {
                             Log.w(TAG, exception);
+                            Log.w(TAG, "--------");
                         }
                     }
                     throw error;

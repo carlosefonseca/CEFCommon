@@ -173,10 +173,10 @@ public final class FileDownloader {
                 return path.getName();
             } catch (FileNotFoundException e) {
                 // URL is wrong - do not retry
-                Log.i(TAG, String.format("(%d remain) Download of %s failed: %s", sDownloadCount.get() - 1, uri, e.getMessage()));
+                Log.i(TAG, "(%d remain) Download of %s failed: %s", sDownloadCount.get() - 1, uri, e.getMessage());
                 return path.getName();
             } catch (Exception e) {
-                Log.i(TAG, String.format("(%d remain) Download of %s failed", sDownloadCount.get() - 1, uri), e);
+                Log.i(TAG, "(%d remain) Download of %s failed", sDownloadCount.get() - 1, uri, e);
                 return path.getName();
             }
             return null;
