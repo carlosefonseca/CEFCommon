@@ -110,7 +110,7 @@ public final class Log {
                        : null;
 
         if (remoteLogger != null && priority >= sRemoteMinPriority) {
-            msg = isEmpty(frm) ? "<no message given>" : String.format(frm, args);
+            msg = isEmpty(frm) ? "<no message given>" : args != null ? String.format(frm, args) : frm;
             logged = remoteLogger.log(priority, tag, msg, tr);
         }
 
