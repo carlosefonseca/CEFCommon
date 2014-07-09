@@ -30,7 +30,7 @@ repositories {
 
 dependencies {
     compile 'com.android.support:support-v4:19.+'
-    compile 'com.intellij:annotations:5.1'
+    compile 'com.intellij:annotations:+'
     compile 'com.google.android.gms:play-services:5.+'
     compile 'com.nineoldandroids:library:2.4.+'
     compile 'de.greenrobot:eventbus:2.0.+'
