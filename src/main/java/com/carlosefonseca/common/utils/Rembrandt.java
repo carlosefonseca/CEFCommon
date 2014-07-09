@@ -186,7 +186,7 @@ public class Rembrandt {
         return ImageUtils.getCachedPhoto(file1, 0, 0, null);
     }
 
-    private static Bitmap bitmapFromUrl(String url) throws IOException {
+    public static Bitmap bitmapFromUrl(String url) throws IOException {
         final File fullPath = ResourceUtils.getFullPath(getLastSegmentOfURL(url));
         Bitmap cachedPhoto = ImageUtils.tryPhotoFromFileOrAssets(fullPath, -1, -1);
         if (cachedPhoto != null) return cachedPhoto;

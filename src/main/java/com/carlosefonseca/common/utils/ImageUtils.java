@@ -223,6 +223,23 @@ public final class ImageUtils {
         return getPhotoFromFileOrAssets(file, -1, -1);
     }
 
+    public static class BitmapCanvas {
+        public final Bitmap bitmap;
+        public final Canvas canvas;
+
+        public BitmapCanvas(Bitmap bitmap, Canvas canvas) {
+            this.bitmap = bitmap;
+            this.canvas = canvas;
+        }
+    }
+
+    public static ImageUtils.BitmapCanvas canvasFromBitmap(Bitmap bitmap) {
+        final Bitmap bitmap1 = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), Bitmap.Config.ARGB_8888);
+        final BitmapCanvas bitmapCanvas = new BitmapCanvas(bitmap1, new Canvas(bitmap1));
+        bitmapCanvas.canvas.drawBitmap(bitmap, 0, 0, new Paint(Paint.DITHER_FLAG));
+        return bitmapCanvas;
+    }
+
     public static interface RunnableWithBitmap {
         public void run(Bitmap bmp);
     }
