@@ -259,4 +259,7 @@ public final class ResourceUtils {
         return Color.HSVToColor(hsv);
     }
 
+    public static String hexColor(int intColor) {
+        return String.format("#%06X", (0xFFFFFF & intColor));
+    }
 }
