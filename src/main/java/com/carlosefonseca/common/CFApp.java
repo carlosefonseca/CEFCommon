@@ -72,7 +72,7 @@ public class CFApp extends Application {
 
     public static void setTestDevice(boolean testDevice) {
         CFApp.test = testDevice;
-        Log.setConsoleLogging(testDevice);
+        Log.setConsoleLogging(testDevice || testIfTestDevice());
         if (testDevice)
             Log.w(TAG, "TEST DEVICE!");
     }
