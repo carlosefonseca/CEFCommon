@@ -11,6 +11,7 @@ import com.google.android.gms.location.LocationClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.maps.LocationSource;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -164,10 +165,13 @@ public class CFLocationManager implements GooglePlayServicesClient.ConnectionCal
         stopLocationUpdates();
     }
 
+    @Nullable
     public Location getLastLocation() {
         if (mLocationClient != null && mLocationClient.isConnected()) {
-            Location googleLoc = mLocationClient.getLastLocation();
-            return location == null || googleLoc.getTime() > location.getTime() ? googleLoc : location;
+            @Nullable Location googleLoc = mLocationClient.getLastLocation();
+            return location == null || (googleLoc != null && googleLoc.getTime() > location.getTime())
+                   ? googleLoc
+                   : location;
         }
         return location;
     }
