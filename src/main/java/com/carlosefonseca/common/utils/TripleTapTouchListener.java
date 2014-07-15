@@ -33,6 +33,7 @@ public class TripleTapTouchListener implements View.OnTouchListener {
     private int mUpCount;
 
     private boolean isDown;
+    private final Object lock = new Object();
 
     private MotionEvent[] mDowns = new MotionEvent[3];
     private MotionEvent[] mUps = new MotionEvent[3];
@@ -65,71 +66,73 @@ public class TripleTapTouchListener implements View.OnTouchListener {
 
     @Override
     public boolean onTouch(View v, MotionEvent ev) {
-        final int action = ev.getAction();
+        synchronized (lock) {
+            final int action = ev.getAction();
 
-        if (log) if (log) Log.v(TAG, "ENTER mDown: " + mDownCount + " mUp: " + mUpCount);
+            if (log) Log.v(TAG, "ENTER mDown: " + mDownCount + " mUp: " + mUpCount);
 
-        switch (action & MotionEvent.ACTION_MASK) {
-            case MotionEvent.ACTION_DOWN:
-                if (isDown) {
-                    if (log) Log.v(TAG, "DOWN: is down");
-                    return false;
-                }
-                isDown = true;
+            switch (action & MotionEvent.ACTION_MASK) {
+                case MotionEvent.ACTION_DOWN:
+                    if (isDown) {
+                        if (log) Log.v(TAG, "DOWN: is down");
+                        return false;
+                    }
+                    isDown = true;
 
-                // if first, store
-                if (mDownCount == 0) {
-                    if (log) Log.v(TAG, "Touch DOWN: " + mDownCount);
-                    mDowns[0] = MotionEvent.obtain(ev);
-                    mDownCount++;
-                } else {
-                    // check if double tap
-                    if (isConsideredDoubleTap(mDowns[mDownCount - 1], mUps[mUpCount - 1], ev)) {
-                        if (log) Log.v(TAG, "Touch DOWN: " + mDownCount + " IS DOUBLE TAP");
-                        mDowns[mDownCount] = MotionEvent.obtain(ev);
+                    // if first, store
+                    if (mDownCount == 0) {
+                        if (log) Log.v(TAG, "Touch DOWN: " + mDownCount);
+                        mDowns[0] = MotionEvent.obtain(ev);
                         mDownCount++;
                     } else {
-                        cancel();
-                        mDowns[0] = MotionEvent.obtain(ev);
-                        mDownCount = 1;
+                        // check if double tap
+                        if (isConsideredDoubleTap(mDowns[mDownCount - 1], mUps[mUpCount - 1], ev)) {
+                            if (log) Log.v(TAG, "Touch DOWN: " + mDownCount + " IS DOUBLE TAP");
+                            mDowns[mDownCount] = MotionEvent.obtain(ev);
+                            mDownCount++;
+                        } else {
+                            cancel();
+                            mDowns[0] = MotionEvent.obtain(ev);
+                            mDownCount = 1;
+                        }
                     }
-                }
 
-                break;
+                    break;
 
-            case MotionEvent.ACTION_UP:
-                if (!isDown) {
-                    if (log) Log.v(TAG, "UP: is up");
-                    return false;
-                }
-                isDown = false;
+                case MotionEvent.ACTION_UP:
+                    if (!isDown) {
+                        if (log) Log.v(TAG, "UP: is up");
+                        return false;
+                    }
+                    isDown = false;
 
-                // this up is a tap?
-                if (isConsideredTap(mDowns[mDownCount - 1], ev)) {
-                    if (log) Log.v(TAG, "Touch UP  : " + mUpCount + " IS TAP");
-                    if (mUpCount >= 2) {
-                        if (log) Log.v(TAG, "TRIPLE TAP!");
-                        MotionEvent mDown = mDowns[0];
-                        mDowns[0] = null;
-                        cancel();
-                        return mTripleTapListener.onTripleTapEvent(mDown);
+                    // this up is a tap?
+                    if (isConsideredTap(mDowns[mDownCount - 1], ev)) {
+                        if (log) Log.v(TAG, "Touch UP  : " + mUpCount + " IS TAP");
+                        if (mUpCount >= 2) {
+                            if (log) Log.v(TAG, "TRIPLE TAP!");
+                            MotionEvent mDown = mDowns[0];
+                            mDowns[0] = null;
+                            cancel();
+                            return mTripleTapListener.onTripleTapEvent(mDown);
+                        } else {
+                            mUps[mUpCount] = MotionEvent.obtain(ev);
+                            mUpCount++;
+                        }
+
                     } else {
-                        mUps[mUpCount] = MotionEvent.obtain(ev);
-                        mUpCount++;
+                        cancel();
                     }
+                    break;
 
-                } else {
+                case MotionEvent.ACTION_CANCEL:
                     cancel();
-                }
-                break;
+                    break;
+            }
+            if (log) Log.v(TAG, "EXIT mDown: " + mDownCount + " mUp: " + mUpCount);
 
-            case MotionEvent.ACTION_CANCEL:
-                cancel();
-                break;
+            return false;
         }
-        if (log) Log.v(TAG, "EXIT mDown: " + mDownCount + " mUp: " + mUpCount);
-
-        return false;
     }
 
     private void cancel() {
