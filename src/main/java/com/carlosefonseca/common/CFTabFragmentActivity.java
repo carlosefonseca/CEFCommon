@@ -104,8 +104,8 @@ public class CFTabFragmentActivity extends CFActivity implements TabHost.OnTabCh
             activity.getSupportFragmentManager().executePendingTransactions();
         }
 
-        tabHost.addTab(tabSpec);
         mapTabInfo.put(tabInfo.tag, tabInfo);
+        tabHost.addTab(tabSpec);
     }
 
     @Override
