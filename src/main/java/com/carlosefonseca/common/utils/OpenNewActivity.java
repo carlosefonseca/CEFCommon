@@ -20,6 +20,7 @@ import org.jetbrains.annotations.Nullable;
 public class OpenNewActivity implements View.OnClickListener {
 
     private static final String TAG = CodeUtils.getTag(OpenNewActivity.class);
+    private Integer flags;
 
     @Deprecated
     public static void now(Activity activity, Class activityClass) {new OpenNewActivity(activity, activityClass).go(null);}
@@ -167,6 +168,10 @@ public class OpenNewActivity implements View.OnClickListener {
         test = null;
     }
 
+    public OpenNewActivity flags(int flags) {
+        this.flags = flags;
+        return this;
+    }
 
     @Override
     public void onClick(@Nullable View view) {
@@ -193,6 +198,7 @@ public class OpenNewActivity implements View.OnClickListener {
         }
 
         Intent intent = new Intent(context, aClass);
+        if (flags != null) intent.addFlags(flags);
         context.startActivity(intent);
         if (activity != null) {
             switch (animation) {
