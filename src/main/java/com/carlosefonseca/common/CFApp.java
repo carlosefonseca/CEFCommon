@@ -5,9 +5,11 @@ import android.app.Application;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Build;
+import android.os.Environment;
 import com.carlosefonseca.common.utils.CodeUtils;
 import com.carlosefonseca.common.utils.Log;
-import com.carlosefonseca.common.utils.NetworkingUtils;
+
+import java.io.File;
 
 import static com.carlosefonseca.common.utils.CodeUtils.getTag;
 
@@ -20,8 +22,6 @@ import static com.carlosefonseca.common.utils.CodeUtils.getTag;
 public class CFApp extends Application {
     private static final String TAG = getTag(CFApp.class);
     public static final String VERSION_KEY = "VERSION";
-
-    protected static String TEST_DEVICE_WIFI_MAC_ADDRESS = null;
 
     public static Context context;
     public static boolean test;
@@ -49,9 +49,13 @@ public class CFApp extends Application {
 
 
     public static boolean testIfTestDevice() {
-        return Build.FINGERPRINT.startsWith("generic") // Emulador
-               || (TEST_DEVICE_WIFI_MAC_ADDRESS != null &&
-                   TEST_DEVICE_WIFI_MAC_ADDRESS.contains(NetworkingUtils.getWifiMacAddress()));
+        return isEmulator() || checkForceLogFile();
+    }
+
+    private static boolean isEmulator() {return Build.FINGERPRINT.startsWith("generic");}
+
+    private static boolean checkForceLogFile() {
+        return new File(Environment.getExternalStorageDirectory(), "logbw.txt").exists();
     }
 
     public static Context getContext() {
