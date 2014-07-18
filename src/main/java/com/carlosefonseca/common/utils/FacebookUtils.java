@@ -67,7 +67,7 @@ public final class FacebookUtils {
                     public void onSuccess(String response) {
                         try {
                             String fbid = new JSONObject(response).getString("id");
-                            CFApp.getUserPreferences(FB_PREFS).edit().putString(text, fbid).commit();
+                            CFApp.getUserPreferences(FB_PREFS).edit().putString(text, fbid).apply();
                             //Tries to make intent with FB's URI
                             Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("fb://profile/" + fbid));
                             runnable.run(intent);

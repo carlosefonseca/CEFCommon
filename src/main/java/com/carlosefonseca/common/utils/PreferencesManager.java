@@ -21,27 +21,27 @@ public final class PreferencesManager {
 
     //region SETTERS
     public static void setParameter(@Nullable Context context, String key, String value) {
-        getSharedPreferences(context).edit().putString(key, value).commit();
+        getSharedPreferences(context).edit().putString(key, value).apply();
     }
 
     public static void setParameter(@Nullable Context context, String key, boolean value) {
-        getSharedPreferences(context).edit().putBoolean(key, value).commit();
+        getSharedPreferences(context).edit().putBoolean(key, value).apply();
     }
 
     public static void setParameter(@Nullable Context context, String key, int value) {
-        getSharedPreferences(context).edit().putInt(key, value).commit();
+        getSharedPreferences(context).edit().putInt(key, value).apply();
     }
 
     public static void setParameter(@Nullable Context context, String key, long value) {
-        getSharedPreferences(context).edit().putLong(key, value).commit();
+        getSharedPreferences(context).edit().putLong(key, value).apply();
     }
 
     public static void setParameter(@Nullable Context context, String key, float value) {
-        getSharedPreferences(context).edit().putFloat(key, value).commit();
+        getSharedPreferences(context).edit().putFloat(key, value).apply();
     }
 
     public static void setParameter(@Nullable Context context, String key, Date date) {
-        getSharedPreferences(context).edit().putLong(key, date.getTime()).commit();
+        getSharedPreferences(context).edit().putLong(key, date.getTime()).apply();
     }
     //endregion
 

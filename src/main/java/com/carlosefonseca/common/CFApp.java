@@ -39,7 +39,7 @@ public class CFApp extends Application {
         final int current = CodeUtils.getAppVersionCode();
         if (stored != current) {
             Log.put("App Update", "" + stored + " -> " + current);
-            sharedPreferences.edit().putInt(VERSION_KEY, current).commit();
+            sharedPreferences.edit().putInt(VERSION_KEY, current).apply();
         }
 
         init(current, stored);

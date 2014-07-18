@@ -23,6 +23,7 @@ public final class TaskUtils {
             Log.w(TAG, error);
             if (error instanceof AggregateException) {
                 for (Exception exception : ((AggregateException) error).getErrors()) {
+                    Log.w(TAG, "--------");
                     Log.w(TAG, exception);
                 }
             }

@@ -21,7 +21,8 @@ import static com.carlosefonseca.common.utils.CodeUtils.isMainThread;
  */
 public class CFActivity extends FragmentActivity {
 
-    private static final String TAG = getTag(CFActivity.class);
+    private static final String sTAG = getTag(CFActivity.class);
+    protected final String TAG = getTag(this.getClass());
     protected boolean canRegisterRunnables;
     protected boolean registered;
     protected SystemBarTintManager tintManager;
@@ -32,7 +33,7 @@ public class CFActivity extends FragmentActivity {
     public static CFActivity getLatestActivity() {
         final CFActivity activity = latestActivity != null ? latestActivity.get() : null;
         if (activity == null) {
-            Log.w(TAG, "Latest Activity not found!");
+            Log.w(sTAG, "Latest Activity not found!");
         }
         return activity;
     }
@@ -41,7 +42,7 @@ public class CFActivity extends FragmentActivity {
     public static LoadingDialog getDialogOnLatestActivityIfExists() {
         CFActivity activity = getLatestActivity();
         if (activity == null) {
-            Log.d(TAG + ".getDialog", "No activity");
+            Log.d(sTAG + ".getDialog", "No activity");
             return null;
         }
         return activity.getLoadingDialogIfExists();
@@ -51,7 +52,7 @@ public class CFActivity extends FragmentActivity {
     public static LoadingDialog getDialogOnLatestActivity() {
         CFActivity activity = getLatestActivity();
         if (activity == null) {
-            Log.d(TAG + ".getDialog", "No activity");
+            Log.d(sTAG + ".getDialog", "No activity");
             return null;
         }
         return activity.getLoadingDialog();
