@@ -12,7 +12,7 @@ import java.util.List;
 
 public class CFLocation extends Location implements Comparable<CFLocation> {
     public static final String LINE_COORDINATE_PART_SPLITTER = " ";
-    protected static final DecimalFormat DECIMAL_FORMAT = new DecimalFormat("#.###");
+    protected static final DecimalFormat DECIMAL_FORMAT = new DecimalFormat("#.####");
     public final float distance;
     public final int index;
 
