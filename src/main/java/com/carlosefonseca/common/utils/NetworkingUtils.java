@@ -35,9 +35,64 @@ public final class NetworkingUtils {
     private static final String TAG = getTag(NetworkingUtils.class);
     public static boolean NETWORK;
     public static boolean WIFI;
+
+    private static Subscription<WifiListener, WifiStatus> wifiSubscription;
+    private static Subscription<InternetListener, NetStatus> internetSubscription;
+
     private static ConnectivityManager conMan;
 
     private NetworkingUtils() {}
+
+    public interface WifiListener {
+        public void onStatusChanged(WifiStatus status);
+    }
+
+    public interface InternetListener {
+        public void onStatusChanged(NetStatus status);
+    }
+
+    public static Subscription<InternetListener, NetStatus> getInternetSubscription() {
+        if (internetSubscription == null) {
+            internetSubscription = new Subscription<>(new Subscription.SubscriberDelegate<InternetListener, NetStatus>() {
+                @Override
+                public void start() {
+                    listenForNetworkChanges();
+                }
+
+                @Override
+                public void stop() {
+                    stopListeningForNetworkChanges();
+                }
+
+                @Override
+                public void send(InternetListener subscriber, NetStatus message) {
+                    subscriber.onStatusChanged(message);
+                }
+            });
+        }
+        return internetSubscription;
+    }
+
+    public static Subscription<WifiListener, WifiStatus> getWifiSubscription() {
+        if (wifiSubscription == null) {
+            wifiSubscription = new Subscription<>(new Subscription.SubscriberDelegate<WifiListener, WifiStatus>() {
+                @Override
+                public void start() {
+                    listenForWifiChanges();
+                }
+
+                @Override
+                public void stop() {
+                    stopListeningForWifiChanges();
+                }
+                @Override
+                public void send(WifiListener subscriber, WifiStatus message) {
+                    subscriber.onStatusChanged(message);
+                }
+            });
+        }
+        return wifiSubscription;
+    }
 
     /**
      * Checks Internet access.
@@ -120,12 +175,12 @@ public final class NetworkingUtils {
      */
     @SuppressWarnings("UnusedDeclaration")
     public static void listenForWifiChanges() {
-        IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
-
-
-        getContext().registerReceiver(wifiBroadcastReceiver, intentFilter);
-        WIFI = true;
+        if (!WIFI) {
+            IntentFilter intentFilter = new IntentFilter();
+            intentFilter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
+            getContext().registerReceiver(wifiBroadcastReceiver, intentFilter);
+            WIFI = true;
+        }
     }
 
     @SuppressWarnings("UnusedDeclaration")
@@ -151,6 +206,7 @@ public final class NetworkingUtils {
                     //This implies the WiFi connection is through
                     if (isOnWifi()) {
                         EventBus.getDefault().postSticky(WifiStatus.CONNECTED);
+                        getWifiSubscription().send(WifiStatus.CONNECTED);
                     } else {
                         new Handler(context.getMainLooper()).postDelayed(NetworkingUtils.POST_HAS_WIFI, 5000);
                     }
@@ -168,8 +224,10 @@ public final class NetworkingUtils {
         public void run() {
             if (isOnWifi()) {
                 EventBus.getDefault().postSticky(WifiStatus.CONNECTED);
+                getWifiSubscription().send(WifiStatus.CONNECTED);
             } else {
                 EventBus.getDefault().postSticky(WifiStatus.DISCONNECTED);
+                getWifiSubscription().send(WifiStatus.DISCONNECTED);
             }
         }
     };
@@ -182,9 +240,11 @@ public final class NetworkingUtils {
      */
     @SuppressWarnings("UnusedDeclaration")
     public static void listenForNetworkChanges() {
-        IntentFilter intentFilter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
-        getContext().registerReceiver(networkBroadcastReceiver, intentFilter);
-        NETWORK = true;
+        if (!NETWORK) {
+            IntentFilter intentFilter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
+            getContext().registerReceiver(networkBroadcastReceiver, intentFilter);
+            NETWORK = true;
+        }
     }
 
     @SuppressWarnings("UnusedDeclaration")
@@ -206,11 +266,13 @@ public final class NetworkingUtils {
             if (ConnectivityManager.CONNECTIVITY_ACTION.equals(action)) {
                 if (hasInternet()) {
                     EventBus.getDefault().postSticky(NetStatus.CONNECTED);
+                    getInternetSubscription().send(NetStatus.CONNECTED);
                 } else {
                     if (intent.getBooleanExtra(ConnectivityManager.EXTRA_IS_FAILOVER, false)) {
                         Log.i(TAG, "Failing over...");
                     } else {
                         EventBus.getDefault().postSticky(NetStatus.DISCONNECTED);
+                        getInternetSubscription().send(NetStatus.DISCONNECTED);
                     }
                 }
             }
