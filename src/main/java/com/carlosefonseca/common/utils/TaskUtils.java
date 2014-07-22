@@ -19,6 +19,11 @@ public final class TaskUtils {
 
     public static Void logTaskError(Task<?> voidTask) {
         final Exception error = voidTask.getError();
+        logAggregateException(error);
+        return null;
+    }
+
+    public static void logAggregateException(Exception error) {
         if (error != null) {
             Log.w(TAG, error);
             if (error instanceof AggregateException) {
@@ -28,7 +33,6 @@ public final class TaskUtils {
                 }
             }
         }
-        return null;
     }
 
     private TaskUtils() {}
