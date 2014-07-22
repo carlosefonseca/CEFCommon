@@ -13,15 +13,27 @@ public final class TaskUtils {
     public static final Continuation<Void, Void> LogErrorContinuation = new Continuation<Void, Void>() {
         @Override
         public Void then(Task<Void> voidTask) throws Exception {
-            return logTaskError(voidTask);
+            logTaskError(voidTask);
+            return null;
         }
     };
 
-    public static Void logTaskError(Task<?> voidTask) {
+    public static boolean logTaskError(Task<?> voidTask) {
         final Exception error = voidTask.getError();
         logAggregateException(error);
-        return null;
+        return error != null;
     }
+
+    public static boolean hasErrors(String tag, String msg, Task<String> task) {
+        final Exception error = task.getError();
+        if (error != null) {
+            Log.w(tag, msg);
+            TaskUtils.logAggregateException(error);
+            return true;
+        }
+        return false;
+    }
+
 
     public static void logAggregateException(Exception error) {
         if (error != null) {
