@@ -116,7 +116,7 @@ public final class Log {
 
         if (!logged && (consoleLogging || priority >= android.util.Log.ERROR)) {
             if (msg == null) msg = isEmpty(frm) ? "<no message given>" : args != null ? String.format(frm, args) : frm;
-            android.util.Log.println(priority, tag, msg == null ? "<no message given>" : frm);
+            android.util.Log.println(priority, tag, msg == null ? "<no message given>" : msg);
             if (tr != null) android.util.Log.println(priority, tag, getStackTraceString(tr));
         }
         return priority;
