@@ -9,20 +9,27 @@ import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Interpolator;
 import android.widget.ImageView;
+import android.widget.Scroller;
 import bolts.Continuation;
 import bolts.Task;
 import com.carlosefonseca.common.R;
+import com.carlosefonseca.common.utils.CodeUtils;
+import com.carlosefonseca.common.utils.Log;
 import com.carlosefonseca.common.utils.Rembrandt;
 import com.carlosefonseca.common.utils.TaskUtils;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
 public class Gallery extends ViewPager {
+
+    private static final java.lang.String TAG = CodeUtils.getTag(Gallery.class);
 
     private LayoutInflater layoutInflater;
     private int res;
@@ -32,6 +39,7 @@ public class Gallery extends ViewPager {
     private int width;
     private float density;
     private boolean scaling;
+    private int duration = -1;
 
     public Gallery(Context context) {
         super(context);
@@ -80,6 +88,7 @@ public class Gallery extends ViewPager {
         this.width = width;
         getLayoutParams().height = (int) (width / 2 + 24 * density);
     }
+
 
     class GalleryAdapter extends PagerAdapter {
 
@@ -175,5 +184,65 @@ public class Gallery extends ViewPager {
                 clickListener.onClick(objects.get((Integer) v.getTag()));
             }
         });
+    }
+
+
+
+    /* CUSTOM SCROLL */
+
+
+
+    public static class CustomSpeedScroller extends Scroller {
+
+        private int mDuration;
+
+        public CustomSpeedScroller(Context context, int duration) {
+            super(context);
+            this.mDuration = duration;
+        }
+
+
+        public CustomSpeedScroller(Context context, Interpolator interpolator, int duration) {
+            super(context, interpolator);
+            this.mDuration = duration;
+        }
+
+
+        @Override
+        public void startScroll(int startX, int startY, int dx, int dy, int duration) {
+            // Ignore received duration, use fixed one instead
+            super.startScroll(startX, startY, dx, dy, mDuration);
+        }
+
+        @Override
+        public void startScroll(int startX, int startY, int dx, int dy) {
+            // Ignore received duration, use fixed one instead
+            super.startScroll(startX, startY, dx, dy, mDuration);
+        }
+    }
+
+
+    public void setScrollDuration(int duration) {
+        if (this.duration == duration) return;
+        this.duration = duration;
+        setScroller(new CustomSpeedScroller(getContext(), duration));
+    }
+
+    public void setScrollInterpolatorAndDuration(Interpolator interpolator, int duration) {
+        this.duration = duration;
+        setScroller(new CustomSpeedScroller(getContext(), interpolator, duration));
+    }
+
+    public void setScroller(Scroller scroller) {
+        try {
+            Field mScroller;
+            mScroller = ViewPager.class.getDeclaredField("mScroller");
+            mScroller.setAccessible(true);
+            // scroller.setFixedDuration(5000);
+            mScroller.set(this, scroller);
+        } catch (NoSuchFieldException | IllegalArgumentException | IllegalAccessException ignored) {
+            Log.w(TAG, ignored);
+        }
+        this.setOffscreenPageLimit(2);
     }
 }
