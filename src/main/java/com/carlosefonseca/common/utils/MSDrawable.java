@@ -4,7 +4,9 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.drawable.*;
 import android.graphics.drawable.shapes.Shape;
+import android.os.Build;
 import android.util.StateSet;
+import android.view.View;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -31,6 +33,17 @@ import org.jetbrains.annotations.Nullable;
 public class MSDrawable {
 
     private final Context mContext;
+
+    public MSDrawable asBackground(View view) {
+        Drawable background = build();
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
+            //noinspection deprecation
+            view.setBackgroundDrawable(background);
+        } else {
+            view.setBackground(background);
+        }
+        return this;
+    }
 
     enum Mode {
         COLORS, SINGLE_ICON, MULTI_ICON
@@ -165,6 +178,11 @@ public class MSDrawable {
 
     public MSDrawable pressedColor(int color) {
         set(color, PRESSED);
+        return this;
+    }
+
+    public MSDrawable pressedColor() {
+        set(ResourceUtils.computeDarkerColor(mColors[NORMAL], 0.25), PRESSED);
         return this;
     }
 
