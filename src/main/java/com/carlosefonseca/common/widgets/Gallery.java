@@ -56,13 +56,13 @@ public class Gallery extends ViewPager {
     }
 
     public void setupWithImageList(List<File> imageList) {
-        setAdapter(new GalleryAdapter().withFileList(imageList));
         layoutInflater = LayoutInflater.from(getContext());
+        setAdapter(new GalleryAdapter().withFileList(imageList));
     }
 
     public void setupWithUrlList(List<String> imageList) {
-        setAdapter(new GalleryAdapter().withUrlList(imageList));
         layoutInflater = LayoutInflater.from(getContext());
+        setAdapter(new GalleryAdapter().withUrlList(imageList));
     }
 
     public void setImageOverlay(int res, int bottomMargin, int rightMargin) {
