@@ -72,6 +72,9 @@ public final class TaskUtils {
         return taskCompletionSource.getTask();
     }
 
+    /**
+     * TaskUtils.<Object>getPassThruLogErrorContinuation()
+     */
     public static <T> Continuation<T, T> getPassThruLogErrorContinuation() {
         return new Continuation<T, T>() {
             @Override

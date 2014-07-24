@@ -78,6 +78,11 @@ public final class Log {
         if (consoleLogging) android.util.Log.i(tag(1), key + ": " + value);
     }
 
+    public static void put(String tag, String key, String value) {
+        if (remoteLogger != null) remoteLogger.put(key, value);
+        if (consoleLogging) android.util.Log.i(tag, key + ": " + value);
+    }
+
     public static void put(String key, float value) {
         if (remoteLogger != null) remoteLogger.put(key, value);
         if (consoleLogging) android.util.Log.i(tag(1), key + ": " + value);
