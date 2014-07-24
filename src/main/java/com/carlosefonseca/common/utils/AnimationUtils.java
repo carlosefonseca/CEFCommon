@@ -169,7 +169,7 @@ public final class AnimationUtils {
     }
 
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
-    public static void setScale(List<View> views, int scale) {
+    public static void setScale(List<? extends View> views, int scale) {
         for (View view : views) {
             view.setScaleX(scale);
             view.setScaleY(scale);
