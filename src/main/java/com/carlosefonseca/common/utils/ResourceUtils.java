@@ -262,4 +262,8 @@ public final class ResourceUtils {
     public static String hexColor(int intColor) {
         return String.format("#%06X", (0xFFFFFF & intColor));
     }
+
+    public static void setPadding(int px, View... views) {
+        for (View view : views) view.setPadding(px, px, px, px);
+    }
 }
