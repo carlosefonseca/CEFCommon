@@ -24,7 +24,17 @@ public final class FacebookUtils {
     private FacebookUtils() {}
 
     public static String getFacebookNameFromURL(String url) {
-        Matcher matcher = Pattern.compile("^(?:https://)?(?:www\\.)?facebook\\.com/(?:([^/]*)|pages(?:.*)/(\\d+))/?$").matcher(url);
+        // Supports the following URL's:
+        // https://www.facebook.com/xtourmaker
+        //  http://www.facebook.com/xtourmaker
+        //         www.facebook.com/xtourmaker
+        //             facebook.com/xtourmaker
+        // https://www.facebook.com/pages/Beware/255500287862344
+        //  http://www.facebook.com/pages/Beware/255500287862344
+        //         www.facebook.com/pages/Beware/255500287862344
+        //             facebook.com/pages/Beware/255500287862344
+        // + optional ending slash
+        Matcher matcher = Pattern.compile("^(?:https?://)?(?:www\\.)?facebook\\.com/(?:([^/]*)|pages(?:.*)/(\\d+))/?$").matcher(url);
         if (matcher.find()) {
             return StringUtils.defaultString(matcher.group(1), matcher.group(2));
         }
