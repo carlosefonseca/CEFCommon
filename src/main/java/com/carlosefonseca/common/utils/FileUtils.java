@@ -167,9 +167,9 @@ public final class FileUtils {
             is = CFApp.getContext().getAssets().open(file);
             return new Scanner(is, "UTF-8").useDelimiter("\\A").next();
         } catch (FileNotFoundException e) {
-            Log.w(TAG, "File not found " + file);
+            Log.w(TAG, "File not found in assets: " + file);
         } catch (IOException e) {
-            Log.e(TAG, "Error opening the file " + file, e);
+            Log.e(TAG, "Error opening the file in assets: " + file, e);
         }
         return null;
     }
@@ -181,9 +181,9 @@ public final class FileUtils {
             is = context.getAssets().open(file);
             return new Scanner(is, "UTF-8").useDelimiter("\\A").next();
         } catch (FileNotFoundException e) {
-            Log.w(TAG, "File not found " + file);
+            Log.w(TAG, "File not found in assets: " + file);
         } catch (IOException e) {
-            Log.e(TAG, "Error opening the file " + file, e);
+            Log.e(TAG, "Error opening the file in assets: " + file, e);
         }
         return null;
     }

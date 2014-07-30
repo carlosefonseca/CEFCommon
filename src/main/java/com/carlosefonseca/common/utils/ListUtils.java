@@ -222,6 +222,11 @@ public final class ListUtils {
                                : !oldObjects.isEmpty() ? oldObjects.get(0) : !sameObjects.isEmpty() ? sameObjects.get(0) : null;
             return instance != null ? instance.getClass().getSimpleName() : "<Empty List?>";
         }
+
+        public boolean hasChanges() {
+            return !newObjects.isEmpty() || !oldObjects.isEmpty() ||
+                   (updatedObjects != null && !updatedObjects.isEmpty());
+        }
     }
 
 
