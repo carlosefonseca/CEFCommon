@@ -24,7 +24,15 @@ public final class TaskUtils {
         return error != null;
     }
 
-    public static boolean hasErrors(String tag, String msg, Task<String> task) {
+    /**
+     * Checks the task for errors and performs AggregateException-aware logging.
+     *
+     * @param tag  A tag for the error logs.
+     * @param msg  A message to prepend to the exceptions
+     * @param task The task to check.
+     * @return True if there are errors, false otherwise.
+     */
+    public static boolean hasErrors(String tag, String msg, Task<?> task) {
         final Exception error = task.getError();
         if (error != null) {
             Log.w(tag, msg);
@@ -79,16 +87,40 @@ public final class TaskUtils {
         return new Continuation<T, T>() {
             @Override
             public T then(Task<T> task) throws Exception {
-                final Exception error = task.getError();
-                if (error != null) {
-                    Log.w(TAG, "Errors during task execution", error);
-                    if (error instanceof AggregateException) {
-                        for (Exception exception : ((AggregateException) error).getErrors()) {
-                            Log.w(TAG, exception);
-                            Log.w(TAG, "--------");
-                        }
-                    }
-                    throw error;
+                if (hasErrors(TAG, "Errors during task execution", task)) {
+                    throw task.getError();
+                } else {
+                    return task.getResult();
+                }
+            }
+        };
+    }
+
+    /**
+     * TaskUtils.<Object>getPassThruLogErrorContinuation()
+     */
+    public static <T> Continuation<T, T> getPassThruLogErrorContinuation(final String tag, final String message) {
+        return new Continuation<T, T>() {
+            @Override
+            public T then(Task<T> task) throws Exception {
+                if (hasErrors(tag, message, task)) {
+                    throw task.getError();
+                } else {
+                    return task.getResult();
+                }
+            }
+        };
+    }
+
+    /**
+     * TaskUtils.<Object>getPassThruLogErrorContinuation()
+     */
+    public static Continuation<Void, Void> getLogErrorContinuation(final String tag, final String message) {
+        return new Continuation<Void, Void>() {
+            @Override
+            public Void then(Task<Void> task) throws Exception {
+                if (hasErrors(tag, message, task)) {
+                    throw task.getError();
                 } else {
                     return task.getResult();
                 }
