@@ -41,6 +41,7 @@ dependencies {
     compile 'com.loopj.android:android-async-http:1.4.4'
     compile 'com.readystatesoftware.systembartint:systembartint:1.+'
     compile 'fr.avianey:bolts-android-api:1.1.0'
+    compile 'com.facebook.rebound:rebound:0.3.3'
 }
 
 android {
