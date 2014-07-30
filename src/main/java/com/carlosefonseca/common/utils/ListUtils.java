@@ -42,7 +42,7 @@ public final class ListUtils {
 
     /**
      * Returns a list containing all objects.
-     * @see #list(java.util.List[])
+     * @see #list(java.util.Collection[])
      */
     @SafeVarargs
     public static <T> ArrayList<T> list(T... objects) {
@@ -290,13 +290,14 @@ public final class ListUtils {
         }
     }
 
-    public interface Id {
-        Integer getId();
+    public interface Id<T> {
+        T getId();
     }
 
-    public static ArrayList<Integer> getIds(Iterable<? extends Id> list) {
-        final ArrayList<Integer> integers = new ArrayList<>();
-        for (Id item : list) integers.add(item.getId());
+    public static <T> ArrayList<T> getIds(Iterable<? extends Id<T>> list) {
+        final ArrayList<T> integers = new ArrayList<>();
+        for (Id item : list) //noinspection unchecked
+            integers.add((T) item.getId());
         return integers;
     }
 }
