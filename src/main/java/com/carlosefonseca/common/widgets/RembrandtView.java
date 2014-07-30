@@ -29,6 +29,7 @@ public class RembrandtView extends ImageView {
     }
 
     public Rembrandt getRembrandt() {
+        if (mRembrandt == null) mRembrandt = Rembrandt.with(getContext());
         return mRembrandt;
     }
 
@@ -37,11 +38,11 @@ public class RembrandtView extends ImageView {
     }
 
     public RembrandtView setImageUrl(String url) {
-        Rembrandt.with(getContext()).load(url).fadeIn(this);
+        getRembrandt().load(url).fadeIn(this);
         return this;
     }
     public RembrandtView setCrossFadeImageUrl(String url) {
-        Rembrandt.with(getContext()).load(url).xFade(this);
+        getRembrandt().load(url).xFade(this);
         return this;
     }
 }
