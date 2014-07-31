@@ -398,8 +398,9 @@ public class LoadingDialog extends Dialog {
      *
      * @param millis timeout in milliseconds.
      */
-
+    @Deprecated
     public void setTimeout(int millis) {
+        if (true) return;
         timeoutCounting = new RuntimeException("Dialog was closed by timeout! Timeout set here");
         if (timeoutRunnable == null) {
             timeoutRunnable = new Runnable() {
