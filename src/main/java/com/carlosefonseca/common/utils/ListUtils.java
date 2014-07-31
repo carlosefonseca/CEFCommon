@@ -64,12 +64,20 @@ public final class ListUtils {
 
     /**
      * Returns a copy of the specified list with object appended to it.
+     * (Not a copy if original is a List and supports adding).
      */
     @SafeVarargs
-    public static <T> List<T> add(List<T> list, T... objects) {
-        list = new ArrayList<>(list);
-        list.addAll(Arrays.asList(objects));
-        return list;
+    public static <T> List<T> add(Collection<T> list, T... objects) {
+        if (list instanceof List) {
+            try {
+                list.addAll(Arrays.asList(objects));
+                return (List<T>) list;
+            } catch (UnsupportedOperationException ignored) {
+            }
+        }
+        final ArrayList<T> list1 = new ArrayList<>(list);
+        list1.addAll(Arrays.asList(objects));
+        return list1;
     }
 
     public static <T> SparseArray<T> copySparseArray(SparseArray<T> original) {
