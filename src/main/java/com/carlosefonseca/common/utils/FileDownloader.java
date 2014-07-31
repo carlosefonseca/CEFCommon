@@ -142,6 +142,16 @@ public final class FileDownloader {
                 OutputStream output = new FileOutputStream(tempPath);
                 try {
                     IOUtils.copy(input, output);
+                } catch (IOException e) {
+                    // Network error. May retry
+                    Log.i(TAG,
+                          String.format("(%d remain) Download of %s failed (will retry): %s",
+                                        sDownloadCount.get() - 1,
+                                        uri,
+                                        e.getMessage())
+                    );
+                    download(download);
+                    return path.getName();
                 } finally {
                     output.flush();
                     output.close();
