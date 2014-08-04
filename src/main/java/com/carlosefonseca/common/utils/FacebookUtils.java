@@ -34,7 +34,7 @@ public final class FacebookUtils {
         //         www.facebook.com/pages/Beware/255500287862344
         //             facebook.com/pages/Beware/255500287862344
         // + optional ending slash
-        Matcher matcher = Pattern.compile("^(?:https?://)?(?:www\\.)?facebook\\.com/(?:([^/]*)|pages(?:.*)/(\\d+))/?$").matcher(url);
+        Matcher matcher = Pattern.compile("^(?:https?://)?(?:www\\.)?facebook\\.com/(?:([^/]*)|pages(?:.*)/(\\d+))/?(?:\\?.*)?$").matcher(url);
         if (matcher.find()) {
             return StringUtils.defaultString(matcher.group(1), matcher.group(2));
         }
