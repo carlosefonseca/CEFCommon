@@ -874,6 +874,50 @@ public final class ImageUtils {
     }
 
     /**
+     * Creates a new bitmap from the original resource and paints the visible parts with the given color.
+     * The alpha channel is the only part of the original resource that is used for the painting.
+     * <p/>
+     * Note: I tried saving a painted file on disk and loading that one each time. Got 1ms improvement but more used memory for
+     * repeated calls.
+     *
+     * @param c     A context.
+     * @param resId The original image with alpha channel.
+     * @param color The new Color
+     * @return Bitmap with new color.
+     */
+    public static Bitmap createRecoloredBitmapMultiply(Context c, int resId, int color) {
+        BitmapFactory.Options opts = new BitmapFactory.Options();
+        opts.inPreferredConfig = Bitmap.Config.ARGB_8888;
+        Bitmap source = BitmapFactory.decodeResource(c.getResources(), resId);
+        return createRecoloredBitmapMultiply(source, color);
+    }
+
+
+    /**
+     * Creates a new bitmap from the original resource and paints the visible parts with the given color.
+     * The alpha channel is the only part of the original resource that is used for the painting.
+     *
+     * @param source A context.
+     * @param color  The original image with alpha channel.
+     * @return Bitmap with new color.
+     */
+    public static Bitmap createRecoloredBitmapMultiply(Bitmap source, int color) {
+        final Bitmap blend = createRecoloredBitmap(source, color);
+
+        Paint p = new Paint();
+        p.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.MULTIPLY));
+        p.setShader(new BitmapShader(blend, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP));
+
+        Canvas c = new Canvas();
+        final Bitmap targetBitmap = source.copy(Bitmap.Config.ARGB_8888, true);
+        c.setBitmap(targetBitmap);
+        c.drawBitmap(source, 0, 0, null);
+        c.drawRect(0, 0, source.getWidth(), source.getHeight(), p);
+
+        return targetBitmap;
+    }
+
+    /**
      * Draws text on the canvas. Tries to make the text as big as possible so it fills the canvas but not more.
      * <p/>
      * This method starts on size 1 and goes up. Maybe a binary search or something could be better, but it works for simple
