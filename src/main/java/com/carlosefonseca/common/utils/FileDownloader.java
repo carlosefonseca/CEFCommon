@@ -24,7 +24,7 @@ public final class FileDownloader {
     private static final int CORE_POOL_SIZE = CPU_COUNT + 1;
     private static final int MAX_POOL_SIZE = CPU_COUNT * 2 + 1;
     private static final long KEEP_ALIVE_TIME = 1L;
-    private static final int MAX_QUEUE_SIZE = 1024;
+    private static final int MAX_QUEUE_SIZE = 2048;
     private static ThreadPoolExecutor sThreadPoolExecutor;
 
     public static AtomicInteger sDownloadCount = new AtomicInteger();
