@@ -38,7 +38,7 @@ dependencies {
     compile 'org.apache.commons:commons-lang3:3.+'
     compile 'org.apache.commons:commons-collections4:4.+'
     compile 'com.google.code.gson:gson:1.7.+'
-    compile 'com.loopj.android:android-async-http:1.4.5'
+    compile 'com.loopj.android:android-async-http:1.4.4'
     compile 'com.readystatesoftware.systembartint:systembartint:1.+'
     compile 'fr.avianey:bolts-android-api:1.1.0'
     compile 'com.facebook.rebound:rebound:0.3.3'
