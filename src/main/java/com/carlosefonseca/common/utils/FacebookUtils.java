@@ -7,7 +7,7 @@ import android.net.Uri;
 import com.carlosefonseca.common.CFApp;
 import com.carlosefonseca.common.widgets.LoadingDialog;
 import com.loopj.android.http.AsyncHttpClient;
-import com.loopj.android.http.AsyncHttpResponseHandler;
+import com.loopj.android.http.TextHttpResponseHandler;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Header;
 import org.json.JSONException;
@@ -65,16 +65,20 @@ public final class FacebookUtils {
                     throw new NetworkingUtils.NotConnectedException();
                 }
 
+                // CHANGE TO TASK AND VOLLEY
                 AsyncHttpClient client = new AsyncHttpClient();
-                client.get("https://graph.facebook.com/" + text, new AsyncHttpResponseHandler() {
+                client.get("https://graph.facebook.com/" + text, new TextHttpResponseHandler() {
                     @Override
-                    public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
-                        Log.w(TAG, error.getMessage());
+                    public void onFailure(int statusCode,
+                                          Header[] headers,
+                                          String responseString,
+                                          Throwable throwable) {
+                        Log.w(TAG, throwable.getMessage());
                         runnable.run(new Intent(Intent.ACTION_VIEW, Uri.parse("https://www.facebook.com/" + text)));
                     }
 
                     @Override
-                    public void onSuccess(String response) {
+                    public void onSuccess(int statusCode, Header[] headers, String response) {
                         try {
                             String fbid = new JSONObject(response).getString("id");
                             CFApp.getUserPreferences(FB_PREFS).edit().putString(text, fbid).apply();
