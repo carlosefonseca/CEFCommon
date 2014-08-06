@@ -26,6 +26,7 @@ public class CFApp extends Application {
     public static Context context;
     public static boolean test;
     private static final boolean ALLOW_TEST_DEVICE = true;
+    private static Boolean isTestDevice = null;
 
     @Override
     public void onCreate() {
@@ -49,7 +50,8 @@ public class CFApp extends Application {
 
 
     public static boolean testIfTestDevice() {
-        return isEmulator() || checkForceLogFile();
+        if (isTestDevice == null) isTestDevice = isEmulator() || checkForceLogFile();
+        return isTestDevice;
     }
 
     private static boolean isEmulator() {return Build.FINGERPRINT.startsWith("generic");}
