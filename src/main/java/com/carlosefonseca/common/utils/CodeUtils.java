@@ -372,4 +372,12 @@ public final class CodeUtils {
     public static boolean equals(Object a, Object b) {
         return (a == null) ? (b == null) : a.equals(b);
     }
+
+    public static void runOnUIThread(Runnable runnable) {
+        if (isMainThread()) {
+            runnable.run();
+        } else {
+            new Handler(Looper.getMainLooper()).post(runnable);
+        }
+    }
 }
