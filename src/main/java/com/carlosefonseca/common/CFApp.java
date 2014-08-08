@@ -41,6 +41,8 @@ public class CFApp extends Application {
         if (stored != current) {
             Log.put("App Update", "" + stored + " -> " + current);
             sharedPreferences.edit().putInt(VERSION_KEY, current).apply();
+        } else {
+            Log.i("App Version: " + current);
         }
 
         init(current, stored);
