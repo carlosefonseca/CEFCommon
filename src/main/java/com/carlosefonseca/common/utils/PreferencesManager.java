@@ -8,9 +8,13 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Date;
 
 @SuppressWarnings({"UnusedDeclaration", "UtilityClassWithoutPrivateConstructor"})
-public final class PreferencesManager {
+public class PreferencesManager {
 
     protected PreferencesManager() {}
+
+    public static SharedPreferences getSharedPreferences() {
+        return getSharedPreferences(null);
+    }
 
     public static SharedPreferences getSharedPreferences(@Nullable Context context) {
         if (context == null) {
