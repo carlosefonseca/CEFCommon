@@ -10,6 +10,8 @@ public class RembrandtView extends ImageView {
     private static final java.lang.String TAG = CodeUtils.getTag(RembrandtView.class);
     private Rembrandt mRembrandt;
 
+    boolean hideIfNull;
+
     public RembrandtView(Context context) {
         this(context, new Rembrandt(context));
     }
@@ -38,11 +40,24 @@ public class RembrandtView extends ImageView {
     }
 
     public RembrandtView setImageUrl(String url) {
-        getRembrandt().load(url).fadeIn(this);
+        getRembrandt().load(url).hideIfNull(hideIfNull).fadeIn(this);
         return this;
     }
     public RembrandtView setCrossFadeImageUrl(String url) {
-        getRembrandt().load(url).xFade(this);
+        getRembrandt().load(url).hideIfNull(hideIfNull).xFade(this);
         return this;
+    }
+
+    public boolean isHideIfNull() {
+        return hideIfNull;
+    }
+
+    /**
+     * Set GONE when URL is null or empty, and VISIBLE otherwise. Defaults to false.
+     *
+     * @param hideIfNull
+     */
+    public void setHideIfNull(boolean hideIfNull) {
+        this.hideIfNull = hideIfNull;
     }
 }

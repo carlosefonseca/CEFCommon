@@ -3,6 +3,7 @@ package com.carlosefonseca.common.utils;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.support.v4.util.LruCache;
+import android.view.View;
 import android.widget.ImageView;
 import bolts.Continuation;
 import bolts.Task;
@@ -42,6 +43,7 @@ public class Rembrandt {
     private HashMap<ImageView, String> mMapping = new HashMap<>();
     private Transform mTransform;
     private OnBitmap mNotify;
+    private boolean mHideIfNull;
 
     public Rembrandt(Context context) {
         /*mContext = context*/;
@@ -54,13 +56,13 @@ public class Rembrandt {
         return new Rembrandt(context);
     }
 
-    public Rembrandt load(String url) {
+    public Rembrandt load(@Nullable String url) {
         mUrl = StringUtils.stripToNull(url);
         mFile = null;
         return this;
     }
 
-    public Rembrandt load(File file) {
+    public Rembrandt load(@Nullable File file) {
         mFile = file;
         mUrl = null;
         return this;
@@ -88,8 +90,10 @@ public class Rembrandt {
         if (null == mUrl && null == mFile) {
             view.setImageBitmap(null);
             mMapping.remove(view);
+            if (mHideIfNull) view.setVisibility(View.GONE);
             run = Task.forResult(null);
         } else {
+            if (mHideIfNull) view.setVisibility(View.VISIBLE);
             run = run(view, mUrl, mFile, placeholder, animation, mMapping, mTransform, mNotify, mCache);
         }
         mUrl = null;
@@ -212,6 +216,16 @@ public class Rembrandt {
                 view.setImageBitmap(result);
                 break;
         }
+    }
+
+    public Rembrandt hideIfNull() {
+        mHideIfNull = true;
+        return this;
+    }
+
+    public Rembrandt hideIfNull(boolean hide) {
+        mHideIfNull = hide;
+        return this;
     }
 
     public interface Transform {
