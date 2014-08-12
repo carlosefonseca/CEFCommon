@@ -67,17 +67,17 @@ public final class ListUtils {
      * (Not a copy if original is a List and supports adding).
      */
     @SafeVarargs
-    public static <T> List<T> add(Collection<T> list, T... objects) {
+    public static <T,L extends List<T>> L add(Collection<T> list, T... objects) {
         if (list instanceof List) {
             try {
                 list.addAll(Arrays.asList(objects));
-                return (List<T>) list;
+                return (L) list;
             } catch (UnsupportedOperationException ignored) {
             }
         }
         final ArrayList<T> list1 = new ArrayList<>(list);
         list1.addAll(Arrays.asList(objects));
-        return list1;
+        return (L) list1;
     }
 
     public static <T> SparseArray<T> copySparseArray(SparseArray<T> original) {
