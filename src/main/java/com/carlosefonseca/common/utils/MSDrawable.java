@@ -285,20 +285,18 @@ public class MSDrawable {
         return mFinal[state];
     }
 
+    @Nullable
     private Drawable recolorDrawable(int state) {
         if (mFinal[state] != null) {
             return mFinal[state];
         }
 
-        if (mBitmaps[state] == null && mBitmapDrawables[state] == null) {
-            if (mShapeDrawables[state] != null) { // shape
-                return recolorShape(state);
-            } else { // nothing O.o
-                throw new RuntimeException("No Shape or Bitmap set");
-            }
-        } else { // bitmap
+        if (mShapeDrawables[state] != null) { // shape
+            return recolorShape(state);
+        } else if (mBitmaps[state] != null || mBitmapDrawables[state] != null) {
             return recolorBitmap(state);
         }
+        return null;
     }
 
 
@@ -358,7 +356,7 @@ public class MSDrawable {
         mBitmapDrawables[state] = bitmapDrawable;
         mBitmaps[state] = bitmap;
 //        mShapes[state] = shape;
-        mShapeDrawables[state] = new ShapeDrawable(shape);
+        mShapeDrawables[state] = shape != null ? new ShapeDrawable(shape) : null;
         mFinal[state] = null;
     }
 
