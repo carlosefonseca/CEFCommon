@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<merge
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        >
+
+    <com.carlosefonseca.common.widgets.Gallery
+            android:id="@+id/gallery"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            />
+
+    <ImageView
+            android:id="@+id/arrow_left"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/cef_arrow_left"
+            android:layout_gravity="left|center_vertical"
+            android:layout_marginLeft="10dp"
+            android:contentDescription="Previous"/>
+
+    <ImageView
+            android:id="@+id/arrow_right"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/cef_arrow_right"
+            android:layout_gravity="right|center_vertical"
+            android:layout_marginRight="10dp"
+            android:contentDescription="Next"/>
+
+
+</merge>

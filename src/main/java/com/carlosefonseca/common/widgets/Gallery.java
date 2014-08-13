@@ -15,10 +15,7 @@ import android.widget.Scroller;
 import bolts.Continuation;
 import bolts.Task;
 import com.carlosefonseca.common.R;
-import com.carlosefonseca.common.utils.CodeUtils;
-import com.carlosefonseca.common.utils.Log;
-import com.carlosefonseca.common.utils.Rembrandt;
-import com.carlosefonseca.common.utils.TaskUtils;
+import com.carlosefonseca.common.utils.*;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
@@ -109,6 +106,7 @@ public class Gallery extends ViewPager {
 
         public GalleryAdapter withUrlList(List<String> imageList) {
             this.urlList = new ArrayList<>(imageList);
+            ListUtils.removeNullElements(this.urlList);
             this.imageList = null;
             return this;
         }
