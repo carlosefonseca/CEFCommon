@@ -9,6 +9,7 @@ import com.carlosefonseca.common.R;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
+import java.util.Collection;
 import java.util.List;
 
 public class GalleryPlus extends FrameLayout {
@@ -86,13 +87,13 @@ public class GalleryPlus extends FrameLayout {
         arrowRightView.setVisibility(singleImage ? GONE : VISIBLE);
     }
 
-    public void setupWithImageList(List<File> imageList) {
+    public void setupWithImageList(Collection<File> imageList) {
         galleryView.setupWithImageList(imageList);
         setSingleImage(imageList.size() < 2);
         hideIfEmpty(imageList.size());
     }
 
-    public void setupWithUrlList(List<String> imageList) {
+    public void setupWithUrlList(Collection<String> imageList) {
         galleryView.setupWithUrlList(imageList);
         setSingleImage(imageList.size() < 2);
         hideIfEmpty(imageList.size());

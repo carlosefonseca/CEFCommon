@@ -21,6 +21,7 @@ import org.jetbrains.annotations.Nullable;
 import java.io.File;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -60,12 +61,12 @@ public class Gallery extends ViewPager {
         this.scaling = scaling;
     }
 
-    public void setupWithImageList(List<File> imageList) {
+    public void setupWithImageList(Collection<File> imageList) {
         layoutInflater = LayoutInflater.from(getContext());
         setAdapter(new GalleryAdapter().withFileList(imageList));
     }
 
-    public void setupWithUrlList(List<String> imageList) {
+    public void setupWithUrlList(Collection<String> imageList) {
         layoutInflater = LayoutInflater.from(getContext());
         setAdapter(new GalleryAdapter().withUrlList(imageList));
     }
@@ -98,13 +99,13 @@ public class Gallery extends ViewPager {
             rembrandt = new Rembrandt(getContext());
         }
 
-        public GalleryAdapter withFileList(List<File> imageList) {
+        public GalleryAdapter withFileList(Collection<File> imageList) {
             this.imageList = new ArrayList<>(imageList);
             this.urlList = null;
             return this;
         }
 
-        public GalleryAdapter withUrlList(List<String> imageList) {
+        public GalleryAdapter withUrlList(Collection<String> imageList) {
             this.urlList = new ArrayList<>(imageList);
             ListUtils.removeNullElements(this.urlList);
             this.imageList = null;
