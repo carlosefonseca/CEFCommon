@@ -43,21 +43,7 @@ public class GalleryPlus extends FrameLayout {
 
             @Override
             public void onPageSelected(int position) {
-                final int count = galleryView.getAdapter().getCount();
-                if (count > 1) {
-                    if (position == 0 && arrowLeftView.getVisibility() == VISIBLE) {
-                        arrowLeftView.setVisibility(GONE);
-                        return;
-                    } else if (position > 0 && arrowLeftView.getVisibility() == GONE) {
-                        arrowLeftView.setVisibility(VISIBLE);
-                        return;
-                    }
-                    if (position == count - 1 && arrowRightView.getVisibility() == VISIBLE) {
-                        arrowRightView.setVisibility(GONE);
-                    } else if (position < count - 1 && arrowRightView.getVisibility() == GONE) {
-                        arrowRightView.setVisibility(VISIBLE);
-                    }
-                }
+                setArrowsForPage(position);
             }
 
             @Override
@@ -65,6 +51,27 @@ public class GalleryPlus extends FrameLayout {
 
             }
         });
+    }
+
+    protected void setArrowsForPage(int position) {
+        final int count = galleryView.getAdapter().getCount();
+        if (count > 1) {
+            if (position == 0 && arrowLeftView.getVisibility() == VISIBLE) {
+                arrowLeftView.setVisibility(GONE);
+                return;
+            } else if (position > 0 && arrowLeftView.getVisibility() == GONE) {
+                arrowLeftView.setVisibility(VISIBLE);
+                return;
+            }
+            if (position == count - 1 && arrowRightView.getVisibility() == VISIBLE) {
+                arrowRightView.setVisibility(GONE);
+            } else if (position < count - 1 && arrowRightView.getVisibility() == GONE) {
+                arrowRightView.setVisibility(VISIBLE);
+            }
+        } else {
+            arrowLeftView.setVisibility(GONE);
+            arrowRightView.setVisibility(GONE);
+        }
     }
 
     @Override
@@ -82,29 +89,34 @@ public class GalleryPlus extends FrameLayout {
     }
 
 
+/*
     protected void setSingleImage(boolean singleImage) {
         arrowLeftView.setVisibility(singleImage ? GONE : VISIBLE);
         arrowRightView.setVisibility(singleImage ? GONE : VISIBLE);
     }
+*/
 
     public void setupWithImageList(Collection<File> imageList) {
         galleryView.setupWithImageList(imageList);
-        setSingleImage(imageList.size() < 2);
-        hideIfEmpty(imageList.size());
+        afterSetup(imageList);
     }
 
     public void setupWithUrlList(Collection<String> imageList) {
         galleryView.setupWithUrlList(imageList);
-        setSingleImage(imageList.size() < 2);
-        hideIfEmpty(imageList.size());
+        afterSetup(imageList);
     }
 
     public <T> void setupWithUrlsForObjects(List<String> urls,
                                             List<T> objects,
                                             Gallery.OnItemClickListener<T> clickListener) {
         galleryView.setupWithUrlsForObjects(urls, objects, clickListener);
-        setSingleImage(urls.size() < 2);
+        afterSetup(urls);
+    }
+
+    protected void afterSetup(Collection<?> urls) {
+//        setSingleImage(urls.size() < 2);
         hideIfEmpty(urls.size());
+        setArrowsForPage(galleryView.getCurrentItem());
     }
 
     @Override
