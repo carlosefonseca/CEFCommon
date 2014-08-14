@@ -1,17 +1,14 @@
 package com.carlosefonseca.common.utils;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.*;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
-import android.os.Build;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.view.View;
-import android.view.ViewTreeObserver;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -88,29 +85,20 @@ public class MapHelper {
 
     public void initialState() {
         try {
-            if (parentView.getViewTreeObserver() != null && parentView.getViewTreeObserver().isAlive()) {
-                parentView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-                    @SuppressLint("NewApi") // We check which build version we are using.
-                    @Override
-                    public void onGlobalLayout() {
-                        if (parentView.getWidth() == 0) return;
-                        layoutOccurred = true;
-                        CameraUpdate cameraUpdateWithAllPoints1 = getCameraUpdateWithAllPoints();
-                        if (gMap != null && cameraUpdateWithAllPoints1 != null) {
-                            Log.i(TAG, "Animating Camera");
-                            gMap.animateCamera(cameraUpdateWithAllPoints1);
-                            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
-                                //noinspection deprecation
-                                parentView.getViewTreeObserver().removeGlobalOnLayoutListener(this);
-                            } else {
-                                parentView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-                            }
-                            parentBackground = parentView.getBackground();
-                            ResourceUtils.setBackground(parentView, null);
-                        }
+            CodeUtils.runOnGlobalLayout(parentView, new CodeUtils.RunnableWithView<View>() {
+                @Override
+                public void run(View view) {
+                    if (parentView.getWidth() == 0) return;
+                    layoutOccurred = true;
+                    CameraUpdate cameraUpdateWithAllPoints1 = getCameraUpdateWithAllPoints();
+                    if (gMap != null && cameraUpdateWithAllPoints1 != null) {
+                        Log.i(TAG, "Animating Camera");
+                        gMap.animateCamera(cameraUpdateWithAllPoints1);
+                        parentBackground = parentView.getBackground();
+                        ResourceUtils.setBackground(parentView, null);
                     }
-                });
-            }
+                }
+            });
             parentView.requestLayout();
         } catch (Exception e) {
             Log.e(TAG, e);
