@@ -59,7 +59,7 @@ android {
 
     defaultConfig {
         minSdkVersion 9
-        targetSdkVersion compileSdkVersion
+//        targetSdkVersion compileSdkVersion
     }
 
     compileOptions {
