@@ -29,17 +29,21 @@ repositories {
 }
 
 dependencies {
-    compile 'com.android.support:support-v4:19.+'
-    compile 'com.intellij:annotations:+'
+    //noinspection GradleDependency
+    compile 'com.android.support:support-v4:19.1.0'
+    //noinspection GradleDynamicVersion,GradleDependency
     compile 'com.google.android.gms:play-services:5.+'
-    compile 'com.nineoldandroids:library:2.4.+'
-    compile 'de.greenrobot:eventbus:2.0.+'
+    //noinspection GradleDependency
+    compile 'com.google.code.gson:gson:1.7.2'
+
+    compile 'com.intellij:annotations:12.0'
+    compile 'com.nineoldandroids:library:2.4.0'
+    compile 'de.greenrobot:eventbus:2.0.2'
     compile 'commons-io:commons-io:2.4'
-    compile 'org.apache.commons:commons-lang3:3.+'
-    compile 'org.apache.commons:commons-collections4:4.+'
-    compile 'com.google.code.gson:gson:1.7.+'
+    compile 'org.apache.commons:commons-lang3:3.3.2'
+    compile 'org.apache.commons:commons-collections4:4.0'
     compile 'com.loopj.android:android-async-http:1.4.4'
-    compile 'com.readystatesoftware.systembartint:systembartint:1.+'
+    compile 'com.readystatesoftware.systembartint:systembartint:1.0.4'
     compile 'fr.avianey:bolts-android-api:1.1.0'
     compile 'com.facebook.rebound:rebound:0.3.3'
 }
@@ -50,12 +54,12 @@ android {
 //        compileSdkVersion = 19
 //        buildToolsVersion = "19.1.0"
 //    }
-    compileSdkVersion rootProject.ext.compileSdkVersion
-    buildToolsVersion rootProject.ext.buildToolsVersion
+    compileSdkVersion rootProject.ext.hasProperty("compileSdkVersion") ? rootProject.ext.getProperty("compileSdkVersion") : 19
+    buildToolsVersion rootProject.ext.hasProperty("buildToolsVersion") ? rootProject.ext.getProperty("buildToolsVersion") : "20.0.0"
 
     defaultConfig {
         minSdkVersion 9
-        targetSdkVersion rootProject.ext.compileSdkVersion
+        targetSdkVersion compileSdkVersion
     }
 
     compileOptions {
