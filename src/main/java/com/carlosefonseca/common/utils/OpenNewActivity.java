@@ -14,16 +14,13 @@ import org.jetbrains.annotations.Nullable;
  * {@code button.setOnClickListener(new OpenNewActivity(this, NewActivity.class);}
  * <p/>
  * It can also be used inside other code by calling<br/>
- * {@code new OpenNewActivity(this, NewActivity.class).go();}
+ * {@code new OpenNewActivity(this, NewActivity.class).go();} or start() or finishAndStart()
  */
 @SuppressWarnings("UnusedDeclaration")
 public class OpenNewActivity implements View.OnClickListener {
 
     private static final String TAG = CodeUtils.getTag(OpenNewActivity.class);
     private Integer flags;
-
-    @Deprecated
-    public static void now(Activity activity, Class activityClass) {new OpenNewActivity(activity, activityClass).go(null);}
 
     public enum TransitionAnimation {
         /**
@@ -55,6 +52,16 @@ public class OpenNewActivity implements View.OnClickListener {
         boolean isValid(@Nullable View view);
     }
 
+    /** A convenience method for just opening an activity, quick and simple. */
+    public static void start(Class aClass) {
+        new OpenNewActivity(null, aClass, null).go(null);
+    }
+
+    /** A convenience method for just opening an activity, quick and simple, and finishing the current one. */
+    public static void finishAndStart(Activity activityToFinish, Class aClass) {
+        activityToFinish.finish();
+        new OpenNewActivity(null, aClass, null).go(null);
+    }
 
     /**
      * Creates a View.OnClickListener that starts a new activity.
