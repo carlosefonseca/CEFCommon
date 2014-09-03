@@ -58,10 +58,8 @@ public class GalleryPlus extends FrameLayout {
         if (count > 1) {
             if (position == 0 && arrowLeftView.getVisibility() == VISIBLE) {
                 arrowLeftView.setVisibility(GONE);
-                return;
             } else if (position > 0 && arrowLeftView.getVisibility() == GONE) {
                 arrowLeftView.setVisibility(VISIBLE);
-                return;
             }
             if (position == count - 1 && arrowRightView.getVisibility() == VISIBLE) {
                 arrowRightView.setVisibility(GONE);
