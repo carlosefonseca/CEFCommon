@@ -218,6 +218,42 @@ public final class ImageUtils {
         return bitmap;
     }
 
+    /**
+     * Gets the aspect ratio (h/w) of an image be it on the full path or on the assets folder.
+     * @return The ratio (h/w) or 0 if there's a problem with the image.
+     */
+    public static double getAspectRatio(File file) {
+        final BitmapFactory.Options imageBounds = getImageBounds(file);
+        if (imageBounds == null) return 0;
+        return 1.0 * imageBounds.outHeight / imageBounds.outWidth;
+    }
+
+    @Nullable
+    static BitmapFactory.Options getImageBounds(File file) {
+        Bitmap bitmap = null;
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inJustDecodeBounds = true;
+        options.inPurgeable = true;
+        options.inInputShareable = true;
+        if (file.exists()) {
+            BitmapFactory.decodeFile(file.getAbsolutePath(), options);
+        } else if (getImagesOnAssets().contains(file.getName())) {
+            try {
+                InputStream stream = CFApp.getContext().getAssets().open(file.getName());
+                BitmapFactory.decodeStream(stream, null, options);
+            } catch (IOException e) {
+                Log.e(TAG, "" + e.getMessage(), e);
+                return null;
+            }
+        } else {
+            return null;
+        }
+        return options;
+    }
+
+
+//            return 1.0 * options.outHeight / options.outWidth;
+
     @Nullable
     public static Bitmap getPhotoFromFileOrAssets(File file) {
         return getPhotoFromFileOrAssets(file, -1, -1);

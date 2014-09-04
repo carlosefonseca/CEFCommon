@@ -129,7 +129,7 @@ public class Gallery extends ViewPager {
             if (view == null) {
                 view = layoutInflater.inflate(R.layout.gallery_styled_image_view, container, false);
                 if (scaling) {
-                    ((ImageView) ((ViewGroup) view).getChildAt(0)).setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+                    ((ImageView) ((ViewGroup) view).getChildAt(0)).setScaleType(ImageView.ScaleType.FIT_CENTER);
                 }
             }
             if (view != null) {

@@ -6,6 +6,7 @@ import android.util.AttributeSet;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import com.carlosefonseca.common.R;
+import com.carlosefonseca.common.utils.ImageUtils;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
@@ -146,5 +147,18 @@ public class GalleryPlus extends FrameLayout {
      */
     public void setAspectRatio(@Nullable Double aspectRatio) {
         this.aspectRatio = aspectRatio;
+    }
+
+    public void setAspectRatioFromImage(File image) {
+        final double aspectRatio1 = ImageUtils.getAspectRatio(image);
+        if (aspectRatio1 != 0) setAspectRatio(aspectRatio1);
+    }
+
+    public void setScaling(boolean scaling) {
+        galleryView.setScaling(scaling);
+    }
+
+    public boolean isScaling() {
+        return galleryView.isScaling();
     }
 }
