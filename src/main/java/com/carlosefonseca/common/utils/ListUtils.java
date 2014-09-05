@@ -313,4 +313,13 @@ public final class ListUtils {
             integers.add((T) item.getId());
         return integers;
     }
+
+    public static boolean containsIgnoreCase(Collection<String> list, String string) {
+        for (String s : list) {
+            if (s.equalsIgnoreCase(string)) {
+                return true;
+            }
+        }
+        return false;
+    }
 }
