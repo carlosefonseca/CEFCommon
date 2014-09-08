@@ -151,6 +151,23 @@ public class MapHelper {
         return followUserButton;
     }
 
+
+    public boolean isFollowingUser() {
+        return followingUser;
+    }
+
+    public void setFollowingUser(boolean followingUser) {
+        this.followingUser = followingUser;
+    }
+
+    public void showAllPoints() {
+        setFollowingUser(false);
+        final CameraUpdate cameraUpdateWithAllPoints1 = getCameraUpdateWithAllPoints();
+        if (gMap != null && cameraUpdateWithAllPoints1 != null) {
+            gMap.animateCamera(cameraUpdateWithAllPoints1);
+        }
+    }
+
     View.OnClickListener followUserAction = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
