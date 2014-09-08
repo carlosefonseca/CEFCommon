@@ -59,8 +59,7 @@ public class OpenNewActivity implements View.OnClickListener {
 
     /** A convenience method for just opening an activity, quick and simple, and finishing the current one. */
     public static void finishAndStart(Activity activityToFinish, Class aClass) {
-        activityToFinish.finish();
-        new OpenNewActivity(null, aClass, null).go(null);
+        new OpenNewActivity(activityToFinish, aClass, true).go(null);
     }
 
     /**
