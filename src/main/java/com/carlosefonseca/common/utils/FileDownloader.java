@@ -51,19 +51,25 @@ public final class FileDownloader {
         }
     }
 
-    public static void downloadFiles(Collection<Download> toDownload) {
+    public static void downloadFiles(final Collection<Download> toDownload) {
         if (CollectionUtils.isEmpty(toDownload)) return;
 
         if (sDownloadCount.getAndAdd(toDownload.size()) == 0) {
             getNotifier().start(sDownloadCount.get());
         }
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-            getThreadPoolExecutor();
-            for (Download download : toDownload) new Downloader().executeOnExecutor(sThreadPoolExecutor, download);
-        } else {
-            for (Download download : toDownload) new Downloader().execute(download);
-        }
+        CodeUtils.runOnUIThread(new Runnable() {
+            @Override
+            public void run() {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+                    getThreadPoolExecutor();
+                    for (Download download : toDownload)
+                        new Downloader().executeOnExecutor(sThreadPoolExecutor, download);
+                } else {
+                    for (Download download : toDownload) new Downloader().execute(download);
+                }
+            }
+        });
     }
 
     public static void downloadUrls(Collection<String> toDownload) {
