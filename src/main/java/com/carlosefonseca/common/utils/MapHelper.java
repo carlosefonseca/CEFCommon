@@ -13,9 +13,7 @@ import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.Projection;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.LatLngBounds;
-import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -42,9 +40,11 @@ public class MapHelper {
     private View followUserButton;
     private boolean followingUser;
     private Handler handler;
-    @Nullable private LatLng userLocation;
+    @Nullable protected LatLng userLocation;
     public boolean waitingToFocusOnAll;
     private Drawable parentBackground;
+    private boolean followingUserAndPoint;
+    private LatLng followPoint;
 
 
     @SuppressWarnings("NullableProblems")
@@ -128,7 +128,6 @@ public class MapHelper {
                     cameraUpdateWithAllPoints = CameraUpdateFactory.newLatLngBounds(latLngBounds, dp2px(50));
                 }
             }
-
         }
         return cameraUpdateWithAllPoints;
     }
@@ -138,7 +137,6 @@ public class MapHelper {
         if (latLngBounds == null) latLngBounds = latLngBoundsBuilder.build();
         return latLngBounds;
     }
-
 
     public void setFollowUserButton(@Nullable View followUserButton) {
         if (this.followUserButton != null && this.followUserButton != followUserButton) {
@@ -151,7 +149,6 @@ public class MapHelper {
     public View getFollowUserButton() {
         return followUserButton;
     }
-
 
     public boolean isFollowingUser() {
         return followingUser;
@@ -212,16 +209,57 @@ public class MapHelper {
             gMap.moveCamera(getCameraUpdateWithAllPoints(true));
         } else if (followingUser) {
             panTo(userLocation);
+        } else if (followingUserAndPoint) {
+            panTo(userLocation, followPoint);
         }
     }
 
-    private static LatLng LL(@NotNull Location location) {
+    /**
+     * Focus on a point and the user on each new coordinate. Disables FollowingUser. Pass null to disable this.
+     */
+    public void setFollowingUserAndPoint(@Nullable LatLng point) {
+        setFollowingUser(false);
+        followingUserAndPoint = point != null;
+        followPoint = point;
+        if (point != null) panTo(userLocation, point);
+    }
+
+    private static float latLngDistance(LatLngBounds bounds) {
+        float[] results = new float[1];
+        Location.distanceBetween(bounds.northeast.latitude,
+                                 bounds.northeast.longitude,
+                                 bounds.southwest.latitude,
+                                 bounds.southwest.longitude,
+                                 results);
+        return results[0];
+    }
+
+    public static LatLng LL(@NotNull Location location) {
         return new LatLng(location.getLatitude(), location.getLongitude());
     }
 
     private void panTo(@NotNull LatLng location) {
         if (gMap == null) return;
         gMap.animateCamera(CameraUpdateFactory.newLatLng(location));
+    }
+
+    protected void panTo(LatLng... points) {
+        if (gMap == null || points.length == 0) return;
+
+        if (points.length == 1) {
+            gMap.animateCamera(CameraUpdateFactory.newLatLng(points[0]));
+            return;
+        }
+
+        final LatLngBounds.Builder builder = new LatLngBounds.Builder();
+
+        for (LatLng point : points) {
+            builder.include(point);
+        }
+
+        final LatLngBounds build = builder.build();
+
+        gMap.animateCamera(CameraUpdateFactory.newLatLngBounds(build, dp2px(50)));
     }
 
     void updateMyLocationMarkerAnimated(@NotNull final LatLng target) {
@@ -285,5 +323,48 @@ public class MapHelper {
     protected void onStop() {
 //        ResourceUtils.setBackground(parentView, new ColorDrawable(Color.RED));
 //        if (this.parentBackground != null) ResourceUtils.setBackground(parentView, parentBackground);
+    }
+
+    public enum AnchorPlacement {
+        CENTER_BOTTOM, CENTER;
+
+        float u() {
+            switch (this) {
+                case CENTER_BOTTOM:
+                case CENTER:
+                default:
+                    return 0.5f;
+            }
+        }
+
+        float v() {
+            switch (this) {
+
+                case CENTER_BOTTOM:
+                    return 1;
+                case CENTER:
+                default:
+                    return 0.5f;
+            }
+        }
+    }
+
+    /**
+     * Holds a bitmap and its placement.
+     */
+    public static class AnchoredBitmap {
+        private final float u;
+        private final float v;
+        private final BitmapDescriptor bitmapD;
+
+        public AnchoredBitmap(@Nullable Bitmap bitmap, AnchorPlacement placement) {
+            this.bitmapD = BitmapDescriptorFactory.fromBitmap(bitmap);
+            this.u = placement.u();
+            this.v = placement.v();
+        }
+
+        public MarkerOptions set(MarkerOptions options) {
+            return options.icon(bitmapD).anchor(u, v);
+        }
     }
 }
