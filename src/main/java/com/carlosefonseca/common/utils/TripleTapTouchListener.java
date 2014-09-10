@@ -100,7 +100,7 @@ public class TripleTapTouchListener implements View.OnTouchListener {
                     break;
 
                 case MotionEvent.ACTION_UP:
-                    if (!isDown) {
+                    if (!isDown || mDownCount == 0) {
                         if (log) Log.v(TAG, "UP: is up");
                         return false;
                     }
