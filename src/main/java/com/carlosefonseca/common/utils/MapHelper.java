@@ -26,7 +26,8 @@ import static com.carlosefonseca.common.utils.ImageUtils.dp2px;
 public class MapHelper {
 
     private static final String TAG = getTag(MapHelper.class);
-    public static final int USER_ZOOM = 18;
+
+    protected int userZoom = 18;
     protected final View parentView;
     @Nullable protected final GoogleMap gMap;
     protected Marker myLocationMarker;
@@ -41,7 +42,7 @@ public class MapHelper {
     private View followUserButton;
     private boolean followingUser;
     private Handler handler;
-    private LatLng userLocation;
+    @Nullable private LatLng userLocation;
     public boolean waitingToFocusOnAll;
     private Drawable parentBackground;
 
@@ -157,6 +158,9 @@ public class MapHelper {
     }
 
     public void setFollowingUser(boolean followingUser) {
+        if (!this.followingUser && followingUser && userLocation != null) {
+            panZoomTo(userLocation);
+        }
         this.followingUser = followingUser;
     }
 
@@ -184,8 +188,8 @@ public class MapHelper {
 
     private void panZoomTo(@NotNull LatLng location) {
         if (gMap != null) {
-            if (gMap.getCameraPosition().zoom < USER_ZOOM) {
-                gMap.animateCamera(CameraUpdateFactory.newLatLngZoom(location, USER_ZOOM));
+            if (gMap.getCameraPosition().zoom < userZoom) {
+                gMap.animateCamera(CameraUpdateFactory.newLatLngZoom(location, userZoom));
             } else {
                 panTo(location);
             }
