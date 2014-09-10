@@ -17,6 +17,7 @@ import android.view.View;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.widget.ImageView;
+import bolts.Task;
 import com.carlosefonseca.common.CFApp;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -28,6 +29,7 @@ import java.io.InputStream;
 import java.security.InvalidParameterException;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.concurrent.Callable;
 import java.util.regex.Pattern;
 
 import static android.os.Build.VERSION.SDK_INT;
@@ -565,6 +567,21 @@ public final class ImageUtils {
             }
             return null;
         }
+    }
+
+    static void writeImageInBackground(final File file, final Bitmap bitmap) {
+        Task.callInBackground(new Callable<Object>() {
+            @Override
+            public Object call() throws Exception {
+                try {
+                    FileOutputStream out = new FileOutputStream(file);
+                    bitmap.compress(Bitmap.CompressFormat.PNG, 0, out);
+                } catch (Exception e) {
+                    Log.e(TAG, "Bitmap file:" + file, e);
+                }
+                return null;
+            }
+        });
     }
 
 

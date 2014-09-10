@@ -196,7 +196,8 @@ public class Rembrandt {
         if (cachedPhoto != null) return cachedPhoto;
         Log.i(TAG, "Downloading image " + url);
         Bitmap bitmap = NetworkingUtils.loadBitmap(url);
-        new ImageUtils.ImageWriter(fullPath, bitmap).execute();
+//        new ImageUtils.ImageWriter(fullPath, bitmap).execute();
+        ImageUtils.writeImageInBackground(fullPath, bitmap);
         return bitmap;
     }
 
