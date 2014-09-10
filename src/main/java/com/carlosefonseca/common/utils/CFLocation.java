@@ -13,6 +13,8 @@ import java.util.List;
 public class CFLocation extends Location implements Comparable<CFLocation> {
     public static final String LINE_COORDINATE_PART_SPLITTER = " ";
     protected static final DecimalFormat DECIMAL_FORMAT = new DecimalFormat("#.####");
+    public static final float NO_DISTANCE = Float.NaN;
+    public static final int NO_INDEX = -1;
     public final float distance;
     public final int index;
 
@@ -22,7 +24,7 @@ public class CFLocation extends Location implements Comparable<CFLocation> {
      * @param coordinateString The coordinate as a string in the format -9.123,38.123,0 (long,lat,…)
      */
     public CFLocation(@NotNull String coordinateString) {
-        this(coordinateString, null, -1);
+        this(coordinateString, null, NO_INDEX);
     }
 
     /**
@@ -45,7 +47,7 @@ public class CFLocation extends Location implements Comparable<CFLocation> {
         if (locationToDistance != null) {
             distance = distanceTo(locationToDistance);
         } else {
-            distance = -1;
+            distance = NO_DISTANCE;
         }
         this.index = index;
     }
@@ -53,15 +55,15 @@ public class CFLocation extends Location implements Comparable<CFLocation> {
     public CFLocation(Location l, float distance) {
         super(l);
         this.distance = distance;
-        index = -1;
+        index = NO_INDEX;
     }
 
     public CFLocation(@NotNull Double lat, @NotNull Double lng) {
-        this(lat, lng, -1);
+        this(lat, lng, NO_DISTANCE);
     }
 
     public CFLocation(double lat, double lng, Location loc) {
-        this(lat, lng, loc, -1);
+        this(lat, lng, loc, NO_INDEX);
     }
 
     public CFLocation(@NotNull Double lat, @NotNull Double lng, float distance) {
@@ -69,7 +71,7 @@ public class CFLocation extends Location implements Comparable<CFLocation> {
         setLatitude(lat);
         setLongitude(lng);
         this.distance = distance;
-        index = -1;
+        index = NO_INDEX;
     }
 
     public CFLocation(@NotNull Location location, float distance, int index) {
@@ -82,8 +84,20 @@ public class CFLocation extends Location implements Comparable<CFLocation> {
         super("");
         setLatitude(lat);
         setLongitude(lng);
-        this.distance = locationToDistance != null ? distanceTo(locationToDistance) : -1;
+        this.distance = locationToDistance != null ? distanceTo(locationToDistance) : NO_DISTANCE;
         this.index = index;
+    }
+
+    /**
+     * Creates a new Location similar to the first argument but calculates and stores the distance from the first to
+     * the second argument.
+     * @param location The location to copy.
+     * @param distanceTo The second point to calculate the distance to.
+     */
+    public CFLocation(Location location, Location distanceTo) {
+        super(location);
+        this.distance = location.distanceTo(distanceTo);
+        this.index = NO_INDEX;
     }
 
     @Override
@@ -96,7 +110,7 @@ public class CFLocation extends Location implements Comparable<CFLocation> {
         return String.format("%s,%s%s",
                              DECIMAL_FORMAT.format(getLatitude()),
                              DECIMAL_FORMAT.format(getLongitude()),
-                             (distance > -1 ? "  D " + DECIMAL_FORMAT.format(distance) : ""));
+                             (distance != NO_DISTANCE ? "  D " + DECIMAL_FORMAT.format(distance) : ""));
     }
 
     public static Location getCenter(Collection<Location> locations) {
