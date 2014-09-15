@@ -244,7 +244,7 @@ public class MapHelper {
     }
 
     protected void panTo(LatLng... points) {
-        if (gMap == null || points.length == 0) return;
+        if (gMap == null || points == null || points.length == 0) return;
 
         if (points.length == 1) {
             gMap.animateCamera(CameraUpdateFactory.newLatLng(points[0]));
@@ -254,7 +254,7 @@ public class MapHelper {
         final LatLngBounds.Builder builder = new LatLngBounds.Builder();
 
         for (LatLng point : points) {
-            builder.include(point);
+            if (point != null) builder.include(point);
         }
 
         final LatLngBounds build = builder.build();

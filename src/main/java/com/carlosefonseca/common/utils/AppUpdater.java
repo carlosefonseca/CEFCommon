@@ -177,17 +177,21 @@ public final class AppUpdater {
         checkForUpdates(new CheckForUpdatesDelegate() {
             @Override
             public void newUpdateExists(String version) {
-                new AlertDialog.Builder(context).setMessage(
-                        "Version " + version + " is available for download. Do you want to update now?")
-                                                .setPositiveButton("Update", new DialogInterface.OnClickListener() {
-                                                    @Override
-                                                    public void onClick(DialogInterface dialog, int which) {
-                                                        updateApp(context);
-                                                    }
-                                                })
-                                                .setNegativeButton("Later", null)
-                                                .setCancelable(true)
-                                                .show();
+                try {
+                    new AlertDialog.Builder(context).setMessage(
+                            "Version " + version + " is available for download. Do you want to update now?")
+                                                    .setPositiveButton("Update", new DialogInterface.OnClickListener() {
+                                                        @Override
+                                                        public void onClick(DialogInterface dialog, int which) {
+                                                            updateApp(context);
+                                                        }
+                                                    })
+                                                    .setNegativeButton("Later", null)
+                                                    .setCancelable(true)
+                                                    .show();
+                } catch (Exception e) {
+                    Log.e(TAG, "" + e.getMessage(), e);
+                }
             }
         });
     }
