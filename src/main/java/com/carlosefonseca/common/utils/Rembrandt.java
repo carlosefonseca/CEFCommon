@@ -46,7 +46,7 @@ public class Rembrandt {
     private boolean mHideIfNull;
 
     public Rembrandt(Context context) {
-        /*mContext = context*/;
+        /*mContext = context;*/
     }
 
     /**

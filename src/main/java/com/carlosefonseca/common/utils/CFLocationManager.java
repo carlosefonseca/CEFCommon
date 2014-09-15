@@ -103,9 +103,15 @@ public class CFLocationManager implements GooglePlayServicesClient.ConnectionCal
         if (location != null) onLocationChangedListener.onLocationChanged(location);
     }
 
+    /**
+     * If there's a map use {@link #deactivate(com.google.android.gms.maps.LocationSource.OnLocationChangedListener)}
+     */
     @Override
     public void deactivate() {
-        mapLocationChangedListener = null;
+    }
+
+    public void deactivate(@Nullable OnLocationChangedListener listener) {
+        if (listener == null || mapLocationChangedListener.equals(listener)) mapLocationChangedListener = null;
     }
 
     /* LISTENERS */
