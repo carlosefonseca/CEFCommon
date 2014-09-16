@@ -1,6 +1,8 @@
 package com.carlosefonseca.common.utils;
 
+import android.annotation.TargetApi;
 import android.graphics.Rect;
+import android.os.Build;
 import android.view.MotionEvent;
 import android.view.View;
 import com.facebook.rebound.SimpleSpringListener;
@@ -13,6 +15,7 @@ public class SpringUtils {
         final Spring spring = springSystem1.createSpring();
         spring.setCurrentValue(1);
         spring.addListener(new SimpleSpringListener() {
+            @TargetApi(Build.VERSION_CODES.HONEYCOMB)
             @Override
             public void onSpringUpdate(Spring spring) {
                 final float currentValue = (float) spring.getCurrentValue();
