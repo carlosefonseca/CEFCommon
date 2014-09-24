@@ -1,5 +1,6 @@
 package com.carlosefonseca.common.utils;
 
+import android.app.Activity;
 import android.graphics.Typeface;
 import android.util.SparseArray;
 import android.view.ViewGroup;
@@ -45,7 +46,8 @@ public final class TypeFaceManager {
     }
 
     /**
-     * Applies the specified typeface to a set of views in the specified container. Use this if you need typefaces on views that
+     * Applies the specified typeface to a set of views in the specified container. Use this if you need typefaces on
+     * views that
      * you don't access on your code, since this will perform findViewById, which has its costs.
      *
      * @param typeface The typeface to apply, from a TypeFace enum.
@@ -64,7 +66,28 @@ public final class TypeFaceManager {
     }
 
     /**
-     * Obtains a TypeFace from the enum constant. If it's not already in the cache, it will load the font from the defined fonts
+     * Applies the specified typeface to a set of views in the specified activity.
+     * Use this if you need typefaces on views that you don't access on your code,
+     * since this will perform findViewById, which has its costs.
+     *
+     * @param typeface The typeface to apply, from a TypeFace enum.
+     * @param activity The activity that holds all the target subviews.
+     * @param views    The resource IDs for the target views.
+     * @param <T>      TypeFaces Enum.
+     */
+    public static <T extends Enum> void setTypeFace(T typeface, Activity activity, int... views) {
+        if (typeface == null) return;
+        Typeface typeFace = getTypeFace(typeface);
+        TextView textView;
+        for (int view : views) {
+            textView = (TextView) activity.findViewById(view);
+            if (textView != null) textView.setTypeface(typeFace);
+        }
+    }
+
+    /**
+     * Obtains a TypeFace from the enum constant. If it's not already in the cache, it will load the font from the
+     * defined fonts
      * folder.
      *
      * @param typeface The typeface to obtain, from a TypeFace enum.

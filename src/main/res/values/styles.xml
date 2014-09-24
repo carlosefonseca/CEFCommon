@@ -44,13 +44,13 @@
     </style>
 
     <style name="NavBarBase">
-        <item name="android:layout_marginBottom">1dp</item>
+        <!--<item name="android:layout_marginBottom">1dp</item>-->
         <!--<item name="android:background">@color/White</item>-->
     </style>
 
     <style name="NavBarTitle">
         <!--<item name="android:background">@color/DarkerGray</item>-->
-        <item name="android:gravity">center_vertical|left</item>
+        <item name="android:gravity">center_vertical|center</item>
         <item name="android:textColor">@color/White</item>
         <item name="android:layout_marginLeft">1dp</item>
         <item name="android:layout_width">0dp</item>

@@ -18,6 +18,7 @@ import bolts.Task;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 /**
  * from http://stackoverflow.com/a/17782522/1069444
@@ -26,18 +27,28 @@ import java.util.Collections;
 public class AutoResizeTextView extends TextView {
     private boolean mNeedsResize = true;
 
+    public static void makeSameSizeOnNextResize(List<AutoResizeTextView> autoResizeTextViews) {
+        AutoResizeTextView[] arr = new AutoResizeTextView[autoResizeTextViews.size()];
+        makeSameSizeOnNextResize((AutoResizeTextView[]) autoResizeTextViews.toArray(arr));
+    }
+
     public static void makeSameSizeOnNextResize(final AutoResizeTextView... textViews) {
+        // This was made with tasks but could be done with a simple checker that ran on every listener call.
+        // It would probably be faster lol
+
         final Float[] sizes = new Float[textViews.length];
 
+        // create a task source for each TextView
         final ArrayList<Task<Void>.TaskCompletionSource> tasks = new ArrayList<>();
         for (AutoResizeTextView ignored : textViews) {
             tasks.add(Task.<Void>create());
         }
 
+        // Assign a listener to each TextView
         for (int i = 0; i < textViews.length; i++) {
-            final AutoResizeTextView button = textViews[i];
+            final AutoResizeTextView textView = textViews[i];
             final int finalI = i;
-            button.setListener(new OnSizeCalculated() {
+            textView.setListener(new OnSizeCalculated() {
                 @Override
                 public void onSizeCalculated(float newSize) {
                     sizes[finalI] = newSize;
@@ -47,10 +58,12 @@ public class AutoResizeTextView extends TextView {
             });
         }
 
-
+        // Gets the tasks
         final ArrayList<Task<Void>> tasks2 = new ArrayList<>();
         for (Task<Void>.TaskCompletionSource task : tasks) tasks2.add(task.getTask());
 
+        // When all tasks finish, all listeners have been called and all sizes where obtained.
+        // Find the smallest size and set it on all TextViews
         Task.whenAll(tasks2).continueWith(new Continuation<Void, Void>() {
             @Override
             public Void then(Task<Void> task) throws Exception {

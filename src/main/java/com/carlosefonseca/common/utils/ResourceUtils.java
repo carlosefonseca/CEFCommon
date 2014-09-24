@@ -120,6 +120,29 @@ public final class ResourceUtils {
     }
 
     /**
+     * Creates a State List for normal, pressed and selected states that can be used as textColor.
+     *
+     * @param normal A color.
+     * @param pressed  A color.
+     * @param selected A color.
+     * @return A new ColorStateList with all states set.
+     */
+    public static ColorStateList createTripleColorStateList(int normal, int pressed, int selected) {
+        int[] stateList = new int[]{android.R.attr.state_checked,
+                                    android.R.attr.state_selected,
+                                    android.R.attr.state_pressed};
+
+        final int[][] states = new int[stateList.length + 1][];
+        final int[] colors = new int[]{selected, selected, pressed, normal};
+
+        for (int i = 0; i < states.length; i++) {
+            states[i] = i == stateList.length ? new int[]{} : new int[]{stateList[i]};
+        }
+
+        return new ColorStateList(states, colors);
+    }
+
+    /**
      * Prepends getExternalFilesDir to the parameter. This is the app's private files.
      */
     public static File getFullPath(String localPath) {
