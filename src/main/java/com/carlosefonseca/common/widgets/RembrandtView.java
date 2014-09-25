@@ -11,6 +11,7 @@ public class RembrandtView extends ImageView {
     private Rembrandt mRembrandt;
 
     boolean hideIfNull;
+    private String url;
 
     public RembrandtView(Context context) {
         this(context, new Rembrandt(context));
@@ -40,10 +41,14 @@ public class RembrandtView extends ImageView {
     }
 
     public RembrandtView setImageUrl(String url) {
+        if (CodeUtils.equals(url, this.url)) return this;
+        this.url = url;
         getRembrandt().load(url).hideIfNull(hideIfNull).fadeIn(this);
         return this;
     }
     public RembrandtView setCrossFadeImageUrl(String url) {
+        if (CodeUtils.equals(url, this.url)) return this;
+        this.url = url;
         getRembrandt().load(url).hideIfNull(hideIfNull).xFade(this);
         return this;
     }
