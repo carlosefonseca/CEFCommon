@@ -23,4 +23,10 @@
         <item name="NavBarTitle">@style/NavBarTitle</item>
         <item name="NavBarBack">@style/NavBarBack</item>
     </style>
+
+    <style name="AppBaseTheme.NumberKeyboard">
+        <item name="NumberKeyboardNumberKey">@style/NumberKeyboardNumberKey</item>
+        <item name="NumberKeyboardBackspaceKey">@style/NumberKeyboardBackspaceKey</item>
+        <item name="NumberKeyboardEmptyKey">@style/NumberKeyboardEmptyKey</item>
+    </style>
 </resources>

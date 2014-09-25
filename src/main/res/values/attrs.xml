@@ -27,4 +27,8 @@
     <attr name="NavBarBase" format="reference"/>
     <attr name="NavBarBack" format="reference"/>
     <attr name="NavBarTitle" format="reference"/>
+
+    <attr name="NumberKeyboardNumberKey" format="reference"/>
+    <attr name="NumberKeyboardEmptyKey" format="reference"/>
+    <attr name="NumberKeyboardBackspaceKey" format="reference"/>
 </resources>

@@ -63,4 +63,30 @@
         <item name="android:layout_width">50dp</item>
         <item name="android:layout_height">50dp</item>
     </style>
+
+    <!--KEYBOARD-->
+
+    <style name="NumberKeyboardNumberKey">
+        <item name="android:layout_height">53dp</item>
+        <item name="android:background">@drawable/keyboard_number_background</item>
+        <item name="android:layout_marginRight">-1dp</item>
+        <item name="android:layout_marginBottom">-1dp</item>
+        <item name="android:textSize">@dimen/keyboard_key_size</item>
+    </style>
+
+    <style name="NumberKeyboardEmptyKey">
+        <item name="android:background">@drawable/keyboard_other_background</item>
+        <item name="android:enabled">false</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">match_parent</item>
+    </style>
+
+    <style name="NumberKeyboardBackspaceKey">
+        <item name="android:background">@drawable/keyboard_other_background</item>
+        <item name="android:src">@drawable/backspace</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">match_parent</item>
+    </style>
+
+    <dimen name="keyboard_key_size">15sp</dimen>
 </resources>
