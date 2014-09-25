@@ -7,7 +7,10 @@ import android.graphics.drawable.shapes.Shape;
 import android.os.Build;
 import android.util.StateSet;
 import android.view.View;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import static android.R.attr.*;
 
 /**
  * MultiStateDrawable: A StateListDrawable builder!
@@ -52,17 +55,20 @@ public class MSDrawable {
     public static final int NORMAL = 0;
     public static final int PRESSED = 1;
     public static final int SELECTED = 2;
+    public static final int DISABLED = 3;
+
+    public static final int STATE_COUNT = 4;
 
     Mode mMode = Mode.COLORS;
 
     Bitmap mIcon;
     Shape mShape;
-    int[] mColors = new int[3];
-    BitmapDrawable[] mBitmapDrawables = new BitmapDrawable[3];
-//    Shape[] mShapes = new Shape[3];
-    ShapeDrawable[] mShapeDrawables = new ShapeDrawable[3];
-    Bitmap[] mBitmaps = new Bitmap[3];
-    Drawable[] mFinal = new Drawable[3];
+    int[] mColors = new int[STATE_COUNT];
+    BitmapDrawable[] mBitmapDrawables = new BitmapDrawable[STATE_COUNT];
+    //    Shape[] mShapes = new Shape[3];
+    ShapeDrawable[] mShapeDrawables = new ShapeDrawable[STATE_COUNT];
+    Bitmap[] mBitmaps = new Bitmap[STATE_COUNT];
+    Drawable[] mFinal = new Drawable[STATE_COUNT];
 
     public MSDrawable(Context context) { this.mContext = context;}
 
@@ -243,6 +249,50 @@ public class MSDrawable {
         return this;
     }
 
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+    public MSDrawable disabled(Bitmap bitmap) {
+        set(bitmap, 0, DISABLED);
+        return this;
+    }
+
+    public MSDrawable disabled(BitmapDrawable drawable) {
+        set(drawable, 0, DISABLED);
+        return this;
+    }
+
+    public MSDrawable disabled(Shape shape) {
+        set(shape, 0, DISABLED);
+        return this;
+    }
+
+    public MSDrawable disabledRes(int res) {
+        set((BitmapDrawable) mContext.getResources().getDrawable(res), 0, DISABLED);
+        return this;
+    }
+
+    public MSDrawable disabledColor(int color) {
+        set(color, DISABLED);
+        return this;
+    }
+
+    public MSDrawable disabled(BitmapDrawable drawable, int color) {
+        set(drawable, color, DISABLED);
+        return this;
+    }
+
+    public MSDrawable disabled(Shape shape, int color) {
+        set(shape, color, DISABLED);
+        return this;
+    }
+
+    public MSDrawable disabledRes(int res, int color) {
+        set((BitmapDrawable) mContext.getResources().getDrawable(res), color, DISABLED);
+        return this;
+    }
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     /**
@@ -251,11 +301,17 @@ public class MSDrawable {
     public Drawable build() {
         switch (mMode) {
             case COLORS:
-                return createFromDrawables(getColor(NORMAL), getColor(PRESSED), getColor(SELECTED));
+                return createFromDrawables(getColor(NORMAL), getColor(PRESSED), getColor(SELECTED), getColor(DISABLED));
             case SINGLE_ICON:
-                return createFromDrawables(recolorIcon(NORMAL), recolorIcon(PRESSED), recolorIcon(SELECTED));
+                return createFromDrawables(recolorIcon(NORMAL),
+                                           recolorIcon(PRESSED),
+                                           recolorIcon(SELECTED),
+                                           recolorIcon(DISABLED));
             case MULTI_ICON:
-                return createFromDrawables(recolorDrawable(NORMAL), recolorDrawable(PRESSED), recolorDrawable(SELECTED));
+                return createFromDrawables(recolorDrawable(NORMAL),
+                                           recolorDrawable(PRESSED),
+                                           recolorDrawable(SELECTED),
+                                           recolorDrawable(DISABLED));
         }
         return null;
     }
@@ -279,6 +335,12 @@ public class MSDrawable {
                 mFinal[state] = ImageUtils.createRecoloredDrawable(mContext, mIcon, mColors[state]);
             } else if (mShape != null) {
                 mFinal[state] = recoloredShape(new ShapeDrawable(mShape), mColors[state]);
+            }
+        } else if (state == NORMAL) {
+            if (mIcon != null) {
+                mFinal[state] = new BitmapDrawable(mContext.getResources(), mIcon);
+            } else if (mShape != null) {
+                mFinal[state] = new ShapeDrawable(mShape);
             }
         }
 
@@ -322,11 +384,26 @@ public class MSDrawable {
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    public static StateListDrawable createFromDrawables(@Nullable Drawable normal, @Nullable Drawable pressed, @Nullable Drawable selected) {
+    public static StateListDrawable createFromDrawables(@NotNull Drawable normal,
+                                                        @Nullable Drawable pressed,
+                                                        @Nullable Drawable selected,
+                                                        @Nullable Drawable disabled) {
         StateListDrawable stateListDrawable = new StateListDrawable();
-        if (selected != null) stateListDrawable.addState(new int[]{android.R.attr.state_selected}, selected);
-        if (pressed != null) stateListDrawable.addState(new int[]{android.R.attr.state_pressed}, pressed);
-        stateListDrawable.addState(StateSet.WILD_CARD, normal);
+
+        if (disabled == null) {
+            if (selected != null) stateListDrawable.addState(new int[]{state_selected}, selected);
+            if (pressed != null) stateListDrawable.addState(new int[]{state_pressed}, pressed);
+            stateListDrawable.addState(StateSet.WILD_CARD, normal);
+        } else {
+            if (selected != null) {
+                stateListDrawable.addState(new int[]{state_selected, state_enabled}, selected);
+            }
+            if (pressed != null) {
+                stateListDrawable.addState(new int[]{state_pressed, state_enabled}, pressed);
+            }
+            stateListDrawable.addState(new int[]{state_enabled}, normal);
+            stateListDrawable.addState(StateSet.WILD_CARD, disabled);
+        }
         return stateListDrawable;
     }
 
