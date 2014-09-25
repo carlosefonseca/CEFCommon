@@ -161,4 +161,8 @@ public class GalleryPlus extends FrameLayout {
     public boolean isScaling() {
         return galleryView.isScaling();
     }
+
+    public void setCurrentItem(int item, boolean smoothScroll) {
+        galleryView.setCurrentItem(item, smoothScroll);
+    }
 }

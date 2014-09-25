@@ -2,7 +2,7 @@ package com.carlosefonseca.common.widgets;
 
 
 import android.content.Context;
-import android.graphics.Color;
+import android.graphics.*;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.AttributeSet;
@@ -29,11 +29,9 @@ public class Gallery extends ViewPager {
 
     private static final java.lang.String TAG = CodeUtils.getTag(Gallery.class);
 
-    private LayoutInflater layoutInflater;
     private int res;
     private int bottomMargin;
     private int rightMargin;
-    private OnClickListener clickListener;
     private int width;
     private float density;
     private boolean scaling;
@@ -62,13 +60,11 @@ public class Gallery extends ViewPager {
     }
 
     public void setupWithImageList(Collection<File> imageList) {
-        layoutInflater = LayoutInflater.from(getContext());
-        setAdapter(new GalleryAdapter().withFileList(imageList));
+        setAdapter(new GalleryAdapter(getContext(), scaling).withFileList(imageList));
     }
 
     public void setupWithUrlList(Collection<String> imageList) {
-        layoutInflater = LayoutInflater.from(getContext());
-        setAdapter(new GalleryAdapter().withUrlList(imageList));
+        setAdapter(new GalleryAdapter(getContext(), scaling).withUrlList(imageList));
     }
 
     public void setImageOverlay(int res, int bottomMargin, int rightMargin) {
@@ -79,7 +75,7 @@ public class Gallery extends ViewPager {
 
     @Override
     public void setOnClickListener(OnClickListener listener) {
-        clickListener = listener;
+        ((GalleryAdapter) getAdapter()).setClickListener(listener);
     }
 
     public void setImageWidth(int width) {
@@ -88,15 +84,28 @@ public class Gallery extends ViewPager {
     }
 
 
-    class GalleryAdapter extends PagerAdapter {
+    public static class GalleryAdapter extends PagerAdapter {
 
         private final Rembrandt rembrandt;
+        private final boolean scaling;
         @Nullable private List<File> imageList;
         @Nullable private ArrayList<String> urlList;
         private LinkedList<View> recycledViews = new LinkedList<View>();
+        private LayoutInflater layoutInflater;
+        private OnClickListener clickListener;
 
-        GalleryAdapter() {
-            rembrandt = new Rembrandt(getContext());
+        public GalleryAdapter(Context context) {
+            this(context, false);
+        }
+
+        GalleryAdapter(Context context, boolean scaling) {
+            this.scaling = scaling;
+            rembrandt = new Rembrandt(context);
+            layoutInflater = LayoutInflater.from(context);
+        }
+
+        public void setClickListener(OnClickListener clickListener) {
+            this.clickListener = clickListener;
         }
 
         public GalleryAdapter withFileList(Collection<File> imageList) {
@@ -124,7 +133,7 @@ public class Gallery extends ViewPager {
 
 
         @Override
-        public Object instantiateItem(ViewGroup container, int position) {
+        public Object instantiateItem(ViewGroup container, final int position) {
             View view = recycledViews.poll();
             if (view == null) {
                 view = layoutInflater.inflate(R.layout.gallery_styled_image_view, container, false);
