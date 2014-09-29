@@ -92,7 +92,7 @@ public class CFNumberKeyboard extends TableLayout {
         tableRow.addView(cell);
         final ViewGroup.LayoutParams layoutParams1 = cell.getLayoutParams();
         final TableRow.LayoutParams layoutParams = (TableRow.LayoutParams) layoutParams1;
-        layoutParams.height = dp2px(45);
+        layoutParams.height = (int) (getResources().getDisplayMetrics().widthPixels / 3 * 0.4);
         layoutParams.bottomMargin = MARGIN;
         layoutParams.rightMargin = MARGIN;
         cell.setLayoutParams(layoutParams);

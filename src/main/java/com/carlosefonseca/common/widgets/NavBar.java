@@ -191,8 +191,8 @@ public class NavBar extends LinearLayout {
         if ((color != NO_COLOR || defaultNormalColor != NO_COLOR) && defaultTitleDrawable == null) {
             setColor();
         } else if (defaultTitleDrawable != null) {
-            if (defaultBackDrawable instanceof ShapeDrawable) {
-                setTitleDrawable(new ShapeDrawable(((ShapeDrawable) defaultBackDrawable).getShape()));
+            if (defaultTitleDrawable instanceof ShapeDrawable) {
+                setTitleDrawable(new ShapeDrawable(((ShapeDrawable) defaultTitleDrawable).getShape()));
             } else {
                 setTitleDrawable(defaultTitleDrawable.getConstantState().newDrawable());
             }
@@ -255,6 +255,10 @@ public class NavBar extends LinearLayout {
     private void setColor() {
         final int color1 = color != NO_COLOR ? color : defaultNormalColor;
         final int color2 = color != NO_COLOR ? pressedColor : defaultPressedColor;
+
+        if (color1 == NO_COLOR && color2 == NO_COLOR) {
+            return;
+        }
 
         if (titleDrawable != null) {
             if (titleDrawable instanceof ShapeDrawable) ((ShapeDrawable) titleDrawable).getPaint().setColor(color1);
