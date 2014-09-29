@@ -77,13 +77,13 @@ public final class CodeUtils {
     }
 
     public static int hashCode(int seed, Object... objects) {
-            if (objects == null) return seed;
-            int hashCode = seed;
-            for (Object element : objects) {
-                hashCode = 31 * hashCode + (element == null ? 0 : element.hashCode());
-            }
-            return hashCode;
+        if (objects == null) return seed;
+        int hashCode = seed;
+        for (Object element : objects) {
+            hashCode = 31 * hashCode + (element == null ? 0 : element.hashCode());
         }
+        return hashCode;
+    }
 
     public interface RunnableWithView<T extends View> {
         void run(T view);
@@ -143,9 +143,9 @@ public final class CodeUtils {
 
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                if (onDone != null && (actionId == EditorInfo.IME_ACTION_SEARCH || actionId == EditorInfo.IME_ACTION_DONE ||
-                                       event.getAction() == KeyEvent.ACTION_DOWN &&
-                                       event.getKeyCode() == KeyEvent.KEYCODE_ENTER)) {
+                if (onDone != null &&
+                    (actionId == EditorInfo.IME_ACTION_SEARCH || actionId == EditorInfo.IME_ACTION_DONE ||
+                     event.getAction() == KeyEvent.ACTION_DOWN && event.getKeyCode() == KeyEvent.KEYCODE_ENTER)) {
                     // the user is done typing.
                     onDone.onClick(dialog, 0);
                     return true; // consume.
@@ -157,16 +157,17 @@ public final class CodeUtils {
 
 
     @SuppressLint("InlinedApi")
-    public static void setupNumericEditText(final EditText editText, @Nullable final DialogInterface.OnClickListener onDone) {
+    public static void setupNumericEditText(final EditText editText,
+                                            @Nullable final DialogInterface.OnClickListener onDone) {
         editText.setImeOptions(EditorInfo.IME_ACTION_DONE);
         editText.setInputType(InputType.TYPE_CLASS_PHONE | InputType.TYPE_NUMBER_VARIATION_PASSWORD);
         editText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
 
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                if (onDone != null && (actionId == EditorInfo.IME_ACTION_SEARCH || actionId == EditorInfo.IME_ACTION_DONE ||
-                                       event.getAction() == KeyEvent.ACTION_DOWN &&
-                                       event.getKeyCode() == KeyEvent.KEYCODE_ENTER)) {
+                if (onDone != null &&
+                    (actionId == EditorInfo.IME_ACTION_SEARCH || actionId == EditorInfo.IME_ACTION_DONE ||
+                     event.getAction() == KeyEvent.ACTION_DOWN && event.getKeyCode() == KeyEvent.KEYCODE_ENTER)) {
                     // the user is done typing.
                     onDone.onClick(null, 0);
                     return true; // consume.
@@ -184,9 +185,9 @@ public final class CodeUtils {
 
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                if (onDone != null && (actionId == EditorInfo.IME_ACTION_SEARCH || actionId == EditorInfo.IME_ACTION_DONE ||
-                                       event.getAction() == KeyEvent.ACTION_DOWN &&
-                                       event.getKeyCode() == KeyEvent.KEYCODE_ENTER)) {
+                if (onDone != null &&
+                    (actionId == EditorInfo.IME_ACTION_SEARCH || actionId == EditorInfo.IME_ACTION_DONE ||
+                     event.getAction() == KeyEvent.ACTION_DOWN && event.getKeyCode() == KeyEvent.KEYCODE_ENTER)) {
                     // the user is done typing.
                     onDone.onClick(editText);
                     return true; // consume.
@@ -204,9 +205,9 @@ public final class CodeUtils {
 
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                if (runnable != null && (actionId == EditorInfo.IME_ACTION_SEARCH || actionId == EditorInfo.IME_ACTION_DONE ||
-                                         event.getAction() == KeyEvent.ACTION_DOWN &&
-                                         event.getKeyCode() == KeyEvent.KEYCODE_ENTER)) {
+                if (runnable != null &&
+                    (actionId == EditorInfo.IME_ACTION_SEARCH || actionId == EditorInfo.IME_ACTION_DONE ||
+                     event.getAction() == KeyEvent.ACTION_DOWN && event.getKeyCode() == KeyEvent.KEYCODE_ENTER)) {
                     // the user is done typing.
                     runnable.run();
                     return true; // consume.
@@ -217,7 +218,8 @@ public final class CodeUtils {
     }
 
     public static boolean isGpsOn() {
-        return Settings.Secure.isLocationProviderEnabled(CFApp.getContext().getContentResolver(), LocationManager.GPS_PROVIDER);
+        return Settings.Secure.isLocationProviderEnabled(CFApp.getContext().getContentResolver(),
+                                                         LocationManager.GPS_PROVIDER);
     }
 
     /**
@@ -306,7 +308,9 @@ public final class CodeUtils {
             versionName = "";
             try {
                 //noinspection ConstantConditions
-                PackageInfo pInfo = CFApp.getContext().getPackageManager().getPackageInfo(CFApp.getContext().getPackageName(), 0);
+                PackageInfo pInfo = CFApp.getContext()
+                                         .getPackageManager()
+                                         .getPackageInfo(CFApp.getContext().getPackageName(), 0);
                 versionName = pInfo.versionName;
             } catch (PackageManager.NameNotFoundException e) {
                 Log.e(TAG, "Exception", e);
@@ -321,7 +325,9 @@ public final class CodeUtils {
         if (versionCode == -1) {
             try {
                 //noinspection ConstantConditions
-                PackageInfo pInfo = CFApp.getContext().getPackageManager().getPackageInfo(CFApp.getContext().getPackageName(), 0);
+                PackageInfo pInfo = CFApp.getContext()
+                                         .getPackageManager()
+                                         .getPackageInfo(CFApp.getContext().getPackageName(), 0);
                 versionCode = pInfo.versionCode;
             } catch (PackageManager.NameNotFoundException e) {
                 Log.e(TAG, "Exception", e);
@@ -358,7 +364,7 @@ public final class CodeUtils {
     }
 
     public static void toast(final String message) {
-        new Handler(Looper.getMainLooper()).post(new Runnable() {
+        runOnUIThread(new Runnable() {
             @Override
             public void run() {
                 Toast.makeText(CFApp.getContext(), message, Toast.LENGTH_SHORT).show();

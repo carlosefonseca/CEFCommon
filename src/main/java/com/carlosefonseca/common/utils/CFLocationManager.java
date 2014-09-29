@@ -28,7 +28,7 @@ public class CFLocationManager implements GooglePlayServicesClient.ConnectionCal
     protected OnLocationChangedListener mapLocationChangedListener;
     protected Handler handler;
     private boolean connectionRequested;
-    private Set<OnLocationChangedListener> listeners = new HashSet<OnLocationChangedListener>();
+    private Set<OnLocationChangedListener> listeners = new HashSet<>();
     private Location location;
     protected LocationClient mLocationClient;
     private boolean mShouldBeLocating;
