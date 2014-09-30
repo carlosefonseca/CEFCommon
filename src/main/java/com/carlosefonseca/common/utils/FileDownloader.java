@@ -72,7 +72,7 @@ public final class FileDownloader {
         });
     }
 
-    public static void downloadUrls(Collection<String> toDownload) {
+    public static void downloadUrls(final Collection<String> toDownload) {
         if (CollectionUtils.isEmpty(toDownload)) return;
 
         if (sDownloadCount.getAndAdd(toDownload.size()) == 0) {
@@ -81,7 +81,18 @@ public final class FileDownloader {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
             getThreadPoolExecutor();
-            for (String url : toDownload) new Downloader().executeOnExecutor(sThreadPoolExecutor, new Download(url));
+            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1) {
+                for (String url : toDownload)
+                    new Downloader().executeOnExecutor(sThreadPoolExecutor, new Download(url));
+            } else {
+                CodeUtils.runOnUIThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        for (String url : toDownload)
+                            new Downloader().executeOnExecutor(sThreadPoolExecutor, new Download(url));
+                    }
+                });
+            }
         } else {
             for (String url : toDownload) new Downloader().execute(new Download(url));
         }
