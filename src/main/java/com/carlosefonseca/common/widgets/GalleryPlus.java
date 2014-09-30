@@ -38,19 +38,13 @@ public class GalleryPlus extends FrameLayout {
         arrowRightView = (ImageView) findViewById(R.id.arrow_right);
         galleryView.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
-            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-
-            }
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) { }
 
             @Override
-            public void onPageSelected(int position) {
-                setArrowsForPage(position);
-            }
+            public void onPageSelected(int position) { setArrowsForPage(position); }
 
             @Override
-            public void onPageScrollStateChanged(int state) {
-
-            }
+            public void onPageScrollStateChanged(int state) { }
         });
     }
 

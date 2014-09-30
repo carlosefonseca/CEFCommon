@@ -17,6 +17,11 @@ public class CustomScrollView extends ScrollView {
     private GestureDetector mGestureDetector;
     View.OnTouchListener mGestureListener;
 
+    public CustomScrollView(Context context) {
+        super(context);
+        mGestureDetector = new GestureDetector(context, new YScrollDetector());
+    }
+
     public CustomScrollView(Context context, AttributeSet attrs) {
         super(context, attrs);
         mGestureDetector = new GestureDetector(context, new YScrollDetector());
