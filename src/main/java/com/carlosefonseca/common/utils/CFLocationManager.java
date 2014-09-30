@@ -122,8 +122,10 @@ public class CFLocationManager implements GooglePlayServicesClient.ConnectionCal
     }
 
     public void removeListener(OnLocationChangedListener listener) {
-        listeners.remove(listener);
-        Log.d(TAG, "Listeners--: " + listeners.size());
+        if (listeners != null && listener != null) {
+            listeners.remove(listener);
+            Log.d(TAG, "Listeners--: " + listeners.size());
+        }
         if (listeners.isEmpty()) stop();
     }
 
