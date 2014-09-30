@@ -26,6 +26,7 @@ public final class FileUtils {
 
     /**
      * Copies a file from one place to another.
+     *
      * @param src The full path to the original file.
      * @param dst The full path the destination. Parent dirs will be created if needed.
      */
@@ -46,9 +47,10 @@ public final class FileUtils {
 
     /**
      * Copies a file from the assets folder to the file system.
+     *
      * @param context A context.
-     * @param src The path to the file relative to the assets folder.
-     * @param dst The full path the destination. Parent dirs will be created if needed.
+     * @param src     The path to the file relative to the assets folder.
+     * @param dst     The full path the destination. Parent dirs will be created if needed.
      * @return True if the copy was successful, false otherwise.
      */
     public static boolean copyFromAssets(Context context, String src, File dst) {
@@ -80,6 +82,7 @@ public final class FileUtils {
 
     /**
      * Reads from a stream and writes on another.
+     *
      * @throws IOException
      */
     private static void copyStreams(InputStream in, OutputStream out) throws IOException {
@@ -98,7 +101,7 @@ public final class FileUtils {
                 deleteDir(dir);
             }
         } catch (Exception e) {
-            Log.w(TAG+".clearExternalCache", e.getMessage());
+            Log.w(TAG + ".clearExternalCache", e.getMessage());
         }
     }
 
@@ -136,6 +139,9 @@ public final class FileUtils {
         return null;
     }
 
+    /**
+     * @return String from the file or null if doesn't exist.
+     */
     @Nullable
     public static String StrFromFile(File file) {
         try {
@@ -148,16 +154,18 @@ public final class FileUtils {
         return null;
     }
 
-    public static void StrToFile(String text, File file) {
+    public static boolean StrToFile(String text, File file) {
         try {
             OutputStream os;
             os = new FileOutputStream(file);
             os.write(text.getBytes());
+            return true;
         } catch (FileNotFoundException e) {
             Log.w(TAG, "File not found " + file);
         } catch (IOException e) {
             Log.e(TAG, "Error writing to file " + file, e);
         }
+        return false;
     }
 
     @Nullable
