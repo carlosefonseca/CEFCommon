@@ -771,6 +771,22 @@ public final class ImageUtils {
     }
 
 
+    public static Rect getCenterSquare(Bitmap bitmap) {
+        int originalWidth = bitmap.getWidth();
+        int originalHeight = bitmap.getHeight();
+        int x, y, side;
+        if (originalWidth > originalHeight) {
+            x = (originalWidth - originalHeight) / 2;
+            y = 0;
+            side = originalHeight;
+        } else {
+            x = 0;
+            y = (originalHeight - originalWidth) / 2;
+            side = originalWidth;
+        }
+        return new Rect(x, y, x + side, y + side);
+    }
+
     @Deprecated
     public static Bitmap getThumbnail(Bitmap bitmap, int side) {
         int iw = bitmap.getWidth();
