@@ -49,6 +49,7 @@ public class Gallery extends ViewPager {
 
     private void init() {
         density = getResources().getDisplayMetrics().density;
+        setOffscreenPageLimit(2);
     }
 
     public boolean isScaling() {
