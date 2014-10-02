@@ -12,6 +12,8 @@ import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.TextHttpResponseHandler;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Header;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -23,9 +25,9 @@ public final class UrlUtils {
 
     private UrlUtils() {}
 
-    public static String urlForEmail(String email) {return "mailto:" + email;}
+    public static String urlForEmail(String email) {return "mailto:" + email.trim();}
 
-    public static String urlForTel(String number) {return "tel:" + number.replaceAll("\\s*", "");}
+    public static String urlForTel(String number) {return "tel:" + number.trim().replaceAll("\\s*", "");}
 
     public static final class Facebook {
         private Facebook() {}
@@ -130,7 +132,8 @@ public final class UrlUtils {
         }
 
         /* EXAMPLE USAGE */
-        public static boolean tryOpenUrl(Context context, String url) {
+        public static boolean tryOpenUrl(Context context, @NotNull String url) {
+            if (url == null) return false;
             String facebookName = Facebook.getFacebookNameFromURL(url);
             if (facebookName != null) {
                 try {
@@ -164,7 +167,8 @@ public final class UrlUtils {
             context.startActivity(intent);
         }
 
-        public static boolean tryOpenProfileFromURL(Context context, String url) {
+        public static boolean tryOpenProfileFromURL(Context context, @NotNull String url) {
+            if (url == null) return false;
             final Matcher matcher = TWITTER_USER_NAME_REGEX.matcher(url);
             if (matcher.matches()) {
                 final String userName = matcher.group(1);
@@ -182,10 +186,17 @@ public final class UrlUtils {
 
         private Coordinates() {}
 
-//      "http://maps.google.com/maps?q=loc:" + contact + " (" + getEntity().getName() + ")";
+        public static String urlForCoordinates(@Nullable String name, @NotNull String coordinates) {
+            name = StringUtils.stripToNull(name);
+            return "geo:0,0?q=" + coordinates + (name != null ? " (" + name + ")" : "");
+        }
 
-        public static String urlForCoordinates(String name, String coordinates) {
-            return "geo:0,0?q=" + coordinates + " (" + name + ")";
+//      "http://maps.google.com/maps?q=" + StringUtils.normalizeSpace(getName()).replaceAll(StringUtils.SPACE, "%20");
+
+        @Nullable
+        public static String urlForAddress(@Nullable String address) {
+            if (address == null) return null;
+            return "geo:0,0?q=" + StringUtils.normalizeSpace(address);
         }
 
         public static String urlForCoordinates(String name, double lat, double lng) {
@@ -205,7 +216,7 @@ public final class UrlUtils {
             if (canHandleDirections(context)) {
                 return url;
             } else {
-                return url.replace("geo:0,0?q=", "http://maps.google.com/maps?q=loc:");
+                return url.replace("geo:0,0?q=", "http://maps.google.com/maps?q=");
             }
         }
 
@@ -217,7 +228,8 @@ public final class UrlUtils {
          *
          * @return True if the url was opened; False if the url doesn't start with "geo:".
          */
-        public static boolean tryOpenUrl(Context context, String url) {
+        public static boolean tryOpenUrl(Context context, @NotNull String url) {
+            if (url == null) return false;
             return url.startsWith("geo:") && tryStartIntentForUrl(context, getIntent(context, url));
         }
     }
@@ -245,6 +257,7 @@ public final class UrlUtils {
      * @return True if the URL was handled and something opened; False if the URL could not be handled.
      */
     public static boolean tryAll(Context context, String url) {
+        if (url == null) throw new RuntimeException("URL is null!");
         return Facebook.tryOpenUrl(context, url) || Twitter.tryOpenProfileFromURL(context, url) ||
                Coordinates.tryOpenUrl(context, url) || UrlUtils.tryStartIntentForUrl(context, url);
     }
