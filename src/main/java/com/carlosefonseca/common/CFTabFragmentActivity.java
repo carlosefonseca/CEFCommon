@@ -6,6 +6,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.view.View;
 import android.widget.TabHost;
+import junit.framework.Assert;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
@@ -111,6 +112,7 @@ public class CFTabFragmentActivity extends CFActivity implements TabHost.OnTabCh
     @Override
     public void onTabChanged(String tag) {
         TabInfo newTab = this.mapTabInfo.get(tag);
+        Assert.assertNotNull(newTab);
         if (mLastTab != newTab) {
             FragmentTransaction ft = this.getSupportFragmentManager().beginTransaction();
             if (mLastTab != null) {

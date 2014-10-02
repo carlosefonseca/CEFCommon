@@ -765,7 +765,7 @@ public final class ImageUtils {
             y = (originalHeight - originalWidth) / 2;
             side = originalWidth;
         }
-        Log.v("getThumbnail", "x:" + x + " y:" + y + " side:" + side);
+//        Log.v("getThumbnail", "x:" + x + " y:" + y + " side:" + side);
         bitmap = Bitmap.createBitmap(bitmap, x, y, side, side);
         return bitmap;
     }
