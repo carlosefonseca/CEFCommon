@@ -35,7 +35,7 @@ public class Rembrandt {
     private static final short FADE_IN = 1;
     private static final short CROSS_FADE = 2;
 
-//    private final Context mContext;
+    private final Context mContext;
     private String mUrl;
     private File mFile;
     private int placeholder;
@@ -46,7 +46,7 @@ public class Rembrandt {
     private boolean mHideIfNull;
 
     public Rembrandt(Context context) {
-        /*mContext = context;*/
+        mContext = context;
     }
 
     /**
@@ -88,9 +88,13 @@ public class Rembrandt {
     public Task<Void> into(final ImageView view, short animation) {
         final Task<Void> run;
         if (null == mUrl && null == mFile) {
-            view.setImageBitmap(null);
+            if (placeholder != 0) {
+                placePlaceholder(view);
+            } else {
+                view.setImageBitmap(null);
+                if (mHideIfNull) view.setVisibility(View.GONE);
+            }
             mMapping.remove(view);
-            if (mHideIfNull) view.setVisibility(View.GONE);
             run = Task.forResult(null);
         } else {
             if (mHideIfNull) view.setVisibility(View.VISIBLE);
@@ -112,7 +116,7 @@ public class Rembrandt {
                                   @Nullable final OnBitmap notify,
                                   final LruCache<String, Bitmap> cache) {
 
-        Assert.assertTrue("URL and File are null!", url != null || file != null);
+        Assert.assertTrue("URL and File are null!", url != null || file != null); // take care on into()
         Assert.assertNotNull("ImageView is null!", view);
 
         final String path = url != null ? url : file.getAbsolutePath();
@@ -217,6 +221,37 @@ public class Rembrandt {
                 view.setImageBitmap(result);
                 break;
         }
+    }
+
+    private void placePlaceholder(final ImageView view) {
+/*
+        if (mTransform != null) {
+            final Bitmap bitmap = mCache.get("placeholder");
+            Task<Bitmap> placeholderTask;
+            if (bitmap == null) {
+                placeholderTask = Task.callInBackground(new Callable<Bitmap>() {
+                    @Override
+                    public Bitmap call() throws Exception {
+                        Bitmap bitmap = BitmapFactory.decodeResource(mContext.getResources(),
+                                                                     Rembrandt.this.placeholder);
+                        final Bitmap bitmap1 = mTransform.bitmap(bitmap);
+                        mCache.put("placeholder", bitmap);
+                        return bitmap1;
+                    }
+                });
+            } else {
+                placeholderTask = Task.forResult(bitmap);
+            }
+            placeholderTask.continueWith(new Continuation<Bitmap, Void>() {
+                @Override
+                public Void then(Task<Bitmap> task) throws Exception {
+                    view.setImageBitmap(task.getResult());
+                    return null;
+                }
+            }, Task.UI_THREAD_EXECUTOR);
+        }
+*/
+        view.setImageResource(placeholder);
     }
 
     public Rembrandt hideIfNull() {
