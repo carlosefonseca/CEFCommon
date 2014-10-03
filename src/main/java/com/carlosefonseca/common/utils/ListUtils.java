@@ -56,7 +56,7 @@ public final class ListUtils {
      * @see #list(Object[])
      */
     @SafeVarargs
-    public static <T> ArrayList<T> list(Collection<T>... lists) {
+    public static <T> ArrayList<T> merge(Collection<T>... lists) {
         ArrayList<T> list = new ArrayList<>();
         for (Collection<T> ts : lists) list.addAll(ts);
         return list;
