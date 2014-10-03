@@ -158,9 +158,11 @@ public class Rembrandt {
                 } else {
                     bitmap = ImageUtils.getCachedPhoto(file, 0, 0, null);
                 }
-                if (transform != null) bitmap = transform.bitmap(bitmap);
-                cache.put(path, bitmap);
-                if (notify != null) notify.bitmap(bitmap);
+                if (bitmap != null) {
+                    if (transform != null) bitmap = transform.bitmap(bitmap);
+                    cache.put(path, bitmap);
+                    if (notify != null) notify.bitmap(bitmap);
+                }
                 return bitmap;
             }
         }).continueWith(new Continuation<Bitmap, Void>() {
@@ -201,7 +203,7 @@ public class Rembrandt {
         Log.i(TAG, "Downloading image " + url);
         Bitmap bitmap = NetworkingUtils.loadBitmap(url);
 //        new ImageUtils.ImageWriter(fullPath, bitmap).execute();
-        ImageUtils.writeImageInBackground(fullPath, bitmap);
+        if (bitmap != null) ImageUtils.writeImageInBackground(fullPath, bitmap);
         return bitmap;
     }
 
