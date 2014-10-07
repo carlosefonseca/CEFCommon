@@ -67,11 +67,13 @@ public class CFNumberKeyboard extends TableLayout {
         // Backspace
         backspace = new ImageButton(getContext());
 
-        final Drawable drawable = new MSDrawable(getContext()).icon(R.drawable.backspace)
-                                                              .disabledColor(Color.GRAY)
-                                                              .build();
+        if (!isInEditMode()) {
+            final Drawable drawable = new MSDrawable(getContext()).icon(R.drawable.backspace)
+                                                                  .disabledColor(Color.GRAY)
+                                                                  .build();
 
-        backspace.setImageDrawable(drawable);
+            backspace.setImageDrawable(drawable);
+        }
         backspace.setBackgroundResource(R.drawable.keyboard_other_background);
         backspace.setOnClickListener(keyboardBackspaceClick);
         backspace.setOnLongClickListener(keyboardBackspaceLongClick);
