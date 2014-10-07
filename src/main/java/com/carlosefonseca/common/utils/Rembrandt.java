@@ -1,7 +1,7 @@
 package com.carlosefonseca.common.utils;
 
 import android.content.Context;
-import android.graphics.Bitmap;
+import android.graphics.*;
 import android.support.v4.util.LruCache;
 import android.view.View;
 import android.widget.ImageView;
@@ -291,5 +291,43 @@ public class Rembrandt {
     public Rembrandt notify(OnBitmap listener) {
         this.mNotify = listener;
         return this;
+    }
+
+    public static class CircleCropTransform implements Transform {
+        private Bitmap mMask;
+        private int mSide;
+        public final int mMargin;
+
+        public CircleCropTransform(int side, int margin) {
+            this.mSide = side;
+            this.mMargin = margin;
+        }
+
+        @Override
+        public Bitmap bitmap(Bitmap original) {
+            Bitmap mask = getMask();
+            Bitmap result = Bitmap.createBitmap(mask.getWidth(), mask.getHeight(), Bitmap.Config.ARGB_8888);
+            Canvas mCanvas = new Canvas(result);
+            Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+            paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.DST_IN));
+            final Rect rect = new Rect(0, 0, mask.getWidth(), mask.getHeight());
+            rect.inset(mMargin, mMargin);
+            mCanvas.drawBitmap(original, ImageUtils.getCenterSquare(original), rect, null);
+            mCanvas.drawBitmap(mask, 0, 0, paint);
+            paint.setXfermode(null);
+            return result;
+        }
+
+        private Bitmap getMask() {
+            if (mMask == null) {
+                mMask = Bitmap.createBitmap(mSide, mSide, Bitmap.Config.ARGB_8888);
+                final Canvas canvasMask = new Canvas(mMask);
+                final Paint maskPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+                maskPaint.setColor(Color.GREEN);
+                maskPaint.setStyle(Paint.Style.FILL);
+                canvasMask.drawCircle(mSide / 2, mSide / 2, mSide / 2 - mMargin, maskPaint);
+            }
+            return mMask;
+        }
     }
 }
