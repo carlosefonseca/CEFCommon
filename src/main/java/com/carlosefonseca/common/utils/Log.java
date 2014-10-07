@@ -254,11 +254,11 @@ public final class Log {
     public static String tag(int i) {
         StackTraceElement stackTraceElement = Thread.currentThread().getStackTrace()[3 + i];
         String[] split = sSplitRegEx.split(stackTraceElement.getClassName());
-        return String.format("%s.%s.%s:%d",
+        return String.format("%s.%s:%d %s()",
                              split[1],
                              split[split.length - 1],
-                             stackTraceElement.getMethodName(),
-                             stackTraceElement.getLineNumber());
+                             stackTraceElement.getLineNumber(),
+                             stackTraceElement.getMethodName());
     }
 
     public static String tag() {
