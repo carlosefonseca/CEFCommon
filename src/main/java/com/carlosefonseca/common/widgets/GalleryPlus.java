@@ -159,4 +159,8 @@ public class GalleryPlus extends FrameLayout {
     public void setCurrentItem(int item, boolean smoothScroll) {
         galleryView.setCurrentItem(item, smoothScroll);
     }
+
+    public Gallery getGalleryView() {
+        return galleryView;
+    }
 }

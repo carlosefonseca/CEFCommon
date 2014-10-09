@@ -36,6 +36,7 @@ public class Gallery extends ViewPager {
     private float density;
     private boolean scaling;
     private int duration = -1;
+    private ImageView.ScaleType scaleType;
 
     public Gallery(Context context) {
         super(context);
@@ -60,12 +61,22 @@ public class Gallery extends ViewPager {
         this.scaling = scaling;
     }
 
+    public void stretch() {
+        this.scaleType = ImageView.ScaleType.FIT_XY;
+    }
+
+    public void scale() {
+        this.scaleType = ImageView.ScaleType.FIT_CENTER;
+    }
+
+    public void setScaleType(ImageView.ScaleType scaleType) {this.scaleType = scaleType;}
+
     public void setupWithImageList(Collection<File> imageList) {
-        setAdapter(new GalleryAdapter(getContext(), scaling).withFileList(imageList));
+        setAdapter(new GalleryAdapter(getContext(), scaleType).withFileList(imageList));
     }
 
     public void setupWithUrlList(Collection<String> imageList) {
-        setAdapter(new GalleryAdapter(getContext(), scaling).withUrlList(imageList));
+        setAdapter(new GalleryAdapter(getContext(), scaleType).withUrlList(imageList));
     }
 
     public void setImageOverlay(int res, int bottomMargin, int rightMargin) {
@@ -88,19 +99,19 @@ public class Gallery extends ViewPager {
     public static class GalleryAdapter extends PagerAdapter {
 
         private final Rembrandt rembrandt;
-        private final boolean scaling;
         @Nullable private List<File> imageList;
         @Nullable private ArrayList<String> urlList;
         private LinkedList<View> recycledViews = new LinkedList<View>();
         private LayoutInflater layoutInflater;
         private OnClickListener clickListener;
+        private ImageView.ScaleType scaleType;
 
         public GalleryAdapter(Context context) {
-            this(context, false);
+            this(context, null);
         }
 
-        GalleryAdapter(Context context, boolean scaling) {
-            this.scaling = scaling;
+        GalleryAdapter(Context context, ImageView.ScaleType scaleType) {
+            this.scaleType = scaleType;
             rembrandt = new Rembrandt(context);
             layoutInflater = LayoutInflater.from(context);
         }
@@ -138,8 +149,8 @@ public class Gallery extends ViewPager {
             View view = recycledViews.poll();
             if (view == null) {
                 view = layoutInflater.inflate(R.layout.gallery_styled_image_view, container, false);
-                if (scaling) {
-                    ((ImageView) ((ViewGroup) view).getChildAt(0)).setScaleType(ImageView.ScaleType.FIT_CENTER);
+                if (scaleType != null) {
+                    ((ImageView) ((ViewGroup) view).getChildAt(0)).setScaleType(scaleType);
                 }
             }
             if (view != null) {
