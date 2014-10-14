@@ -104,6 +104,7 @@ public class Gallery extends ViewPager {
         private LinkedList<View> recycledViews = new LinkedList<View>();
         private LayoutInflater layoutInflater;
         private OnClickListener clickListener;
+        protected int gallery_layout = R.layout.gallery_styled_image_view;
         private ImageView.ScaleType scaleType;
 
         public GalleryAdapter(Context context) {
@@ -148,7 +149,7 @@ public class Gallery extends ViewPager {
         public Object instantiateItem(ViewGroup container, final int position) {
             View view = recycledViews.poll();
             if (view == null) {
-                view = layoutInflater.inflate(R.layout.gallery_styled_image_view, container, false);
+                view = layoutInflater.inflate(gallery_layout, container, false);
                 if (scaleType != null) {
                     ((ImageView) ((ViewGroup) view).getChildAt(0)).setScaleType(scaleType);
                 }
@@ -174,7 +175,7 @@ public class Gallery extends ViewPager {
                 }, Task.UI_THREAD_EXECUTOR).continueWith(TaskUtils.LogErrorContinuation);
 
                 imageView.setTag(position);
-                imageView.setOnClickListener(clickListener);
+                view.setOnClickListener(clickListener);
 
                 container.addView(view);
             }
