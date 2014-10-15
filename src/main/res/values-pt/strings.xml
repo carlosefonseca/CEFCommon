@@ -2,4 +2,5 @@
 <resources>
     <string name="wrong_password">Palavra passe errada!</string>
     <string name="cancel">Cancelar</string>
+    <string name="back_button_cd">Voltar</string>
 </resources>

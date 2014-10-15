@@ -12,7 +12,7 @@
     <ImageButton
             android:id="@+id/back_bt"
             style="?NavBarBack"
-            />
+            android:contentDescription="@string/back_button_cd"/>
             <!--android:background="@drawable/gray_btn_states"-->
             <!--android:src="@drawable/back_button"-->
             <!--android:contentDescription="@string/cd_back"-->
@@ -29,6 +29,6 @@
             android:paddingRight="20dp"
             android:id="@+id/nav_title"
             style="?NavBarTitle"
-            />
+            android:layout_width="0dp"/>
 
 </LinearLayout>

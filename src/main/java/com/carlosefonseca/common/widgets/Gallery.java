@@ -111,7 +111,7 @@ public class Gallery extends ViewPager {
             this(context, null);
         }
 
-        GalleryAdapter(Context context, ImageView.ScaleType scaleType) {
+        protected GalleryAdapter(Context context, ImageView.ScaleType scaleType) {
             this.scaleType = scaleType;
             rembrandt = new Rembrandt(context);
             layoutInflater = LayoutInflater.from(context);
