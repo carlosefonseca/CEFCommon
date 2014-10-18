@@ -145,8 +145,10 @@ public final class ResourceUtils {
     /**
      * Prepends getExternalFilesDir to the parameter. This is the app's private files.
      */
+    @Nullable
     public static File getFullPath(String localPath) {
-        return new File(CFApp.getContext().getExternalFilesDir(null), localPath);
+        final File externalFilesDir = CFApp.getContext().getExternalFilesDir(null);
+        return externalFilesDir == null ? null : new File(externalFilesDir, localPath);
     }
 
     /**

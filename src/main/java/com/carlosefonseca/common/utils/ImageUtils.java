@@ -8,6 +8,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.media.ExifInterface;
 import android.os.AsyncTask;
 import android.os.Build;
+import android.os.Environment;
 import android.support.v4.util.LruCache;
 import android.text.Layout;
 import android.text.StaticLayout;
@@ -210,7 +211,8 @@ public final class ImageUtils {
     }
 
     @Nullable
-    static Bitmap tryPhotoFromFileOrAssets(File file, int widthDp, int heightDp) {
+    static Bitmap tryPhotoFromFileOrAssets(@Nullable File file, int widthDp, int heightDp) {
+        if (file == null) return null;
         Bitmap bitmap = null;
         if (file.exists()) {
             bitmap = getPhotoFromFile(file.getAbsolutePath(), widthDp, heightDp);
@@ -574,10 +576,15 @@ public final class ImageUtils {
             @Override
             public Object call() throws Exception {
                 try {
-                    FileOutputStream out = new FileOutputStream(file);
-                    bitmap.compress(Bitmap.CompressFormat.PNG, 0, out);
+                    final String state = Environment.getExternalStorageState();
+                    if (state.equals(Environment.MEDIA_MOUNTED)) {
+                        FileOutputStream out = new FileOutputStream(file);
+                        bitmap.compress(Bitmap.CompressFormat.PNG, 0, out);
+                    } else {
+                        Log.i("Can't write " + file + " on ExtStorage. " + state);
+                    }
                 } catch (Exception e) {
-                    Log.e(TAG, "Bitmap file:" + file, e);
+                    Log.e(TAG, "WriteImageInBackground Failed for " + file.getAbsolutePath(), e);
                 }
                 return null;
             }

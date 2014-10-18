@@ -44,6 +44,7 @@ public class Rembrandt {
     private Transform mTransform;
     private OnBitmap mNotify;
     private boolean mHideIfNull;
+    private Boolean canWrite;
 
     public Rembrandt(Context context) {
         mContext = context;
@@ -203,7 +204,7 @@ public class Rembrandt {
         Log.i(TAG, "Downloading image " + url);
         Bitmap bitmap = NetworkingUtils.loadBitmap(url);
 //        new ImageUtils.ImageWriter(fullPath, bitmap).execute();
-        if (bitmap != null) ImageUtils.writeImageInBackground(fullPath, bitmap);
+        if (bitmap != null && fullPath != null) ImageUtils.writeImageInBackground(fullPath, bitmap);
         return bitmap;
     }
 
