@@ -34,7 +34,6 @@ public class Gallery extends ViewPager {
     private int rightMargin;
     private int width;
     private float density;
-    private boolean scaling;
     private int duration = -1;
     private ImageView.ScaleType scaleType;
 
@@ -53,20 +52,16 @@ public class Gallery extends ViewPager {
         setOffscreenPageLimit(2);
     }
 
-    public boolean isScaling() {
-        return scaling;
-    }
-
-    public void setScaling(boolean scaling) {
-        this.scaling = scaling;
-    }
-
     public void stretch() {
         this.scaleType = ImageView.ScaleType.FIT_XY;
     }
 
-    public void scale() {
+    public void scaleDown() {
         this.scaleType = ImageView.ScaleType.FIT_CENTER;
+    }
+
+    public void scaleUp() {
+        this.scaleType = ImageView.ScaleType.CENTER_CROP;
     }
 
     public void setScaleType(ImageView.ScaleType scaleType) {this.scaleType = scaleType;}

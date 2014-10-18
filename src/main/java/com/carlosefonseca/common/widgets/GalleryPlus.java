@@ -148,14 +148,6 @@ public class GalleryPlus extends FrameLayout {
         if (aspectRatio1 != 0) setAspectRatio(aspectRatio1);
     }
 
-    public void setScaling(boolean scaling) {
-        galleryView.setScaling(scaling);
-    }
-
-    public boolean isScaling() {
-        return galleryView.isScaling();
-    }
-
     public void setCurrentItem(int item, boolean smoothScroll) {
         galleryView.setCurrentItem(item, smoothScroll);
     }
