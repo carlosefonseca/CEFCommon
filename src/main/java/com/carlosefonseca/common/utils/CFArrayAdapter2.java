@@ -22,7 +22,7 @@ public class CFArrayAdapter2<T, V extends View> extends CFArrayAdapter<T> {
         V view = (V) convertView;
         if (view == null) view = instantiateView(parent);
 
-        setupView(view, getItem(position));
+        setupView(view, getItem(position), position);
 
         return view;
     }
@@ -34,6 +34,16 @@ public class CFArrayAdapter2<T, V extends View> extends CFArrayAdapter<T> {
      */
     protected V instantiateView(ViewGroup parent) {
         throw new NotImplementedException("Implement instantiateView");
+    }
+
+    /**
+     * Override the setup your view with the item
+     *
+     * @param view
+     * @param item
+     */
+    protected void setupView(V view, T item, int position) {
+        setupView(view, item);
     }
 
     /**
