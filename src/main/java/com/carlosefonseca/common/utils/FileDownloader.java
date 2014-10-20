@@ -123,7 +123,7 @@ public final class FileDownloader {
     }
 
 
-    static class Downloader extends AsyncTask<Download, Integer, String> {
+    public static class Downloader extends AsyncTask<Download, Integer, String> {
 
         public static final int TIMEOUT_MILLIS = 15 * 1000;
         private static final String TAG = CodeUtils.getTag(Downloader.class);
@@ -132,6 +132,10 @@ public final class FileDownloader {
         @Override
         protected final String doInBackground(Download... params) {
             final Download download = params[0];
+            return syncDownload(download);
+        }
+
+        public static String syncDownload(Download download) {
             String uri = download.url.replace(" ", "%20");
             File path = download.file;
 //            Log.v(TAG, uri);
@@ -165,8 +169,7 @@ public final class FileDownloader {
                           String.format("(%d remain) Download of %s failed (will retry): %s",
                                         sDownloadCount.get() - 1,
                                         uri,
-                                        e.getMessage())
-                    );
+                                        e.getMessage()));
                     download(download);
                     return path.getName();
                 } finally {
@@ -188,6 +191,7 @@ public final class FileDownloader {
                                     path.getName(),
                                     download.tries > 1 ? " " + download.tries + " tries" : "")
                 );
+                return null; // SUCCESS!
             } catch (SocketException e) {
                 // Network error. May retry
                 Log.i(TAG,
@@ -206,7 +210,6 @@ public final class FileDownloader {
                 Log.i(TAG, "(%d remain) Download of %s failed", sDownloadCount.get() - 1, uri, e);
                 return path.getName();
             }
-            return null;
         }
 
         @Override
