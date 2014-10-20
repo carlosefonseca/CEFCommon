@@ -59,7 +59,7 @@ public final class ImageUtils {
             density = c.getResources().getDisplayMetrics().density;
             screenLayout = c.getResources().getConfiguration().screenLayout & Configuration.SCREENLAYOUT_SIZE_MASK;
         } catch (Exception e) {
-            Log.e(TAG, "" + e.getMessage(), e);
+            Log.w(TAG, "" + e.getMessage(), null);
         }
     }
 
@@ -419,7 +419,10 @@ public final class ImageUtils {
      * </ul>
      *
      * @param filenameOrUrl File object pointing to
+     *
+     * @deprecated Use {@link com.carlosefonseca.common.utils.NetworkingUtils#pathOrUrlToFile(String)}
      */
+    @Deprecated
     public static File convertSomeFileReferenceToFile(@NotNull String filenameOrUrl) {
         File file;
         if (filenameOrUrl.startsWith("http://")) {

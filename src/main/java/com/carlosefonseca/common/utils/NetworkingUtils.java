@@ -15,7 +15,9 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.NetworkOnMainThreadException;
 import de.greenrobot.event.EventBus;
+import org.jetbrains.annotations.NotNull;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
@@ -342,4 +344,28 @@ public final class NetworkingUtils {
         inputStream.close();
         return bitmap;
     }
+
+    /**
+     * Converts filenames or URLs to an existing file on disk.
+     * <p/>
+     * Accepted {@code filenameOrUrl} options:
+     * <ul>
+     * <li>http://example.com/image.png</li>
+     * <li>/sdcard/somefolder/image.png</li>
+     * <li>image.png</li>
+     * </ul>
+     *
+     * @param filenameOrUrl File object pointing to
+     */
+    public static File pathOrUrlToFile(@NotNull String filenameOrUrl) {
+        File file;
+        if (filenameOrUrl.startsWith("http://")) {
+            file = ResourceUtils.getFullPath(getLastSegmentOfURL(filenameOrUrl));
+        } else {
+            file = filenameOrUrl.startsWith("/") ? new File(filenameOrUrl) : ResourceUtils.getFullPath(filenameOrUrl);
+        }
+        return file;
+    }
+
+
 }
