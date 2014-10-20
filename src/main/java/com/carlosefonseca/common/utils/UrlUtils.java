@@ -29,6 +29,10 @@ public final class UrlUtils {
 
     public static String urlForTel(String number) {return "tel:" + number.trim().replaceAll("\\s*", "");}
 
+    public static String simplifyUrlForDisplay(String url) {
+        return url.replaceFirst("https?://(www.)?", "").replace("?fref=ts", "");
+    }
+
     public static final class Facebook {
         private Facebook() {}
 
