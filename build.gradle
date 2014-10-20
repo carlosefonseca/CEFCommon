@@ -54,8 +54,8 @@ android {
 //        compileSdkVersion = 19
 //        buildToolsVersion = "19.1.0"
 //    }
-    compileSdkVersion rootProject.ext.hasProperty("compileSdkVersion") ? rootProject.ext.getProperty("compileSdkVersion") : 21
-    buildToolsVersion rootProject.ext.hasProperty("buildToolsVersion") ? rootProject.ext.getProperty("buildToolsVersion") : "21.0.1"
+    compileSdkVersion rootProject.ext.getProperty("compileSdkVersion")
+    buildToolsVersion rootProject.ext.getProperty("buildToolsVersion")
 
     defaultConfig {
         minSdkVersion 9
