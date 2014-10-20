@@ -37,22 +37,33 @@ public class AudioPlayer {
     public static class AudioPlayerNotification {
         public final Status status;
         public final File file;
+        public final MediaPlayer mediaPlayer;
 
         public enum Status { PLAY, PAUSE, STOP}
 
-        public AudioPlayerNotification(Status status, @Nullable File file) {
+        public AudioPlayerNotification(Status status, @Nullable File file, MediaPlayer mediaPlayer) {
             this.status = status;
             this.file = file;
+            this.mediaPlayer = mediaPlayer;
         }
 
         public static void PostStart(@Nullable File file) {
-            EventBus.getDefault().postSticky(new AudioPlayerNotification(Status.PLAY, file));
+            EventBus.getDefault().postSticky(new AudioPlayerNotification(Status.PLAY, file, null));
         }
+
+        public static void PostStart(@Nullable File file, MediaPlayer mediaPlayer) {
+            EventBus.getDefault().postSticky(new AudioPlayerNotification(Status.PLAY, file, mediaPlayer));
+        }
+
         public static void PostPause(File file) {
-            EventBus.getDefault().postSticky(new AudioPlayerNotification(Status.PAUSE, file));
+            EventBus.getDefault().postSticky(new AudioPlayerNotification(Status.PAUSE, file, null));
+        }
+
+        public static void PostPause(File file, MediaPlayer mediaPlayer) {
+            EventBus.getDefault().postSticky(new AudioPlayerNotification(Status.PAUSE, file, mediaPlayer));
         }
         public static void PostStop(File file) {
-            EventBus.getDefault().postSticky(new AudioPlayerNotification(Status.STOP, file));
+            EventBus.getDefault().postSticky(new AudioPlayerNotification(Status.STOP, file, null));
         }
     }
 
@@ -89,7 +100,7 @@ public class AudioPlayer {
         for (AudioPlayerListener playerListener : playerListeners) {
             playerListener.onAudioStart(mediaPlayer, file);
         }
-        AudioPlayerNotification.PostStart(currentFile);
+        AudioPlayerNotification.PostStart(currentFile, mediaPlayer);
 
         Log.v(TAG, "" + (file != null ? file.getName() : "???") + " Playing.");
     }
