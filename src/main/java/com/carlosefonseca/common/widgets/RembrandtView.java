@@ -1,6 +1,7 @@
 package com.carlosefonseca.common.widgets;
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.widget.ImageView;
 import com.carlosefonseca.common.utils.CodeUtils;
@@ -12,6 +13,8 @@ public class RembrandtView extends ImageView {
 
     boolean hideIfNull;
     private String url;
+
+    int placeholder;
 
     public RembrandtView(Context context) {
         this(context, new Rembrandt(context));
@@ -32,7 +35,7 @@ public class RembrandtView extends ImageView {
     }
 
     public Rembrandt getRembrandt() {
-        if (mRembrandt == null) mRembrandt = Rembrandt.with(getContext());
+        if (mRembrandt == null) mRembrandt = Rembrandt.with(getContext()); // DANGEROUS ON LISTS
         return mRembrandt;
     }
 
@@ -40,7 +43,7 @@ public class RembrandtView extends ImageView {
         this.mRembrandt = mRembrandt;
     }
 
-    public RembrandtView setImageUrl(String url) {
+    public synchronized RembrandtView setImageUrl(String url) {
         if (CodeUtils.equals(url, this.url)) return this;
         if (this.url != null) {
             getRembrandt().load(url).hideIfNull(hideIfNull).xFade(this);
@@ -50,11 +53,44 @@ public class RembrandtView extends ImageView {
         this.url = url;
         return this;
     }
+
+    public synchronized RembrandtView setImageUrl(String url, boolean animated) {
+        if (CodeUtils.equals(url, this.url)) return this;
+        if (!animated) {
+            getRembrandt().load(url).hideIfNull(hideIfNull).placeholder(placeholder).into(this);
+        } else if (this.url != null) {
+            getRembrandt().load(url).hideIfNull(hideIfNull).placeholder(placeholder).xFade(this);
+        } else {
+            getRembrandt().load(url).hideIfNull(hideIfNull).placeholder(placeholder).fadeIn(this);
+        }
+        this.url = url;
+        return this;
+    }
     public RembrandtView setCrossFadeImageUrl(String url) {
         if (CodeUtils.equals(url, this.url)) return this;
         this.url = url;
         getRembrandt().load(url).hideIfNull(hideIfNull).xFade(this);
         return this;
+    }
+
+    public int getPlaceholder() {
+        return placeholder;
+    }
+
+    public void setPlaceholder(int placeholder) {
+        this.placeholder = placeholder;
+    }
+
+    @Override
+    public void setImageResource(int resId) {
+        super.setImageResource(resId);
+        this.url = null;
+    }
+
+    @Override
+    public void setImageDrawable(Drawable drawable) {
+        super.setImageDrawable(drawable);
+        this.url = null;
     }
 
     public boolean isHideIfNull() {

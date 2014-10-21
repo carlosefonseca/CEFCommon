@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.concurrent.Callable;
 
+import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 import static com.carlosefonseca.common.utils.NetworkingUtils.getLastSegmentOfURL;
 
 /**
@@ -98,7 +99,7 @@ public class Rembrandt {
             mMapping.remove(view);
             run = Task.forResult(null);
         } else {
-            if (mHideIfNull) view.setVisibility(View.VISIBLE);
+            view.setVisibility(View.VISIBLE);
             run = run(view, mUrl, mFile, placeholder, animation, mMapping, mTransform, mNotify, mCache);
         }
         mUrl = null;
@@ -123,6 +124,7 @@ public class Rembrandt {
         final String path = url != null ? url : file.getAbsolutePath();
         if (path.equals(view.getTag())) return Task.forResult(null);
         if (animation == NOT_ANIMATED || animation == FADE_IN) {
+//            Log.v("setImageBitmap(null)");
             view.setImageBitmap(null);
         }
 //        view.setTag(path);
@@ -130,9 +132,13 @@ public class Rembrandt {
 
         Bitmap bitmap = cache.get(path);
         if (bitmap != null) {
+//            Log.v("Got from cache");
             if (notify != null) notify.bitmap(bitmap);
             setImageBitmapOnView(bitmap, view, animation == FADE_IN ? NOT_ANIMATED : animation);
             return Task.forResult(null);
+        } else {
+//            Log.v("DIDN'T get from cache");
+            if (placeholder != 0) view.setImageResource(placeholder);
         }
 
 
@@ -144,6 +150,9 @@ public class Rembrandt {
                     Log.v(TAG, "CANCELED Image loading of " + url);
                     return null;
                 }
+                int mWidth = view.getLayoutParams().width == WRAP_CONTENT ? 0 : Math.max(view.getMeasuredWidth(), 0);
+                int mHeight = view.getLayoutParams().height == WRAP_CONTENT ? 0 : Math.max(view.getMeasuredHeight(), 0);
+
                 Bitmap bitmap;
                 if (url != null) {
                     if (!ImageUtils.isImage(url)) {
@@ -152,12 +161,13 @@ public class Rembrandt {
                         return null;
                     }
                     if (url.startsWith("http://")) {
-                        bitmap = bitmapFromUrl(url);
+                        bitmap = bitmapFromUrl(url, mWidth, mHeight);
                     } else {
-                        bitmap = bitmapFromFile(url);
+                        bitmap = bitmapFromFile(url, mWidth, mHeight);
                     }
                 } else {
-                    bitmap = ImageUtils.getCachedPhoto(file, 0, 0, null);
+//                    final int measuredHeight = view.getMeasuredHeight();
+                    bitmap = ImageUtils.getCachedPhotoPx(file, mWidth, mHeight, null);
                 }
                 if (bitmap != null) {
                     if (transform != null) bitmap = transform.bitmap(bitmap);
@@ -192,14 +202,14 @@ public class Rembrandt {
     }
 
     @Nullable
-    private static Bitmap bitmapFromFile(String url) {
+    private static Bitmap bitmapFromFile(String url, int measuredWidth, int measuredHeight) {
         final File file1 = url.startsWith("/") ? new File(url) : ResourceUtils.getFullPath(url);
-        return ImageUtils.getCachedPhoto(file1, 0, 0, null);
+        return ImageUtils.getCachedPhoto(file1, measuredWidth, measuredHeight, null);
     }
 
-    public static Bitmap bitmapFromUrl(String url) throws IOException {
+    public static Bitmap bitmapFromUrl(String url, int widthPx, int heightPx) throws IOException {
         final File fullPath = ResourceUtils.getFullPath(getLastSegmentOfURL(url));
-        Bitmap cachedPhoto = ImageUtils.tryPhotoFromFileOrAssets(fullPath, -1, -1);
+        Bitmap cachedPhoto = ImageUtils.tryPhotoFromFileOrAssetsPx(fullPath, widthPx, heightPx);
         if (cachedPhoto != null) return cachedPhoto;
         Log.i(TAG, "Downloading image " + url);
         Bitmap bitmap = NetworkingUtils.loadBitmap(url);

@@ -78,11 +78,8 @@ public final class ImageUtils {
         int inSampleSize = 1;
 
         if (height > reqHeight && width > reqWidth) {
-//            if (width > height) {
-            inSampleSize = Math.min(Math.round((float) height / (float) reqHeight), Math.round((float) width / (float) reqWidth));
-//            } else {
-//                inSampleSize = Math.round((float) width / (float) reqWidth);
-//            }
+            inSampleSize = (int) Math.min(Math.floor((float) height / (float) reqHeight),
+                                          Math.floor((float) width / (float) reqWidth));
         }
         return inSampleSize;
     }
@@ -114,6 +111,13 @@ public final class ImageUtils {
     }
 
 
+    /**
+     * @param c
+     * @param path
+     * @param reqWidth  Pixels
+     * @param reqHeight Pixels
+     * @throws IOException
+     */
     public static Bitmap decodeSampledBitmapFromFileOnAssets(Context c, String path, int reqWidth, int reqHeight)
             throws IOException {
         InputStream stream = c.getAssets().open(path);
@@ -121,7 +125,7 @@ public final class ImageUtils {
         // First decode with inJustDecodeBounds=true to check dimensions
         BitmapFactory.Options options = null;
 
-        if (reqWidth > 0 && reqHeight > 0) {
+        if (reqWidth > 0 || reqHeight > 0) {
             options = new BitmapFactory.Options();
             options.inJustDecodeBounds = true;
             options.inPurgeable = true;
@@ -163,29 +167,32 @@ public final class ImageUtils {
         return decodeSampledBitmapFromFile(path.getAbsolutePath(), reqWidth, reqHeight);
     }
 
+    public static Bitmap getCachedPhoto(@Nullable File file, int widthDp, int heightDp, @Nullable String sizeName) {
+        return getCachedPhotoPx(file, ((int) (widthDp * density)), (int) (heightDp * density), sizeName);
+    }
 
     /**
      * Tries to get an image from the cache folder. If not found, tries to get the original image, scale it and save it to the
      * cache asynchronously.
      *
      * @param file     The path to the image file.
-     * @param widthDp  Minimum widthDp in DP's.
-     * @param heightDp Minimum heightDp in DP's.
+     * @param widthPx  Minimum width in DP's.
+     * @param heightPx Minimum height in DP's.
      * @param sizeName An optional name to use for size of the the cached image.
      * @return Scaled and rotated image.
      * @see #getPhotoFromFile
      */
     @Nullable
-    public static Bitmap getCachedPhoto(@Nullable File file, int widthDp, int heightDp, @Nullable String sizeName) {
+    public static Bitmap getCachedPhotoPx(@Nullable File file, int widthPx, int heightPx, @Nullable String sizeName) {
         Bitmap bitmap = null;
         if (file == null) return null;
         String name = file.getName();
         String cacheName;
         File cacheFile = null;
 
-        if (widthDp > 0 && heightDp > 0) {
+        if (widthPx > 0 && heightPx > 0) {
             if (sizeName == null) {
-                cacheName = name.substring(0, name.length() - 4) + "-" + widthDp + "x" + heightDp + ".png";
+                cacheName = name.substring(0, name.length() - 4) + "-" + widthPx + "x" + heightPx + ".png";
             } else {
                 cacheName = name.substring(0, name.length() - 4) + sizeName + ".png";
             }
@@ -196,13 +203,14 @@ public final class ImageUtils {
         }
 
         if (bitmap == null) {
-            bitmap = getPhotoFromFileOrAssets(file, widthDp, heightDp);
+            bitmap = getPhotoFromFileOrAssetsPx(file, widthPx, heightPx);
             if (bitmap == null) return null;
             if (cacheFile != null) new ImageWriter(cacheFile, bitmap).execute();
         }
         return bitmap;
     }
 
+    @Deprecated
     @Nullable
     private static Bitmap getPhotoFromFileOrAssets(File file, int widthDp, int heightDp) {
         final Bitmap bitmap = tryPhotoFromFileOrAssets(file, widthDp, heightDp);
@@ -211,13 +219,33 @@ public final class ImageUtils {
     }
 
     @Nullable
+    private static Bitmap getPhotoFromFileOrAssetsPx(File file, int width, int height) {
+        final Bitmap bitmap = tryPhotoFromFileOrAssetsPx(file, width, height);
+        if (bitmap == null) Log.w(TAG, "IMAGE DOES NOT EXIST " + file);
+        return bitmap;
+    }
+
+    @Deprecated
+    @Nullable
     static Bitmap tryPhotoFromFileOrAssets(@Nullable File file, int widthDp, int heightDp) {
         if (file == null) return null;
         Bitmap bitmap = null;
         if (file.exists()) {
-            bitmap = getPhotoFromFile(file.getAbsolutePath(), widthDp, heightDp);
+            bitmap = getPhotoFromFile(file.getAbsolutePath(), widthDp, heightDp); // DP's
         } else if (getImagesOnAssets().contains(file.getName())) {
-            bitmap = getPhotoFromAssets(file.getName(), widthDp, heightDp);
+            bitmap = getPhotoFromAssets(file.getName(), widthDp, heightDp); // PIXELS
+        }
+        return bitmap;
+    }
+
+    @Nullable
+    static Bitmap tryPhotoFromFileOrAssetsPx(@Nullable File file, int widthPx, int heightPx) {
+        if (file == null) return null;
+        Bitmap bitmap = null;
+        if (file.exists()) {
+            bitmap = getPhotoFromFilePx(file.getAbsolutePath(), widthPx, heightPx);
+        } else if (getImagesOnAssets().contains(file.getName())) {
+            bitmap = getPhotoFromAssets(file.getName(), widthPx, heightPx);
         }
         return bitmap;
     }
@@ -433,6 +461,13 @@ public final class ImageUtils {
         return file;
     }
 
+    /**
+     *
+     * @param name
+     * @param width Pixels
+     * @param height Pixels
+     * @return
+     */
     @Nullable
     public static Bitmap getPhotoFromAssets(String name, int width, int height) {
         try {
@@ -629,7 +664,7 @@ public final class ImageUtils {
     public static Bitmap getPhotoFromFile(String path, int width, int height) {
         int orientation = getCameraPhotoOrientation(path);
         Bitmap bitmap;
-        if (width > 0 && height > 0) {
+        if (width > 0 || height > 0) {
             if (displayMetrics == null) {
                 Log.w(TAG, "Device density not accurate. Please call setDensity() from an activity before this.");
             }
@@ -642,7 +677,60 @@ public final class ImageUtils {
             width *= density;
             height *= density;
 
-            bitmap = decodeSampledBitmapFromFile(path, width * 2, height * 2);
+            bitmap = decodeSampledBitmapFromFile(path, width, height);
+        } else {
+            bitmap = BitmapFactory.decodeFile(path);
+        }
+        /*
+
+        if (bitmap == null) {
+            Log.e(TAG, "Image "+path+" not found.");
+            return null;
+        }
+
+        float originalImgRatio = (float) (1.0 * bitmap.getWidth() / bitmap.getHeight());
+        float desiredSizeRatio = (float) (1.0 * width / height);
+
+        int finalWidth;
+        int finalHeight;
+
+        if (originalImgRatio > desiredSizeRatio) {
+            finalHeight = height;
+            finalWidth = (int) (height * originalImgRatio);
+        } else {
+            finalWidth = width;
+            finalHeight = (int) (finalWidth / originalImgRatio);
+        }
+
+        Log.i(TAG, "getPhoto " + path + " " + width + "x" + height + " -> " + finalWidth + "x" + finalHeight+" orientation: "+orientation);
+        bitmap = Bitmap.createScaledBitmap(bitmap, finalWidth, finalHeight, true);
+        */
+        bitmap = rotate(bitmap, orientation);
+
+        return bitmap;
+    }
+    /**
+     * Obtains an image, scaled down to be at least the requested size and rotated according to the EXIF on the file.<br/>
+     * It's aware of the device density.
+     *
+     * @param path   The path to the image file.
+     * @param width  Desired width in DP's.
+     * @param height Desired height in DP's.
+     * @return Scaled and rotated image or null if no image was found.
+     */
+    @SuppressWarnings("SuspiciousNameCombination")
+    @Nullable
+    public static Bitmap getPhotoFromFilePx(String path, int width, int height) {
+        int orientation = getCameraPhotoOrientation(path);
+        Bitmap bitmap;
+        if (width > 0 || height > 0) {
+            if (orientation == 90 || orientation == 270) {
+                int x = width;
+                width = height;
+                height = x;
+            }
+
+            bitmap = decodeSampledBitmapFromFile(path, width, height);
         } else {
             bitmap = BitmapFactory.decodeFile(path);
         }
@@ -681,8 +769,8 @@ public final class ImageUtils {
      * The scaling uses the size parameters to calculate the inSampleSize and, therefore, it will have at least that size.
      *
      * @param path      The path to the image file.
-     * @param reqWidth  Minimum width.
-     * @param reqHeight Minimum height.
+     * @param reqWidth  Minimum width px.
+     * @param reqHeight Minimum height px.
      * @return Scaled image.
      */
     public static Bitmap decodeSampledBitmapFromFile(String path, int reqWidth, int reqHeight) {
@@ -1230,8 +1318,8 @@ public final class ImageUtils {
             // Get max available VM memory, exceeding this amount will throw an
             // OutOfMemory exception. Stored in kilobytes as LruCache takes an
             // int in its constructor.
-            // Use 1/6th of the available memory for this memory cache.
-            super((int) (Runtime.getRuntime().maxMemory() / 1024 / 6));
+            // Use 1/4th of the available memory for this memory cache.
+            super((int) (Runtime.getRuntime().maxMemory() / 1024 / 4));
         }
 
         @Override
