@@ -31,6 +31,83 @@ public final class FileDownloader {
 
     private FileDownloader() {}
 
+    public static String syncDownload(Download download) {
+        String uri = download.url.replace(" ", "%20");
+        File path = download.file;
+//            Log.v(TAG, uri);
+        download.tries++;
+
+        if (path.exists()) {
+            return null;
+        }
+
+        try {
+            File tempPath = new File(path.getAbsolutePath() + ".tmp");
+            URL url = new URL(uri);
+            URLConnection connection = url.openConnection();
+            connection.connect();
+
+            // this will be useful so that you can show a typical 0-100% progress bar
+//                int fileLength = connection.getContentLength();
+
+            // download the file
+            URLConnection urlConnection = url.openConnection();
+            urlConnection.setConnectTimeout(Downloader.TIMEOUT_MILLIS);
+            urlConnection.setReadTimeout(Downloader.TIMEOUT_MILLIS);
+
+            InputStream input = new BufferedInputStream(urlConnection.getInputStream());
+            OutputStream output = new FileOutputStream(tempPath);
+            try {
+                IOUtils.copy(input, output);
+            } catch (IOException e) {
+                // Network error. May retry
+                Log.i(TAG,
+                      String.format("(%d remain) Download of %s failed (will retry): %s",
+                                    sDownloadCount.get() - 1,
+                                    uri,
+                                    e.getMessage()));
+                download(download);
+                return path.getName();
+            } finally {
+                output.flush();
+                output.close();
+                input.close();
+            }
+
+            if (!tempPath.renameTo(path)) {
+                Log.w(TAG, new RuntimeException("RENAME FAILED " + tempPath.getName() + " -> " + path.getName()));
+                tempPath.delete();
+                path.delete();
+                download(download);
+                return path.getName();
+            }
+            Log.v(TAG,
+                  String.format("(%d remain) Downloaded %s%s",
+                                sDownloadCount.get() - 1,
+                                path.getName(),
+                                download.tries > 1 ? " " + download.tries + " tries" : "")
+            );
+            return null; // SUCCESS!
+        } catch (SocketException e) {
+            // Network error. May retry
+            Log.i(TAG,
+                  String.format("(%d remain) Download of %s failed (will retry): %s",
+                                sDownloadCount.get() - 1,
+                                uri,
+                                e.getMessage())
+            );
+            download(download);
+            return path.getName();
+        } catch (FileNotFoundException e) {
+            // URL is wrong - do not retry
+            Log.i(TAG, "(%d remain) Download of %s failed: %s", sDownloadCount.get() - 1, uri, e.getMessage());
+            return path.getName();
+        } catch (Exception e) {
+            Log.i(TAG, "(%d remain) Download of %s failed", sDownloadCount.get() - 1, uri, e);
+            return path.getName();
+        }
+    }
+
     public static class Download {
         public final String url;
         public final File file;
@@ -133,83 +210,6 @@ public final class FileDownloader {
         protected final String doInBackground(Download... params) {
             final Download download = params[0];
             return syncDownload(download);
-        }
-
-        public static String syncDownload(Download download) {
-            String uri = download.url.replace(" ", "%20");
-            File path = download.file;
-//            Log.v(TAG, uri);
-            download.tries++;
-
-            if (path.exists()) {
-                return null;
-            }
-
-            try {
-                File tempPath = new File(path.getAbsolutePath() + ".tmp");
-                URL url = new URL(uri);
-                URLConnection connection = url.openConnection();
-                connection.connect();
-
-                // this will be useful so that you can show a typical 0-100% progress bar
-//                int fileLength = connection.getContentLength();
-
-                // download the file
-                URLConnection urlConnection = url.openConnection();
-                urlConnection.setConnectTimeout(TIMEOUT_MILLIS);
-                urlConnection.setReadTimeout(TIMEOUT_MILLIS);
-
-                InputStream input = new BufferedInputStream(urlConnection.getInputStream());
-                OutputStream output = new FileOutputStream(tempPath);
-                try {
-                    IOUtils.copy(input, output);
-                } catch (IOException e) {
-                    // Network error. May retry
-                    Log.i(TAG,
-                          String.format("(%d remain) Download of %s failed (will retry): %s",
-                                        sDownloadCount.get() - 1,
-                                        uri,
-                                        e.getMessage()));
-                    download(download);
-                    return path.getName();
-                } finally {
-                    output.flush();
-                    output.close();
-                    input.close();
-                }
-
-                if (!tempPath.renameTo(path)) {
-                    Log.w(TAG, new RuntimeException("RENAME FAILED " + tempPath.getName() + " -> " + path.getName()));
-                    tempPath.delete();
-                    path.delete();
-                    download(download);
-                    return path.getName();
-                }
-                Log.v(TAG,
-                      String.format("(%d remain) Downloaded %s%s",
-                                    sDownloadCount.get() - 1,
-                                    path.getName(),
-                                    download.tries > 1 ? " " + download.tries + " tries" : "")
-                );
-                return null; // SUCCESS!
-            } catch (SocketException e) {
-                // Network error. May retry
-                Log.i(TAG,
-                      String.format("(%d remain) Download of %s failed (will retry): %s",
-                                    sDownloadCount.get() - 1,
-                                    uri,
-                                    e.getMessage())
-                );
-                download(download);
-                return path.getName();
-            } catch (FileNotFoundException e) {
-                // URL is wrong - do not retry
-                Log.i(TAG, "(%d remain) Download of %s failed: %s", sDownloadCount.get() - 1, uri, e.getMessage());
-                return path.getName();
-            } catch (Exception e) {
-                Log.i(TAG, "(%d remain) Download of %s failed", sDownloadCount.get() - 1, uri, e);
-                return path.getName();
-            }
         }
 
         @Override
