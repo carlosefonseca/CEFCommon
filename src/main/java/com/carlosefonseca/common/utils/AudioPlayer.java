@@ -19,14 +19,17 @@ public class AudioPlayer {
     private static final String TAG = CodeUtils.getTag(AudioPlayer.class);
 
     private static final Context c = CFApp.getContext();
+    public static final int STOPPED = 0;
+    public static final int PLAYING = 1;
+    public static final int PAUSED = 2;
 
     private static MediaPlayer currentMediaPlayer;
     private static File currentFile;
 
-    private static Queue<MediaPlayerWrapper> queue = new LinkedList<MediaPlayerWrapper>();
+    private static Queue<MediaPlayerWrapper> queue = new LinkedList<>();
 
     @Deprecated
-    private static final ArrayList<AudioPlayerListener> playerListeners = new ArrayList<AudioPlayerListener>();
+    private static final ArrayList<AudioPlayerListener> playerListeners = new ArrayList<>();
 
     @Deprecated
     public interface AudioPlayerListener {
@@ -209,7 +212,7 @@ public class AudioPlayer {
             return;
         }
         currentMediaPlayer.pause();
-        AudioPlayerNotification.PostPause(currentFile);
+        AudioPlayerNotification.PostPause(currentFile, currentMediaPlayer);
     }
 
     public static void resume() {
@@ -218,7 +221,7 @@ public class AudioPlayer {
             return;
         }
         currentMediaPlayer.start();
-        AudioPlayerNotification.PostStart(currentFile);
+        AudioPlayerNotification.PostStart(currentFile, currentMediaPlayer);
     }
 
 /*
@@ -234,6 +237,16 @@ public class AudioPlayer {
 
     public static boolean isPlaying() {
         return currentMediaPlayer != null && currentMediaPlayer.isPlaying();
+    }
+
+    public static int getStatus() {
+        if (currentMediaPlayer != null) {
+            return currentMediaPlayer.isPlaying()
+                   ? PLAYING
+                   : currentMediaPlayer.getCurrentPosition() < currentMediaPlayer.getDuration() ? PAUSED : STOPPED;
+        } else {
+            return STOPPED;
+        }
     }
 
     static class onEnd implements MediaPlayer.OnCompletionListener {

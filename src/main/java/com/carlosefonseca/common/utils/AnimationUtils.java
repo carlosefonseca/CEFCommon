@@ -182,4 +182,27 @@ public final class AnimationUtils {
             view.setAlpha(alpha);
         }
     }
+
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
+    public static class SimpleAnimatorListener implements android.animation.Animator.AnimatorListener {
+        @Override
+        public void onAnimationStart(android.animation.Animator animation) {
+
+        }
+
+        @Override
+        public void onAnimationEnd(android.animation.Animator animation) {
+
+        }
+
+        @Override
+        public void onAnimationCancel(android.animation.Animator animation) {
+
+        }
+
+        @Override
+        public void onAnimationRepeat(android.animation.Animator animation) {
+
+        }
+    }
 }
