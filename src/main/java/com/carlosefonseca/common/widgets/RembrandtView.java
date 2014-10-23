@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.widget.ImageView;
+import bolts.Task;
 import com.carlosefonseca.common.utils.CodeUtils;
 import com.carlosefonseca.common.utils.Rembrandt;
 
@@ -54,17 +55,17 @@ public class RembrandtView extends ImageView {
         return this;
     }
 
-    public synchronized RembrandtView setImageUrl(String url, boolean animated) {
-        if (CodeUtils.equals(url, this.url)) return this;
-        if (!animated) {
-            getRembrandt().load(url).hideIfNull(hideIfNull).placeholder(placeholder).into(this);
-        } else if (this.url != null) {
-            getRembrandt().load(url).hideIfNull(hideIfNull).placeholder(placeholder).xFade(this);
-        } else {
-            getRembrandt().load(url).hideIfNull(hideIfNull).placeholder(placeholder).fadeIn(this);
-        }
+    public synchronized bolts.Task<Void> setImageUrl(String url, boolean animated) {
+        if (CodeUtils.equals(url, this.url)) return Task.forResult(null);
         this.url = url;
-        return this;
+        if (!animated) {
+            return getRembrandt().load(url).hideIfNull(hideIfNull).placeholder(placeholder).into(this);
+        } else if (this.url != null) {
+            return getRembrandt().load(url).hideIfNull(hideIfNull).placeholder(placeholder).xFade(this);
+        } else {
+            return getRembrandt().load(url).hideIfNull(hideIfNull).placeholder(placeholder).fadeIn(this);
+        }
+//        return this;
     }
     public RembrandtView setCrossFadeImageUrl(String url) {
         if (CodeUtils.equals(url, this.url)) return this;
