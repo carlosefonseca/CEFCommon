@@ -7,13 +7,13 @@ import android.animation.ObjectAnimator;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
-import android.graphics.Point;
-import android.graphics.Rect;
+import android.graphics.*;
+import android.graphics.drawable.ShapeDrawable;
+import android.graphics.drawable.shapes.RectShape;
 import android.os.Build;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateDecelerateInterpolator;
-import com.carlosefonseca.common.R;
 
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 
@@ -187,8 +187,16 @@ public abstract class ZoomViewController<T extends View> {
     private View getFadeView() {
         if (mFadeView == null) {
             mFadeView = new View(getContext());
-//            mFadeView.setBackgroundColor(Color.parseColor("#80000000"));
-            mFadeView.setBackgroundResource(R.drawable.radial_overlay_gradient);
+            ShapeDrawable mDrawable = new ShapeDrawable(new RectShape());
+            mDrawable.getPaint()
+                     .setShader(new RadialGradient(mContainer.getWidth() / 2,
+                                                   mContainer.getHeight() / 2,
+                                                   mContainer.getWidth() * 2 / 3,
+                                                   Color.TRANSPARENT,
+                                                   Color.parseColor("#A0000000"),
+                                                   Shader.TileMode.CLAMP));
+
+            ResourceUtils.setBackground(mFadeView, mDrawable);
             mFadeView.setVisibility(View.GONE);
             mContainer.addView(mFadeView, MATCH_PARENT, MATCH_PARENT);
         }
