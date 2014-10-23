@@ -23,7 +23,7 @@ public class AudioPlayer {
     public static final int PLAYING = 1;
     public static final int PAUSED = 2;
 
-    private static MediaPlayer currentMediaPlayer;
+    @Nullable private static MediaPlayer currentMediaPlayer;
     private static File currentFile;
 
     private static Queue<MediaPlayerWrapper> queue = new LinkedList<>();
@@ -125,6 +125,7 @@ public class AudioPlayer {
 
     public static void stop() {
         if (isPlaying()) {
+            assert currentMediaPlayer != null;
             currentMediaPlayer.stop();
             for (AudioPlayerListener playerListener : playerListeners) {
                 playerListener.onAudioStop(currentMediaPlayer, currentFile);
@@ -198,13 +199,6 @@ public class AudioPlayer {
         }
     }
 
-    MediaPlayer.OnCompletionListener playEnded = new MediaPlayer.OnCompletionListener() {
-        @Override
-        public void onCompletion(MediaPlayer mediaPlayer) {
-            pause();
-        }
-    };
-
 
     public static void pause() {
         if (currentMediaPlayer == null) {
@@ -247,6 +241,11 @@ public class AudioPlayer {
         } else {
             return STOPPED;
         }
+    }
+
+    @Nullable
+    public static MediaPlayer getMediaPlayer() {
+        return currentMediaPlayer;
     }
 
     static class onEnd implements MediaPlayer.OnCompletionListener {
