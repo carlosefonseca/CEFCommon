@@ -115,6 +115,7 @@ public class AudioPlayer {
     public static void playFile(File audioFile) {
         if (!audioFile.exists()) {
             Log.i(TAG, "File " + audioFile + " doesn't exist.");
+            CodeUtils.toast("File " + audioFile + " doesn't exist.");
             return;
         }
         MediaPlayer mediaPlayerForFile = getMediaPlayerForFile(c, audioFile);
