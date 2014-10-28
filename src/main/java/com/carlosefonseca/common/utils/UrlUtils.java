@@ -6,22 +6,29 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.location.Location;
 import android.net.Uri;
+import bolts.Continuation;
+import bolts.Task;
 import com.carlosefonseca.common.CFApp;
 import com.carlosefonseca.common.widgets.LoadingDialog;
-import com.loopj.android.http.AsyncHttpClient;
-import com.loopj.android.http.TextHttpResponseHandler;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.Header;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.List;
+import java.util.concurrent.Callable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static org.apache.commons.lang3.StringUtils.defaultString;
+
 public final class UrlUtils {
+
+    private static final java.lang.String TAG = CodeUtils.getTag(UrlUtils.class);
 
     private UrlUtils() {}
 
@@ -62,7 +69,7 @@ public final class UrlUtils {
         public static String getFacebookNameFromURL(String url) {
             Matcher matcher = PATTERN.matcher(url);
             if (matcher.find()) {
-                return StringUtils.defaultString(matcher.group(1), matcher.group(2));
+                return defaultString(matcher.group(1), matcher.group(2));
             }
             return null;
         }
@@ -96,33 +103,29 @@ public final class UrlUtils {
                         throw new NetworkingUtils.NotConnectedException();
                     }
 
-                    // CHANGE TO TASK AND VOLLEY
-                    AsyncHttpClient client = new AsyncHttpClient();
-                    client.get("https://graph.facebook.com/" + text, new TextHttpResponseHandler() {
+                    final Continuation<String, Void> continuation = new Continuation<String, Void>() {
                         @Override
-                        public void onFailure(int statusCode,
-                                              Header[] headers,
-                                              String responseString,
-                                              Throwable throwable) {
-                            Log.w(TAG, throwable.getMessage());
-                            runnable.run(new Intent(Intent.ACTION_VIEW, Uri.parse("https://www.facebook.com/" + text)));
-                        }
-
-                        @Override
-                        public void onSuccess(int statusCode, Header[] headers, String response) {
-                            try {
-                                String fbid = new JSONObject(response).getString("id");
-                                CFApp.getUserPreferences(FB_PREFS).edit().putString(text, fbid).apply();
-                                //Tries to make intent with FB's URI
-                                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("fb://profile/" + fbid));
-                                runnable.run(intent);
-                            } catch (JSONException e) {
-                                Log.w(TAG, "" + e.getMessage());
+                        public Void then(Task<String> task) throws Exception {
+                            if (TaskUtils.hasErrors(TAG, "failed", task)) {
                                 runnable.run(new Intent(Intent.ACTION_VIEW,
                                                         Uri.parse("https://www.facebook.com/" + text)));
+                            } else {
+                                try {
+                                    String fbid = new JSONObject(task.getResult()).getString("id");
+                                    CFApp.getUserPreferences(FB_PREFS).edit().putString(text, fbid).apply();
+                                    //Tries to make intent with FB's URI
+                                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("fb://profile/" + fbid));
+                                    runnable.run(intent);
+                                } catch (JSONException e) {
+                                    Log.w(TAG, "" + e.getMessage());
+                                    runnable.run(new Intent(Intent.ACTION_VIEW,
+                                                            Uri.parse("https://www.facebook.com/" + text)));
+                                }
                             }
+                            return null;
                         }
-                    });
+                    };
+                    DownloadURLTask.downloadString("https://graph.facebook.com/" + text).continueWith(continuation);
 
                 } else {
                     // has ID
@@ -264,5 +267,70 @@ public final class UrlUtils {
         if (url == null) throw new RuntimeException("URL is null!");
         return Facebook.tryOpenUrl(context, url) || Twitter.tryOpenProfileFromURL(context, url) ||
                Coordinates.tryOpenUrl(context, url) || UrlUtils.tryStartIntentForUrl(context, url);
+    }
+
+    private static Pattern unfurlPattern;
+
+    protected static Pattern getUnfurlPattern() {
+        if (unfurlPattern == null) {
+            unfurlPattern = Pattern.compile("(https?://)?(www.)?(goo\\.gl|bit\\.ly|tiny\\.cc)/.*");
+        }
+        return unfurlPattern;
+    }
+
+
+    public static boolean canUnfurl(String url) {
+        return !StringUtils.isEmpty(url) && getUnfurlPattern().matcher(url).matches();
+    }
+
+    public static String tryUnfurl(String url) {
+        return canUnfurl(url) ? unfurl(url) : url;
+    }
+
+    public static String unfurl(String urlStr) {
+        try {
+            URL possiblyShortenedURL = new URL(urlStr);
+            Log.v("Unfurling " + possiblyShortenedURL.toString());
+            HttpURLConnection con = (HttpURLConnection) possiblyShortenedURL.openConnection();
+            con.setInstanceFollowRedirects(false);
+            final int responseCode = con.getResponseCode();
+            Log.v("responseCode:" + responseCode);
+            if (responseCode == 301) {
+                // yep, shortened
+                final String location = con.getHeaderField("Location");
+                CFApp.getUserPreferences().edit().putString("URL-" + urlStr, location).apply();
+                con.disconnect();
+                return location;
+            } else {
+                Log.v(con.getHeaderField("Location"));
+                con.disconnect();
+                return urlStr;
+            }
+        } catch (IOException e) {
+            Log.e(TAG, "" + e.getMessage(), e);
+        }
+        return urlStr;
+    }
+
+
+    public static String unfurl(String urlStr, boolean allowCache) {
+        return allowCache
+               ? defaultString(CFApp.getUserPreferences().getString("URL-" + urlStr, null), unfurl(urlStr))
+               : unfurl(urlStr);
+    }
+
+    public static Task<String> unfurlTask(final String urlStr, boolean allowCache) {
+        if (allowCache) {
+            final String string = CFApp.getUserPreferences().getString("URL-" + urlStr, null);
+            if (string != null) {
+                return Task.forResult(string);
+            }
+        }
+        return Task.callInBackground(new Callable<String>() {
+            @Override
+            public String call() throws Exception {
+                return unfurl(urlStr);
+            }
+        });
     }
 }
