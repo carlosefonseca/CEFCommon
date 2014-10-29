@@ -4,7 +4,6 @@ import android.os.AsyncTask;
 import android.os.Build;
 import com.carlosefonseca.common.CFApp;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.io.IOUtils;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.*;

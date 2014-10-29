@@ -35,14 +35,13 @@ dependencies {
     compile 'com.google.android.gms:play-services:5.+'
     //noinspection GradleDependency
     compile 'com.google.code.gson:gson:1.7.2'
-
     compile 'com.intellij:annotations:12.0'
     compile 'com.nineoldandroids:library:2.4.0'
     compile 'de.greenrobot:eventbus:2.0.2'
-    compile 'commons-io:commons-io:2.4'
+    //    compile 'commons-io:commons-io:2.4'
     compile 'org.apache.commons:commons-lang3:3.3.2'
     compile 'org.apache.commons:commons-collections4:4.0'
-//    compile 'com.loopj.android:android-async-http:1.4.4'
+    //    compile 'com.loopj.android:android-async-http:1.4.4'
     compile 'com.readystatesoftware.systembartint:systembartint:1.0.4'
     compile 'fr.avianey:bolts-android-api:1.1.0'
     compile 'com.facebook.rebound:rebound:0.3.6'
@@ -56,21 +55,24 @@ android {
 //    }
     compileSdkVersion rootProject.ext.compileSdkVersion
     buildToolsVersion rootProject.ext.buildToolsVersion
-
     defaultConfig {
         minSdkVersion 9
 //        targetSdkVersion compileSdkVersion
     }
-
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_7
         targetCompatibility JavaVersion.VERSION_1_7
     }
-
     packagingOptions {
         exclude 'META-INF/NOTICE.txt'
         exclude 'META-INF/LICENSE.txt'
         exclude 'META-INF/license.txt'
         exclude 'META-INF/notice.txt'
+    }
+    buildTypes {
+//        release {
+//            runProguard true
+//            proguardFile 'proguard-rules.txt'
+//        }
     }
 }
