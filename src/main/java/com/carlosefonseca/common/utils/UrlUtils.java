@@ -6,6 +6,9 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.location.Location;
 import android.net.Uri;
+import android.text.Html;
+import android.text.method.LinkMovementMethod;
+import android.widget.TextView;
 import bolts.Continuation;
 import bolts.Task;
 import com.carlosefonseca.common.CFApp;
@@ -332,5 +335,11 @@ public final class UrlUtils {
                 return unfurl(urlStr);
             }
         });
+    }
+
+    public static void clickableTextOnTextView(TextView textView, String text) {
+        text = text.replaceAll("(https?://[^\\s]+)", "<a href='$1'>$1</a>").replaceAll("\\n", "<br/>");
+        textView.setText(Html.fromHtml(text));
+        textView.setMovementMethod(LinkMovementMethod.getInstance());
     }
 }
