@@ -1,7 +1,7 @@
 package com.carlosefonseca.common.utils;
 
+import com.carlosefonseca.apache.commons.lang3.ArrayUtils;
 import de.greenrobot.event.EventBus;
-import org.apache.commons.lang3.ArrayUtils;
 
 import java.lang.ref.WeakReference;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -30,7 +30,9 @@ public class EventBusRegister implements ActivityStateListener.Interface {
             if (eventTypes.length == 1) {
                 EventBus.getDefault().register(this.subscriber.get(), eventTypes[0]);
             } else {
-                EventBus.getDefault().register(this.subscriber.get(), eventTypes[0], ArrayUtils.subarray(eventTypes, 1, eventTypes.length));
+                EventBus.getDefault().register(this.subscriber.get(), eventTypes[0], ArrayUtils.subarray(eventTypes,
+                                                                                                         1,
+                                                                                                         eventTypes.length));
             }
         }
     }

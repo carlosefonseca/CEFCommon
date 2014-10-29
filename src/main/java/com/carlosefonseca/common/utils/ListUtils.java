@@ -113,6 +113,32 @@ public final class ListUtils {
         }
     }
 
+    /**
+     * Returns an immutable empty list if the argument is <code>null</code>,
+     * or the argument itself otherwise.
+     *
+     * @param <T> the element type
+     * @param list the list, possibly <code>null</code>
+     * @return an empty list if the argument is <code>null</code>
+     */
+    public static <T> List<T> emptyIfNull(final List<T> list) {
+        return list == null ? Collections.<T>emptyList() : list;
+    }
+
+    /**
+     * Returns either the passed in list, or if the list is {@code null},
+     * the value of {@code defaultList}.
+     *
+     * @param <T> the element type
+     * @param list  the list, possibly {@code null}
+     * @param defaultList  the returned values if list is {@code null}
+     * @return an empty list if the argument is <code>null</code>
+     * @since 4.0
+     */
+    public static <T> List<T> defaultIfNull(final List<T> list, final List<T> defaultList) {
+        return list == null ? defaultList : list;
+    }
+
     public static <T> List<T> defaultIfNull(@Nullable List<T> list) {
         return list == null ? new ArrayList<T>() : list;
     }

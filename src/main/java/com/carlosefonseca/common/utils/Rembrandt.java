@@ -7,8 +7,8 @@ import android.view.View;
 import android.widget.ImageView;
 import bolts.Continuation;
 import bolts.Task;
+import com.carlosefonseca.apache.commons.lang3.StringUtils;
 import junit.framework.Assert;
-import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

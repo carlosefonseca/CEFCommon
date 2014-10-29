@@ -2,8 +2,8 @@ package com.carlosefonseca.common.utils;
 
 import android.os.AsyncTask;
 import android.os.Build;
+import com.carlosefonseca.apache.commons.collections4.CollectionUtils;
 import com.carlosefonseca.common.CFApp;
-import org.apache.commons.collections4.CollectionUtils;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.*;

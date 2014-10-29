@@ -3,7 +3,6 @@ package com.carlosefonseca.common.utils;
 import android.content.Context;
 import android.view.View;
 import android.view.ViewGroup;
-import org.apache.commons.lang3.NotImplementedException;
 
 import java.util.List;
 
@@ -33,7 +32,7 @@ public class CFArrayAdapter2<T, V extends View> extends CFArrayAdapter<T> {
      * @param parent
      */
     protected V instantiateView(ViewGroup parent) {
-        throw new NotImplementedException("Implement instantiateView");
+        throw new UnsupportedOperationException("Implement instantiateView");
     }
 
     /**

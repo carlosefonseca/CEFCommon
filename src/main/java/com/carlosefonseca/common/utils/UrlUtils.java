@@ -11,9 +11,9 @@ import android.text.method.LinkMovementMethod;
 import android.widget.TextView;
 import bolts.Continuation;
 import bolts.Task;
+import com.carlosefonseca.apache.commons.lang3.StringUtils;
 import com.carlosefonseca.common.CFApp;
 import com.carlosefonseca.common.widgets.LoadingDialog;
-import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONException;
@@ -27,7 +27,7 @@ import java.util.concurrent.Callable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static org.apache.commons.lang3.StringUtils.defaultString;
+import static com.carlosefonseca.apache.commons.lang3.StringUtils.defaultString;
 
 public final class UrlUtils {
 

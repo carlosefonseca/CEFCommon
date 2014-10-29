@@ -38,13 +38,13 @@ dependencies {
     compile 'com.intellij:annotations:12.0'
     compile 'com.nineoldandroids:library:2.4.0'
     compile 'de.greenrobot:eventbus:2.0.2'
-    //    compile 'commons-io:commons-io:2.4'
-    compile 'org.apache.commons:commons-lang3:3.3.2'
-    compile 'org.apache.commons:commons-collections4:4.0'
-    //    compile 'com.loopj.android:android-async-http:1.4.4'
     compile 'com.readystatesoftware.systembartint:systembartint:1.0.4'
     compile 'fr.avianey:bolts-android-api:1.1.0'
     compile 'com.facebook.rebound:rebound:0.3.6'
+    //    compile 'commons-io:commons-io:2.4'
+    //    compile 'org.apache.commons:commons-lang3:3.3.2'
+    //    compile 'org.apache.commons:commons-collections4:4.0'
+    //    compile 'com.loopj.android:android-async-http:1.4.4'
 }
 
 android {
