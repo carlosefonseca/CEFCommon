@@ -187,20 +187,28 @@ public abstract class ZoomViewController<T extends View> {
     private View getFadeView() {
         if (mFadeView == null) {
             mFadeView = new View(getContext());
-            ShapeDrawable mDrawable = new ShapeDrawable(new RectShape());
-            mDrawable.getPaint()
-                     .setShader(new RadialGradient(mContainer.getWidth() / 2,
-                                                   mContainer.getHeight() / 2,
-                                                   mContainer.getWidth() * 2 / 3,
-                                                   Color.TRANSPARENT,
-                                                   Color.parseColor("#A0000000"),
-                                                   Shader.TileMode.CLAMP));
+            ShapeDrawable mDrawable = getRadialOverlayDrawable(mContainer);
 
             ResourceUtils.setBackground(mFadeView, mDrawable);
             mFadeView.setVisibility(View.GONE);
             mContainer.addView(mFadeView, MATCH_PARENT, MATCH_PARENT);
         }
         return mFadeView;
+    }
+
+    public static ShapeDrawable getRadialOverlayDrawable(View container) {
+        ShapeDrawable mDrawable = new ShapeDrawable(new RectShape());
+        final int w = container.getWidth();
+        final int h = container.getHeight();
+        if (w <= 0 || h <= 0) throw new RuntimeException("View doesn't have size yet.");
+        mDrawable.getPaint()
+                 .setShader(new RadialGradient(w / 2,
+                                               h / 2,
+                                               w * 2 / 3,
+                                               Color.TRANSPARENT,
+                                               Color.parseColor("#A0000000"),
+                                               Shader.TileMode.CLAMP));
+        return mDrawable;
     }
 
     public Context getContext() {
