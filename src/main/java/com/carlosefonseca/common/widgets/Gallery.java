@@ -147,6 +147,9 @@ public class Gallery extends ViewPager {
                 view = layoutInflater.inflate(gallery_layout, container, false);
                 if (scaleType != null) {
                     ((ImageView) ((ViewGroup) view).getChildAt(0)).setScaleType(scaleType);
+                    if (scaleType == ImageView.ScaleType.FIT_XY) {
+                        ((ViewGroup) view).getChildAt(0).getLayoutParams().width = ViewGroup.LayoutParams.MATCH_PARENT;
+                    }
                 }
             }
             if (view != null) {
