@@ -16,7 +16,6 @@ import com.carlosefonseca.common.CFApp;
 import com.carlosefonseca.common.widgets.LoadingDialog;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
@@ -66,7 +65,7 @@ public final class UrlUtils {
          * }</pre>
          */
         public static final Pattern PATTERN = Pattern.compile(
-                "^(?:https?://)?(?:www\\.)?facebook\\.com/(?:([^/]*)|pages(?:.*)/(\\d+))/?(?:\\?.*)?$");
+                "^(?:https?://)?(?:www\\.)?facebook\\.com/(?:([^/?]*)|pages(?:.*)/(\\d+))/?(?:\\?.*)?$");
 
 
         public static String getFacebookNameFromURL(String url) {
@@ -119,7 +118,7 @@ public final class UrlUtils {
                                     //Tries to make intent with FB's URI
                                     Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("fb://profile/" + fbid));
                                     runnable.run(intent);
-                                } catch (JSONException e) {
+                                } catch (Exception e) {
                                     Log.w(TAG, "" + e.getMessage());
                                     runnable.run(new Intent(Intent.ACTION_VIEW,
                                                             Uri.parse("https://www.facebook.com/" + text)));

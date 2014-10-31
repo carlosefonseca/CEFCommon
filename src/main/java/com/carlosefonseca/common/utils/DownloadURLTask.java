@@ -51,15 +51,16 @@ public final class DownloadURLTask  {
         }
         connection.connect();
 
-        // this will be useful so that you can show a typical 0-100% progress bar
-        int fileLength = connection.getContentLength();
+        if (isFile) {
+            // this will be useful so that you can show a typical 0-100% progress bar
+            int fileLength = connection.getContentLength();
 
-        Log.v(TAG, "File length: " + fileLength);
+            Log.v(TAG, "File length: " + fileLength);
 
-        if (fileLength == -1) {
-            return null;
+            if (fileLength == -1) {
+                return null;
+            }
         }
-
 
         if (isFile) {
             // download the file
