@@ -50,6 +50,11 @@ public class AudioPlayer {
             this.mediaPlayer = mediaPlayer;
         }
 
+        @Override
+        public String toString() {
+            return "AudioNotif:" + status + "-" + (file != null ? file.getName() : "");
+        }
+
         public static void PostStart(@Nullable File file) {
             EventBus.getDefault().postSticky(new AudioPlayerNotification(Status.PLAY, file, null));
         }
