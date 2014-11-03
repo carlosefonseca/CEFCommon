@@ -27,6 +27,7 @@ public class CFTabFragmentActivity extends CFActivity implements TabHost.OnTabCh
         private Class clss;
         private Bundle args;
         public Fragment fragment;
+        boolean notified;
 
         public TabInfo(String tag, Class clazz, @Nullable Bundle args) {
             this.tag = tag;
@@ -110,6 +111,18 @@ public class CFTabFragmentActivity extends CFActivity implements TabHost.OnTabCh
     }
 
     @Override
+    protected void onStart() {
+        super.onStart();
+        if (mLastTab != null && !mLastTab.notified) mLastTab.fragment.setUserVisibleHint(true);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (mLastTab != null) mLastTab.notified = false;
+    }
+
+    @Override
     public void onTabChanged(String tag) {
         TabInfo newTab = this.mapTabInfo.get(tag);
         Assert.assertNotNull(newTab);
@@ -133,8 +146,11 @@ public class CFTabFragmentActivity extends CFActivity implements TabHost.OnTabCh
             ft.commit();
             this.getSupportFragmentManager().executePendingTransactions();
             if (mLastTab != null) mLastTab.fragment.setUserVisibleHint(false);
+            newTab.notified = false;
             mLastTab = newTab;
-            if (newTab.fragment.getView() != null) newTab.fragment.setUserVisibleHint(true);
+            /*if (newTab.fragment.getView() != null) */
+            newTab.fragment.setUserVisibleHint(true);
+            newTab.notified = true;
         }
     }
 
