@@ -14,12 +14,13 @@ public final class ListUtils {
 
     private ListUtils() {}
 
-    public static <T> T first(List<T> list) {
-        return list.get(0);
+    @Nullable
+    public static <T> T first(@Nullable List<T> list) {
+        return list != null && !list.isEmpty() ? list.get(0) : null;
     }
 
-    public static <T> T last(List<T> list) {
-        return list.get(list.size() - 1);
+    public static <T> T last(@Nullable List<T> list) {
+        return list != null && !list.isEmpty() ? list.get(list.size() - 1) : null;
     }
 
     public static <T> List<T> firsts(List<T> list, int length) {
