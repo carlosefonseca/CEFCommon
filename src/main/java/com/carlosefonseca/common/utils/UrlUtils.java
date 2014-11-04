@@ -352,4 +352,16 @@ public final class UrlUtils {
         textView.setText(Html.fromHtml(text));
         textView.setMovementMethod(LinkMovementMethod.getInstance());
     }
+
+    public static Intent sendEmail(@Nullable String to, @Nullable String subject, @Nullable String content) {
+        Intent emailIntent;
+        if (to != null) {
+            emailIntent = new Intent(Intent.ACTION_SENDTO, Uri.fromParts("mailto", to, null));
+        } else {
+            emailIntent = new Intent(Intent.ACTION_SENDTO);
+        }
+        if (StringUtils.isNotBlank(subject)) emailIntent.putExtra(Intent.EXTRA_SUBJECT, subject);
+        if (StringUtils.isNotBlank(content)) emailIntent.putExtra(Intent.EXTRA_TEXT, content);
+        return Intent.createChooser(emailIntent, "Send email...");
+    }
 }
