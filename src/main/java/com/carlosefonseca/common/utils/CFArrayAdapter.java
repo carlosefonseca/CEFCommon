@@ -88,6 +88,17 @@ public class CFArrayAdapter<T> extends BaseAdapter implements Filterable {
         this(context, R.layout.cf_spinner_item, objects);
     }
 
+    /**
+     * Constructor
+     *
+     * @param context The current context.
+     * @param objects The objects to represent in the ListView.
+     */
+    @SafeVarargs
+    public CFArrayAdapter(Context context, T...objects) {
+        this(context, R.layout.cf_spinner_item, Arrays.asList(objects));
+    }
+
 
     /**
      * Constructor
