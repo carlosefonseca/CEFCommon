@@ -39,7 +39,14 @@ public final class UrlUtils {
     public static String urlForTel(String number) {return "tel:" + number.trim().replaceAll("\\s*", "");}
 
     public static String simplifyUrlForDisplay(String url) {
-        return url.replaceFirst("https?://(www.)?", "").replace("?fref=ts", "");
+        return url.trim().replaceFirst("https?://(www.)?", "").replace("?fref=ts", "");
+    }
+
+    /**
+     * Takes any string but only returns those that start with HTTP. Returns null otherwise.
+     */
+    @Nullable public static String filterHttp(String url) {
+        return url != null && url.startsWith("http") ? url : null;
     }
 
     public static final class Facebook {
