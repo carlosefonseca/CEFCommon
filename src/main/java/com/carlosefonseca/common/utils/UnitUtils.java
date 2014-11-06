@@ -10,12 +10,34 @@ public final class UnitUtils {
 
     public static final String SYSTEM = "unit_system";
     private static final java.lang.String TAG = CodeUtils.getTag(UnitUtils.class);
-    private static System mSystem = System.METRIC;
     private static NumberFormat numberFormatter = new DecimalFormat("@#");
 
     @Nullable static Localizer localizer;
 
+    private static System mSystem;
+    private static System mDefaultSystem = System.METRIC;
+
     private UnitUtils() {}
+
+    public static void setSystem(String system) {
+        System system1 = null;
+        try {
+            system1 = System.valueOf(system);
+        } catch (IllegalArgumentException e) {
+            Log.e(TAG, "" + e.getMessage(), e);
+        }
+        if (system1 != null) {
+            setSystem(system1);
+        }
+    }
+
+    public static void setDefaultSystem(String system) {
+        try {
+            mDefaultSystem = System.valueOf(system);
+        } catch (IllegalArgumentException e) {
+            Log.e(TAG, "" + e.getMessage(), e);
+        }
+    }
 
     public enum System {
         METRIC, IMPERIAL;
@@ -29,23 +51,28 @@ public final class UnitUtils {
 
     public static void setSystem(System system) {
         PreferencesManager.setParameter(null, SYSTEM, system.toString());
+        if (mSystem != system) Log.i(TAG, "New Measurement System");
         mSystem = system;
     }
 
     @Nullable
     public static System getSystem() {
+        if (mSystem != null) return mSystem;
+
         @Nullable final String system = PreferencesManager.getParameter(null, SYSTEM, (String) null);
         if (system == null) {
-            Log.i(TAG, "No System Defined!");
-            return null;
+            Log.i(TAG, "No user defined System. Will use default: " + mDefaultSystem);
+            mSystem = mDefaultSystem;
+            return mSystem;
         }
+
         try {
             mSystem = System.valueOf(system);
             return mSystem;
         } catch (IllegalArgumentException e) {
-            Log.w(TAG, "" + e.getMessage(), e);
+            Log.w(TAG, "System parse failed. Falling back to default.", e);
         }
-        return null;
+        return mDefaultSystem;
     }
 
     static final double kTTTMetersToKilometersCoefficient = 0.001;
