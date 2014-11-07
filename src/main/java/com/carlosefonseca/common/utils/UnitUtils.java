@@ -109,7 +109,8 @@ public final class UnitUtils {
     public static String stringForDistance(int meters) {
         String distanceString = null;
         String unitString = null;
-        switch (mSystem) {
+        final System system = getSystem();
+        switch (system != null ? system : System.METRIC) {
 
             case METRIC:
                 double kilometerDistance = distanceToKilometers(meters);
