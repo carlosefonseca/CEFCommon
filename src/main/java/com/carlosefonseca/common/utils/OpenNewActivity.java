@@ -53,8 +53,8 @@ public class OpenNewActivity implements View.OnClickListener {
     }
 
     /** A convenience method for just opening an activity, quick and simple. */
-    public static void start(Class aClass) {
-        new OpenNewActivity(null, aClass, null).go(null);
+    public static void start(Activity context, Class aClass) {
+        new OpenNewActivity(context, aClass, false).go(null);
     }
 
     /** A convenience method for just opening an activity, quick and simple, and finishing the current one. */

@@ -31,11 +31,13 @@ public final class UnitUtils {
         }
     }
 
-    public static void setDefaultSystem(String system) {
-        try {
-            mDefaultSystem = System.valueOf(system);
-        } catch (IllegalArgumentException e) {
-            Log.e(TAG, "" + e.getMessage(), e);
+    public static void setDefaultSystem(@Nullable String system) {
+        if (system != null) {
+            try {
+                mDefaultSystem = System.valueOf(system.toUpperCase());
+            } catch (IllegalArgumentException e) {
+                Log.e(TAG, "" + e.getMessage(), e);
+            }
         }
     }
 
