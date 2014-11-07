@@ -46,6 +46,16 @@ public final class UnitUtils {
         public String toString() {
             return tf(super.toString());
         }
+
+        public String temperature() {
+            switch (this) {
+                case METRIC:
+                    return "C";
+                case IMPERIAL:
+                    return "F";
+            }
+            return null;
+        }
     }
 
 
