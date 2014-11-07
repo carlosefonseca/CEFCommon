@@ -1,14 +1,19 @@
 package com.carlosefonseca.common.utils;
 
+import android.content.Context;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.util.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.IOException;
 import java.security.InvalidParameterException;
 import java.text.DecimalFormat;
 import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
 
 public class CFLocation extends Location implements Comparable<CFLocation> {
     public static final String LINE_COORDINATE_PART_SPLITTER = " ";
@@ -155,4 +160,19 @@ public class CFLocation extends Location implements Comparable<CFLocation> {
         return new Pair<Location, Location>(topRight, bottomLeft);
     }
 
+    public static String reverseGeocodeLocality(Context context, double lat, double lon, Locale locale) throws IOException {
+        List<Address> fromLocation = new Geocoder(context, locale).getFromLocation(lat, lon, 1);
+        Address a = fromLocation.get(0);
+        String msg = a.getLocality() != null
+                     ? a.getLocality()
+                     : a.getSubAdminArea() != null
+                       ? a.getSubAdminArea()
+                       : a.getAdminArea() != null
+                         ? a.getAdminArea()
+                         : a.getMaxAddressLineIndex() > 0
+                           ? a.getAddressLine(a.getMaxAddressLineIndex() - 1).replaceFirst("[\\d-]+", "").trim()
+                           : a.getCountryName();
+        Log.d("reverseGeocodeLocality", msg +" - "+fromLocation.toString());
+        return msg;
+    }
 }
