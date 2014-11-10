@@ -41,6 +41,12 @@ public final class UnitUtils {
         }
     }
 
+    public static void clearUserPreference() {
+        PreferencesManager.getSharedPreferences().edit().remove(SYSTEM).apply();
+        mSystem = null;
+        mDefaultSystem = System.METRIC;
+    }
+
     public enum System {
         METRIC, IMPERIAL;
 

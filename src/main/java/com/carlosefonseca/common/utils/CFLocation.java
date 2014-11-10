@@ -20,6 +20,7 @@ public class CFLocation extends Location implements Comparable<CFLocation> {
     protected static final DecimalFormat DECIMAL_FORMAT = new DecimalFormat("#.####");
     public static final float NO_DISTANCE = Float.NaN;
     public static final int NO_INDEX = -1;
+    private static final java.lang.String TAG = CodeUtils.getTag(CFLocation.class);
     public final float distance;
     public final int index;
 
@@ -160,19 +161,25 @@ public class CFLocation extends Location implements Comparable<CFLocation> {
         return new Pair<Location, Location>(topRight, bottomLeft);
     }
 
+    @Nullable
     public static String reverseGeocodeLocality(Context context, double lat, double lon, Locale locale) throws IOException {
-        List<Address> fromLocation = new Geocoder(context, locale).getFromLocation(lat, lon, 1);
-        Address a = fromLocation.get(0);
-        String msg = a.getLocality() != null
-                     ? a.getLocality()
-                     : a.getSubAdminArea() != null
-                       ? a.getSubAdminArea()
-                       : a.getAdminArea() != null
-                         ? a.getAdminArea()
-                         : a.getMaxAddressLineIndex() > 0
-                           ? a.getAddressLine(a.getMaxAddressLineIndex() - 1).replaceFirst("[\\d-]+", "").trim()
-                           : a.getCountryName();
-        Log.d("reverseGeocodeLocality", msg +" - "+fromLocation.toString());
-        return msg;
+        try {
+            List<Address> fromLocation = new Geocoder(context, locale).getFromLocation(lat, lon, 1);
+            Address a = fromLocation.get(0);
+            String msg = a.getLocality() != null
+                         ? a.getLocality()
+                         : a.getSubAdminArea() != null
+                           ? a.getSubAdminArea()
+                           : a.getAdminArea() != null
+                             ? a.getAdminArea()
+                             : a.getMaxAddressLineIndex() > 0 ? a.getAddressLine(a.getMaxAddressLineIndex() - 1)
+                                                                 .replaceFirst("[\\d-]+", "")
+                                                                 .trim() : a.getCountryName();
+            Log.d("reverseGeocodeLocality", msg + " - " + fromLocation.toString());
+            return msg;
+        } catch (IOException e) {
+            Log.w(TAG, "" + e.getMessage(), e);
+        }
+        return null;
     }
 }
