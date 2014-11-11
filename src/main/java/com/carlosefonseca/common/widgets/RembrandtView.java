@@ -6,7 +6,12 @@ import android.util.AttributeSet;
 import android.widget.ImageView;
 import bolts.Task;
 import com.carlosefonseca.common.utils.CodeUtils;
+import com.carlosefonseca.common.utils.ImageUtils;
 import com.carlosefonseca.common.utils.Rembrandt;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import java.io.File;
 
 public class RembrandtView extends ImageView {
     private static final java.lang.String TAG = CodeUtils.getTag(RembrandtView.class);
@@ -14,6 +19,8 @@ public class RembrandtView extends ImageView {
 
     boolean hideIfNull;
     private String url;
+
+    @Nullable private Double aspectRatio;
 
     int placeholder;
 
@@ -44,7 +51,7 @@ public class RembrandtView extends ImageView {
         this.mRembrandt = mRembrandt;
     }
 
-    public synchronized RembrandtView setImageUrl(String url) {
+    public synchronized RembrandtView setImageUrl(@Nullable String url) {
         if (CodeUtils.equals(url, this.url)) return this;
         if (this.url != null) {
             getRembrandt().load(url).hideIfNull(hideIfNull).xFade(this);
@@ -105,5 +112,33 @@ public class RembrandtView extends ImageView {
      */
     public void setHideIfNull(boolean hideIfNull) {
         this.hideIfNull = hideIfNull;
+    }
+
+    @Nullable
+    public Double getAspectRatio() {
+        return aspectRatio;
+    }
+
+    /**
+     * Ex: 3/5 <-> height / width
+     *
+     * @param aspectRatio
+     */
+    public void setAspectRatio(@Nullable Double aspectRatio) {
+        this.aspectRatio = aspectRatio;
+    }
+
+    public void setAspectRatioFromImage(@NotNull File image) {
+        final double aspectRatio1 = ImageUtils.getAspectRatio(image);
+        if (aspectRatio1 != 0) aspectRatio = aspectRatio1;
+    }
+
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+        if (aspectRatio != null) {
+            final int h = (int) (getMeasuredWidth() * aspectRatio);
+            setMeasuredDimension(widthMeasureSpec, h);
+        }
     }
 }

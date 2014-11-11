@@ -4,5 +4,11 @@
     <string name="loremIpsum">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce fermentum lacus placerat nulla tempor, eget volutpat lorem porta. Sed bibendum porttitor justo id vehicula. Aliquam erat volutpat. Nullam dapibus, velit in tempor vehicula, elit ante pellentesque nibh, vel ullamcorper massa purus in risus. Duis tristique erat ut lorem pellentesque, sed cursus sapien semper. Fusce ultrices fringilla quam, eu accumsan felis laoreet sed. Sed condimentum massa nulla, id pretium tortor ultricies vitae. Quisque arcu velit, molestie non tincidunt vitae, blandit et justo. Donec leo massa, pharetra ac metus eget, convallis convallis lacus. Duis quis porttitor tortor. Maecenas lacinia tincidunt tincidunt. Aenean porttitor leo vel arcu pretium ultricies.
 
 Curabitur suscipit tincidunt convallis. Aliquam non fringilla erat, sit amet gravida risus. Fusce aliquet vestibulum diam, a sollicitudin dolor interdum interdum. Nam at eleifend justo, quis iaculis libero. Integer aliquam hendrerit augue quis vehicula. Cras dignissim ligula convallis sollicitudin pellentesque. Ut condimentum leo eget arcu eleifend suscipit. Morbi vestibulum elit pulvinar, tempus sem ac, dictum lorem. Duis nulla dolor, facilisis fermentum neque eu, suscipit aliquet nulla. Nullam sed mi sed nisl dictum consectetur.</string>
+
+    <string name="smallLoremIpsum">Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+
+Fusce fermentum lacus placerat nulla tempor, eget volutpat lorem porta.
+
+Sed bibendum porttitor justo id vehicula.</string>
     <string name="back_button_cd">Back</string>
 </resources>
