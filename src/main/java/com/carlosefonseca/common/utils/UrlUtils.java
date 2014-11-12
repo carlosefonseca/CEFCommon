@@ -193,6 +193,47 @@ public final class UrlUtils {
             }
             return false;
         }
+
+        public static String getUserUrl(String username) {
+            if (username == null) return null;
+            return "https://twitter.com/" + (username.startsWith("@") ? username.substring(1) : username);
+        }
+    }
+
+    public static final class Instagram {
+        private Instagram() {}
+
+        private static final String TAG = CodeUtils.getTag(Twitter.class);
+        public static final String IG_USER_NAME_URL = "https?://instagram\\.com/([^/]+)/?$";
+        public static final Pattern IG_USER_NAME_REGEX = Pattern.compile(IG_USER_NAME_URL);
+
+
+        public static void openProfile(Context context, String userName) {
+            if (userName.startsWith("@")) userName = userName.substring(1);
+            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://instagram.com/_u/" + userName));
+            intent.setPackage("com.instagram.android");
+            List<ResolveInfo> infos = context.getPackageManager().queryIntentActivities(intent, 0);
+            if (infos.isEmpty()) {
+                intent = new Intent(Intent.ACTION_VIEW, Uri.parse(getUserUrl(userName)));
+            }
+            context.startActivity(intent);
+        }
+
+        public static boolean tryOpenProfileFromURL(Context context, @NotNull String url) {
+            if (url == null) return false;
+            final Matcher matcher = IG_USER_NAME_REGEX.matcher(url);
+            if (matcher.matches()) {
+                final String userName = matcher.group(1);
+                openProfile(context, userName);
+                return true;
+            }
+            return false;
+        }
+
+        public static String getUserUrl(String username) {
+            if (username == null) return null;
+            return "http://instagram.com/" + (username.startsWith("@") ? username.substring(1) : username);
+        }
     }
 
 
@@ -279,13 +320,14 @@ public final class UrlUtils {
     }
 
     /**
-     * Checks for apps that handle the URL in the following order: Facebook, Twitter, Maps, anything else.
+     * Checks for apps that handle the URL in the following order: Facebook, Twitter, Instagram, Maps, anything else.
      * @return True if the URL was handled and something opened; False if the URL could not be handled.
      */
     public static boolean tryAll(Context context, String url) {
         if (url == null) throw new RuntimeException("URL is null!");
         return Facebook.tryOpenUrl(context, url) || Twitter.tryOpenProfileFromURL(context, url) ||
-               Coordinates.tryOpenUrl(context, url) || UrlUtils.tryStartIntentForUrl(context, url);
+               Instagram.tryOpenProfileFromURL(context, url) || Coordinates.tryOpenUrl(context, url) ||
+               UrlUtils.tryStartIntentForUrl(context, url);
     }
 
     private static Pattern unfurlPattern;
