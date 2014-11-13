@@ -63,7 +63,8 @@ public class CFTabFragmentActivity extends CFActivity implements TabHost.OnTabCh
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
-        outState.putString("tab", mTabHost.getCurrentTabTag()); //save the tab selected
+        //save the tab selected
+        if (outState != null && mTabHost != null) outState.putString("tab", mTabHost.getCurrentTabTag());
         super.onSaveInstanceState(outState);
     }
 
