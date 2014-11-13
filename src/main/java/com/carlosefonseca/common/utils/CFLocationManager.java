@@ -111,7 +111,7 @@ public class CFLocationManager implements GooglePlayServicesClient.ConnectionCal
     }
 
     public void deactivate(@Nullable OnLocationChangedListener listener) {
-        if (listener == null || mapLocationChangedListener.equals(listener)) mapLocationChangedListener = null;
+        if (listener == null || (listener.equals(mapLocationChangedListener))) mapLocationChangedListener = null;
     }
 
     /* LISTENERS */
