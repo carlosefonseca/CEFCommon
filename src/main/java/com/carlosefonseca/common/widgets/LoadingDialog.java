@@ -10,10 +10,14 @@ import android.view.View;
 import android.view.Window;
 import android.widget.ImageView;
 import android.widget.TextView;
+import bolts.Continuation;
+import bolts.Task;
 import com.carlosefonseca.common.R;
 import com.carlosefonseca.common.utils.Log;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.concurrent.Callable;
 
 import static com.carlosefonseca.common.utils.CodeUtils.getTag;
 import static com.carlosefonseca.common.utils.CodeUtils.isMainThread;
@@ -110,6 +114,27 @@ public class LoadingDialog extends Dialog {
      */
     public LoadingDialog(Context context, String message) {
         this(context, DialogType.LOADING, message);
+    }
+
+    /**
+     * Creates a new Loading Dialog that runs a specified operation in background and dissmisses the dialog when
+     * finished.
+     *
+     * @param context  Current context.
+     * @param message  Message to display.
+     * @param callable A callable to be run in background.
+     * @param <T>      Return of the callable. Ignored.
+     */
+    public <T> LoadingDialog(Context context, String message, Callable<T> callable) {
+        this(context, message);
+        show();
+        Task.callInBackground(callable).continueWith(new Continuation<T, Void>() {
+            @Override
+            public Void then(Task<T> task) throws Exception {
+                LoadingDialog.this.dismissNow();
+                return null;
+            }
+        });
     }
 
     /**
