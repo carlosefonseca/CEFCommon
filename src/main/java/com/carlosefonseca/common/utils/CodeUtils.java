@@ -386,4 +386,10 @@ public final class CodeUtils {
             new Handler(Looper.getMainLooper()).post(runnable);
         }
     }
+
+    public static void setVisibility(int visibility, View...views) {
+        for (View view : views) {
+            view.setVisibility(visibility);
+        }
+    }
 }

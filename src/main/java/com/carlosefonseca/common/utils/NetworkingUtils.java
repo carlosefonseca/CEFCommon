@@ -16,6 +16,7 @@ import android.os.Handler;
 import android.os.NetworkOnMainThreadException;
 import de.greenrobot.event.EventBus;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.IOException;
@@ -357,6 +358,7 @@ public final class NetworkingUtils {
      *
      * @param filenameOrUrl File object pointing to
      */
+    @Nullable
     public static File pathOrUrlToFile(@NotNull String filenameOrUrl) {
         File file;
         if (filenameOrUrl.startsWith("http://")) {
