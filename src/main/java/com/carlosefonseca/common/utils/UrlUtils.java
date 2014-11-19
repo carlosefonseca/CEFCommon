@@ -38,8 +38,8 @@ public final class UrlUtils {
 
     public static String urlForTel(String number) {return "tel:" + number.trim().replaceAll("\\s*", "");}
 
-    public static String simplifyUrlForDisplay(String url) {
-        return url.trim().replaceFirst("https?://(www.)?", "").replace("?fref=ts", "");
+    public static String simplifyUrlForDisplay(@Nullable String url) {
+        return url == null ? null : url.trim().replaceFirst("https?://(www.)?", "").replace("?fref=ts", "");
     }
 
     /**

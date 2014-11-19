@@ -52,7 +52,10 @@ public class RembrandtView extends ImageView {
     }
 
     public synchronized RembrandtView setImageUrl(@Nullable String url) {
-        if (CodeUtils.equals(url, this.url)) return this;
+        if (CodeUtils.equals(url, this.url)) {
+            if (url == null) setVisibility(GONE);
+            return this;
+        }
         if (this.url != null) {
             getRembrandt().load(url).hideIfNull(hideIfNull).xFade(this);
         } else {
