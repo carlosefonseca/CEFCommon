@@ -278,10 +278,71 @@ public final class ResourceUtils {
      * @return The new, darker color.
      */
     public static int computeDarkerColor(int color, double darkness) {
-        float[] hsv = new float[3];
-        Color.colorToHSV(color, hsv);
-        hsv[2] = (float) Math.max(0, hsv[2] - darkness);
-        return Color.HSVToColor(hsv);
+        return new HSVColor(color).addValue((float) -darkness).color();
+    }
+
+
+    public static class HSVColor {
+
+        private float[] hsv;
+
+        short HUE = 0;
+        short SAT = 1;
+        short VAL = 2;
+
+        public HSVColor(int color) {
+            hsv = new float[3];
+            Color.colorToHSV(color, hsv);
+        }
+
+        public HSVColor addRGB(int value) {
+            int color = color();
+            int argb = Color.argb(Color.alpha(color),
+                                  Color.red(color) + value,
+                                  Color.green(color) + value,
+                                  Color.blue(color) + value);
+            Color.colorToHSV(argb, hsv);
+            return this;
+        }
+
+        public HSVColor addHue(double value) {
+            return add(HUE, value);
+        }
+
+        public HSVColor addSat(double value) {
+            return add(SAT, value);
+        }
+
+        public HSVColor addValue(double value) {
+            return add(VAL, value);
+        }
+
+        public HSVColor mulHue(double value) {
+            return mul(HUE, value);
+        }
+
+        public HSVColor mulSat(double value) {
+            return mul(SAT, value);
+        }
+
+        public HSVColor mulValue(double value) {
+            return mul(VAL, value);
+        }
+
+        private HSVColor add(short field, double value) {
+            hsv[field] = (float) Math.min(Math.max(0, hsv[field] + value), field == HUE ? 359 : 1);
+            return this;
+        }
+
+
+        private HSVColor mul(short field, double value) {
+            hsv[field] = (float) Math.min(Math.max(hsv[field] * value, 0), field == HUE ? 359 : 1);
+            return this;
+        }
+
+        public int color() {
+            return Color.HSVToColor(hsv);
+        }
     }
 
     public static String hexColor(int intColor) {
@@ -290,5 +351,21 @@ public final class ResourceUtils {
 
     public static void setPadding(int px, View... views) {
         for (View view : views) view.setPadding(px, px, px, px);
+    }
+
+    public static void setPaddingTop(View view, int value) {
+        view.setPadding(view.getPaddingLeft(), value, view.getPaddingRight(), view.getPaddingBottom());
+    }
+
+    public static void setPaddingLeft(View view, int value) {
+        view.setPadding(value, view.getPaddingTop(), view.getPaddingRight(), view.getPaddingBottom());
+    }
+
+    public static void setPaddingRight(View view, int value) {
+        view.setPadding(view.getPaddingLeft(), view.getPaddingTop(), value, view.getPaddingBottom());
+    }
+
+    public static void setPaddingBottom(View view, int value) {
+        view.setPadding(view.getPaddingLeft(), view.getPaddingTop(), view.getPaddingRight(), value);
     }
 }

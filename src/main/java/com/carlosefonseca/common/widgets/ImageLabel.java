@@ -15,8 +15,7 @@ import com.carlosefonseca.apache.commons.lang3.StringUtils;
 
 /**
  * Custom view that contains an {@link android.widget.ImageView} and an
- * {@link com.carlosefonseca.common.widgets.AutoResizeTextView}. It manages layout in a way that you can set only the
- * text or only the image and they will be centered. If both label and image are set, the label will be bellow the image.
+ * {@link com.carlosefonseca.common.widgets.AutoResizeTextView}. Allows centered image or text or image above text.
  * Selected state will be passed on to the views so you can attach selected background states or text color states.
  * Works nice on tabs.
  */
