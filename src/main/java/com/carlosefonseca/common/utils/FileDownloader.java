@@ -60,11 +60,7 @@ public final class FileDownloader {
                 IOUtils.copy(input, output);
             } catch (IOException e) {
                 // Network error. May retry
-                Log.i(TAG,
-                      String.format("(%d remain) Download of %s failed (will retry): %s",
-                                    sDownloadCount.get() - 1,
-                                    uri,
-                                    e.getMessage()));
+                Log.i(TAG, String.format("(%d remain) Download of %s failed (will retry): %s", sDownloadCount.get() - 1, uri, e.getMessage()));
                 download(download);
                 return path.getName();
             } finally {
@@ -80,29 +76,21 @@ public final class FileDownloader {
                 download(download);
                 return path.getName();
             }
-            Log.v(TAG,
-                  String.format("(%d remain) Downloaded %s%s",
-                                sDownloadCount.get() - 1,
-                                path.getName(),
-                                download.tries > 1 ? " " + download.tries + " tries" : "")
+            Log.v(TAG, String.format("(%d remain) Downloaded %s%s", sDownloadCount.get() - 1, path.getName(), download.tries > 1 ? " " + download.tries + " tries" : "")
             );
             return null; // SUCCESS!
         } catch (SocketException e) {
             // Network error. May retry
             Log.i(TAG,
-                  String.format("(%d remain) Download of %s failed (will retry): %s",
-                                sDownloadCount.get() - 1,
-                                uri,
-                                e.getMessage())
-            );
+                  String.format("(%d remain) Failed on  %s (will retry) %s: %s ", sDownloadCount.get() - 1, path.getName(), uri, e.getMessage()));
             download(download);
             return path.getName();
         } catch (FileNotFoundException e) {
             // URL is wrong - do not retry
-            Log.i(TAG, "(%d remain) Download of %s failed: %s", sDownloadCount.get() - 1, uri, e.getMessage());
+            Log.i(TAG, "(%d remain) Failed on  %s - %s - %s", sDownloadCount.get() - 1, path.getName(), uri, e.getMessage());
             return path.getName();
         } catch (Exception e) {
-            Log.i(TAG, "(%d remain) Download of %s failed", sDownloadCount.get() - 1, uri, e);
+            Log.i(TAG, "(%d remain) Failed on  %s - %s", sDownloadCount.get() - 1, path.getName(), uri, e);
             return path.getName();
         }
     }
@@ -215,7 +203,7 @@ public final class FileDownloader {
         protected void onPostExecute(@SuppressWarnings("ParameterNameDiffersFromOverriddenParameter") String failedFile) {
             if (failedFile != null) {
                 sNotifier.fileFailed(failedFile);
-                Log.d(TAG, "Download of " + failedFile + " failed");
+//                Log.d(TAG, "Download of " + failedFile + " failed");
             }
             final int i = sDownloadCount.decrementAndGet();
             sNotifier.queueUpdate(i);

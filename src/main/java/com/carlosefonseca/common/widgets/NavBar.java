@@ -305,6 +305,15 @@ public class NavBar extends LinearLayout {
         return color;
     }
 
+    /**
+     * Returns the currently set text color if set.
+     * @return Returns the currently set text color or NO_COLOR if the default color is being used.
+     */
+    public int getTextColor() {
+        return textColor;
+    }
+
+
 
     /**
      * Adds a right side button to the navbar. The other "addView" methods do the same as this.

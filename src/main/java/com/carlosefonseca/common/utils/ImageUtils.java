@@ -20,7 +20,6 @@ import android.view.animation.Animation;
 import android.widget.ImageView;
 import bolts.Task;
 import com.carlosefonseca.common.CFApp;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
@@ -37,6 +36,7 @@ import static android.os.Build.VERSION.SDK_INT;
 import static android.os.Build.VERSION_CODES.ICE_CREAM_SANDWICH;
 import static com.carlosefonseca.common.utils.CodeUtils.getTag;
 import static com.carlosefonseca.common.utils.NetworkingUtils.getLastSegmentOfURL;
+import static com.carlosefonseca.common.utils.NetworkingUtils.getFileFromUrlOrPath;
 
 /**
  * Util methods for manipulating images.
@@ -368,7 +368,7 @@ public final class ImageUtils {
     @Nullable
     public static Bitmap getPhotoFromFileOrAssets(String filenameOrUrl) {
         if (filenameOrUrl == null) return null;
-        return getPhotoFromFileOrAssets(convertSomeFileReferenceToFile(filenameOrUrl), -1, -1);
+        return getPhotoFromFileOrAssets(getFileFromUrlOrPath(filenameOrUrl), -1, -1);
     }
 
 
@@ -411,7 +411,7 @@ public final class ImageUtils {
     @Nullable
     public static Bitmap getCachedPhoto(final String filenameOrUrl, final int widthDp, final int heightDp) {
         if (filenameOrUrl == null) return null;
-        return getCachedPhoto(convertSomeFileReferenceToFile(filenameOrUrl), widthDp, heightDp, null);
+        return getCachedPhoto(getFileFromUrlOrPath(filenameOrUrl), widthDp, heightDp, null);
     }
 
     /**
@@ -433,32 +433,7 @@ public final class ImageUtils {
     @Nullable
     public static Bitmap getResizedIcon(final String filenameOrUrl, final int widthDp, final int heightDp) {
         if (filenameOrUrl == null) return null;
-        return getResizedIcon(convertSomeFileReferenceToFile(filenameOrUrl), widthDp, heightDp);
-    }
-
-    /**
-     * Converts filenames or URLs to an existing file on disk.
-     * <p/>
-     * Accepted {@code filenameOrUrl} options:
-     * <ul>
-     * <li>http://example.com/image.png</li>
-     * <li>/sdcard/somefolder/image.png</li>
-     * <li>image.png</li>
-     * </ul>
-     *
-     * @param filenameOrUrl File object pointing to
-     *
-     * @deprecated Use {@link com.carlosefonseca.common.utils.NetworkingUtils#pathOrUrlToFile(String)}
-     */
-    @Deprecated
-    public static File convertSomeFileReferenceToFile(@NotNull String filenameOrUrl) {
-        File file;
-        if (filenameOrUrl.startsWith("http://")) {
-            file = ResourceUtils.getFullPath(getLastSegmentOfURL(filenameOrUrl));
-        } else {
-            file = filenameOrUrl.startsWith("/") ? new File(filenameOrUrl) : ResourceUtils.getFullPath(filenameOrUrl);
-        }
-        return file;
+        return getResizedIcon(getFileFromUrlOrPath(filenameOrUrl), widthDp, heightDp);
     }
 
     /**
@@ -986,7 +961,6 @@ public final class ImageUtils {
      * @return Bitmap with new color.
      */
     public static Bitmap createRecoloredBitmap(Context c, int resId, int color) {
-
         BitmapFactory.Options opts = new BitmapFactory.Options();
         opts.inPreferredConfig = Bitmap.Config.ARGB_8888;
         Bitmap source = BitmapFactory.decodeResource(c.getResources(), resId);
@@ -1326,11 +1300,11 @@ public final class ImageUtils {
         protected int sizeOf(String key, Bitmap bitmap) {
             // The cache size will be measured in kilobytes rather than
             // number of items.
+            return sizeBitmap(bitmap);
+        }
 
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-                return bitmap.getAllocationByteCount();
-            }
-
+        public static int sizeBitmap(Bitmap bitmap) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) return bitmap.getAllocationByteCount();
             return bitmap.getRowBytes() * bitmap.getHeight();
         }
     }

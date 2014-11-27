@@ -108,7 +108,8 @@ public class GalleryPlus extends FrameLayout {
 
     protected void afterSetup(Collection<?> urls) {
 //        setSingleImage(urls.size() < 2);
-        hideIfEmpty(urls.size());
+        hideIfEmpty(galleryView.getAdapter().getCount());
+//        hideIfEmpty(urls.size());
         setArrowsForPage(galleryView.getCurrentItem());
     }
 

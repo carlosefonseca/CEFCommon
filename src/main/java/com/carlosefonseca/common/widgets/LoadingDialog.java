@@ -315,7 +315,7 @@ public class LoadingDialog extends Dialog {
     @Override
     public void onBackPressed() {
         if (cancelable) cancel();
-        else if (delegateBackToActivity) activity.onBackPressed();
+        else if (delegateBackToActivity && activity != null) activity.onBackPressed();
     }
 
     public void dismissNow() {

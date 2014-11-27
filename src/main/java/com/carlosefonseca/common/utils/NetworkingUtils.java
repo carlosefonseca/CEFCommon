@@ -359,7 +359,7 @@ public final class NetworkingUtils {
      * @param filenameOrUrl File object pointing to
      */
     @Nullable
-    public static File pathOrUrlToFile(@NotNull String filenameOrUrl) {
+    public static File getFileFromUrlOrPath(@NotNull String filenameOrUrl) {
         File file;
         if (filenameOrUrl.startsWith("http://")) {
             file = ResourceUtils.getFullPath(getLastSegmentOfURL(filenameOrUrl));

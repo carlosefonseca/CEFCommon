@@ -52,7 +52,7 @@ public class AudioPlayer {
 
         @Override
         public String toString() {
-            return "AudioNotif:" + status + "-" + (file != null ? file.getName() : "");
+            return String.format("AudioNotif:%-5s-%s", status, file != null ? file.getName() : "");
         }
 
         public static void PostStart(@Nullable File file) {
@@ -268,6 +268,10 @@ public class AudioPlayer {
             AudioPlayerNotification.PostStop(currentFile);
             play();
         }
+    }
+
+    public static File getCurrentFile() {
+        return currentFile;
     }
 
     static class MediaPlayerWrapper {
