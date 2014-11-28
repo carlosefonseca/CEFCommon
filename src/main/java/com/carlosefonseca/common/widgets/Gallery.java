@@ -67,11 +67,23 @@ public class Gallery extends ViewPager {
     public void setScaleType(ImageView.ScaleType scaleType) {this.scaleType = scaleType;}
 
     public void setupWithImageList(Collection<File> imageList) {
-        setAdapter(new GalleryAdapter(getContext(), scaleType).withFileList(imageList));
+        GalleryAdapter adapter = (GalleryAdapter) getAdapter();
+        if (adapter == null) {
+            setAdapter(new GalleryAdapter(getContext(), scaleType).withFileList(imageList));
+        } else {
+            adapter.withFileList(imageList);
+            adapter.notifyDataSetChanged();
+        }
     }
 
     public void setupWithUrlList(Collection<String> imageList) {
-        setAdapter(new GalleryAdapter(getContext(), scaleType).withUrlList(imageList));
+        GalleryAdapter adapter = (GalleryAdapter) getAdapter();
+        if (adapter == null) {
+            setAdapter(new GalleryAdapter(getContext(), scaleType).withUrlList(imageList));
+        } else {
+            adapter.withUrlList(imageList);
+            adapter.notifyDataSetChanged();
+        }
     }
 
     public void setImageOverlay(int res, int bottomMargin, int rightMargin) {
