@@ -265,7 +265,10 @@ public final class ResourceUtils {
     public static StateListDrawable createDualStateDrawable(Drawable normal, Drawable other, int state) {
         StateListDrawable stateListDrawable = new StateListDrawable();
         if (state != SELECTED) stateListDrawable.addState(new int[]{android.R.attr.state_pressed}, other);
-        if (state != PRESSED) stateListDrawable.addState(new int[]{android.R.attr.state_selected}, other);
+        if (state != PRESSED) {
+            stateListDrawable.addState(new int[]{android.R.attr.state_selected}, other);
+            stateListDrawable.addState(new int[]{android.R.attr.state_checked}, other);
+        }
         stateListDrawable.addState(StateSet.WILD_CARD, normal);
         return stateListDrawable;
     }

@@ -521,7 +521,7 @@ public class CFArrayAdapter<T> extends BaseAdapter implements Filterable {
     }
 
     public List<T> getItems() {
-        return new ArrayList<T>(mObjects);
+        return new ArrayList<>(mObjects);
     }
 
     /**
@@ -536,14 +536,14 @@ public class CFArrayAdapter<T> extends BaseAdapter implements Filterable {
 
             if (mOriginalValues == null) {
                 synchronized (mLock) {
-                    mOriginalValues = new ArrayList<T>(mObjects);
+                    mOriginalValues = new ArrayList<>(mObjects);
                 }
             }
 
             if (prefix == null || prefix.length() == 0) {
                 ArrayList<T> list;
                 synchronized (mLock) {
-                    list = new ArrayList<T>(mOriginalValues);
+                    list = new ArrayList<>(mOriginalValues);
                 }
                 results.values = list;
                 results.count = list.size();
@@ -553,10 +553,10 @@ public class CFArrayAdapter<T> extends BaseAdapter implements Filterable {
 
                 ArrayList<T> values;
                 synchronized (mLock) {
-                    values = new ArrayList<T>(mOriginalValues);
+                    values = new ArrayList<>(mOriginalValues);
                 }
 
-                final ArrayList<T> newValues = new ArrayList<T>();
+                final ArrayList<T> newValues = new ArrayList<>();
 
                 for (T value : values) {
                     if (filterItem(value, prefixString)) {

@@ -2,7 +2,7 @@ package com.carlosefonseca.common.widgets;
 
 
 import android.content.Context;
-import android.graphics.*;
+import android.graphics.Color;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.AttributeSet;
@@ -16,6 +16,7 @@ import bolts.Continuation;
 import bolts.Task;
 import com.carlosefonseca.common.R;
 import com.carlosefonseca.common.utils.*;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
@@ -36,6 +37,7 @@ public class Gallery extends ViewPager {
     private float density;
     private int duration = -1;
     private ImageView.ScaleType scaleType;
+    private Rembrandt rembrandt;
 
     public Gallery(Context context) {
         super(context);
@@ -66,24 +68,26 @@ public class Gallery extends ViewPager {
 
     public void setScaleType(ImageView.ScaleType scaleType) {this.scaleType = scaleType;}
 
-    public void setupWithImageList(Collection<File> imageList) {
+    @NotNull
+    public GalleryAdapter getOrCreateAdapter() {
         GalleryAdapter adapter = (GalleryAdapter) getAdapter();
         if (adapter == null) {
-            setAdapter(new GalleryAdapter(getContext(), scaleType).withFileList(imageList));
-        } else {
-            adapter.withFileList(imageList);
-            adapter.notifyDataSetChanged();
+            adapter = new GalleryAdapter(getContext(), scaleType, rembrandt);
+            setAdapter(adapter);
         }
+        return adapter;
+    }
+
+    public void setupWithImageList(Collection<File> imageList) {
+        GalleryAdapter adapter = getOrCreateAdapter();
+        adapter.withFileList(imageList);
+        adapter.notifyDataSetChanged();
     }
 
     public void setupWithUrlList(Collection<String> imageList) {
-        GalleryAdapter adapter = (GalleryAdapter) getAdapter();
-        if (adapter == null) {
-            setAdapter(new GalleryAdapter(getContext(), scaleType).withUrlList(imageList));
-        } else {
-            adapter.withUrlList(imageList);
-            adapter.notifyDataSetChanged();
-        }
+        GalleryAdapter adapter = getOrCreateAdapter();
+        adapter.withUrlList(imageList);
+        adapter.notifyDataSetChanged();
     }
 
     public void setImageOverlay(int res, int bottomMargin, int rightMargin) {
@@ -94,7 +98,7 @@ public class Gallery extends ViewPager {
 
     @Override
     public void setOnClickListener(OnClickListener listener) {
-        ((GalleryAdapter) getAdapter()).setClickListener(listener);
+        getOrCreateAdapter().setClickListener(listener);
     }
 
     public void setImageWidth(int width) {
@@ -102,25 +106,41 @@ public class Gallery extends ViewPager {
         getLayoutParams().height = (int) (width / 2 + 24 * density);
     }
 
+    public void setRembrandt(Rembrandt rembrandt) {
+        this.rembrandt = rembrandt;
+    }
 
-    public static class GalleryAdapter extends PagerAdapter {
+    public Rembrandt getRembrandt() {
+        return rembrandt;
+    }
+
+    public static class GalleryAdapter extends PagerAdapter implements OnClickListener {
 
         private final Rembrandt rembrandt;
         @Nullable private List<File> imageList;
         @Nullable private ArrayList<String> urlList;
         private LinkedList<View> recycledViews = new LinkedList<View>();
         private LayoutInflater layoutInflater;
-        private OnClickListener clickListener;
+        @Nullable private OnClickListener clickListener;
         protected int gallery_layout = R.layout.gallery_styled_image_view;
         private ImageView.ScaleType scaleType;
+
+        @Override
+        public void onClick(View v) {
+            if (clickListener != null) clickListener.onClick(v);
+        }
 
         public GalleryAdapter(Context context) {
             this(context, null);
         }
 
         protected GalleryAdapter(Context context, ImageView.ScaleType scaleType) {
+            this(context, scaleType, null);
+        }
+
+        protected GalleryAdapter(Context context, ImageView.ScaleType scaleType, @Nullable Rembrandt rembrandt) {
             this.scaleType = scaleType;
-            rembrandt = new Rembrandt(context);
+            this.rembrandt = rembrandt == null ? new Rembrandt(context) : rembrandt;
             layoutInflater = LayoutInflater.from(context);
         }
 
@@ -139,6 +159,18 @@ public class Gallery extends ViewPager {
             ListUtils.removeNullElements(this.urlList);
             this.imageList = null;
             return this;
+        }
+
+        @Override
+        public int getItemPosition(Object view) {
+            int i = -1;
+            Object object = ((View) view).getTag();
+            if (imageList != null && object instanceof File) {
+                i = imageList.indexOf(object);
+            } else if (urlList != null && object instanceof String) {
+                i = urlList.indexOf(object);
+            }
+            return i == -1 ? POSITION_NONE : i;
         }
 
         @Override
@@ -168,9 +200,13 @@ public class Gallery extends ViewPager {
                 final ImageView imageView = (ImageView) view.findViewById(R.id.image);
 
                 if (urlList != null) {
-                    rembrandt.load(urlList.get(position));
+                    String url = urlList.get(position);
+                    view.setTag(url);
+                    rembrandt.load(url);
                 } else if (imageList != null) {
-                    rembrandt.load(imageList.get(position));
+                    File file = imageList.get(position);
+                    view.setTag(file);
+                    rembrandt.load(file);
                 }
                 rembrandt.fadeIn(imageView).continueWith(new Continuation<Void, Void>() {
                     @Override
@@ -185,12 +221,16 @@ public class Gallery extends ViewPager {
                 }, Task.UI_THREAD_EXECUTOR).continueWith(TaskUtils.LogErrorContinuation);
 
                 imageView.setTag(position);
-                view.setOnClickListener(clickListener);
+                view.setOnClickListener(this);
 
                 container.addView(view);
             }
 
             return view;
+        }
+
+        private OnClickListener getClickListener() {
+            return clickListener;
         }
 
         @Override

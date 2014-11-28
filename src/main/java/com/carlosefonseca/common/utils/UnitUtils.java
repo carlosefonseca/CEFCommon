@@ -124,7 +124,9 @@ public final class UnitUtils {
                 double kilometerDistance = distanceToKilometers(meters);
 
                 if (kilometerDistance >= 1) {
-                    distanceString = numberFormatter.format(kilometerDistance);
+                    distanceString = kilometerDistance >= 10
+                                     ? "" + (int) kilometerDistance
+                                     : numberFormatter.format(kilometerDistance);
                     unitString = tf("km");
                 } else {
                     distanceString = numberFormatter.format(meters);
@@ -143,7 +145,9 @@ public final class UnitUtils {
                     distanceString = numberFormatter.format(yardDistance);
                     unitString = tf("yds");
                 } else {
-                    distanceString = numberFormatter.format(milesDistance);
+                    distanceString = milesDistance >= 10
+                                     ? "" + (int) milesDistance
+                                     : numberFormatter.format(milesDistance);
                     unitString = (milesDistance > 1.0 && milesDistance < 1.1) ? tf("mile") : tf("miles");
                 }
                 break;
