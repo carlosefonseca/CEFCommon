@@ -21,6 +21,7 @@ import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
+import android.webkit.*;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -83,6 +84,41 @@ public final class CodeUtils {
             hashCode = 31 * hashCode + (element == null ? 0 : element.hashCode());
         }
         return hashCode;
+    }
+
+    @SuppressLint("SetJavaScriptEnabled")
+    public static void setupWebView(WebView webView) {
+        final Context context = webView.getContext();
+        WebSettings webSettings = webView.getSettings();
+        webSettings.setJavaScriptEnabled(true);
+        webSettings.setDomStorageEnabled(true);
+        webSettings.setDatabaseEnabled(true);
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) {
+            webSettings.setDatabasePath(context.getFilesDir() + "/databases/");
+        }
+        webSettings.setAppCacheEnabled(true);
+        webSettings.setUseWideViewPort(true);
+        webSettings.setGeolocationEnabled(true);
+        webSettings.setGeolocationDatabasePath(context.getFilesDir() + "/databases/");
+
+        // Force links and redirects to open in the WebView instead of in a browser
+        webView.setWebViewClient(new WebViewClient() {
+            @Override
+            public boolean shouldOverrideUrlLoading(WebView view, String url) {
+                if (url.startsWith("http")) {
+                    view.loadUrl(url);
+                } else {
+                    UrlUtils.tryStartIntentForUrl(context, url);
+                }
+                return true;
+            }
+        });
+        webView.setWebChromeClient(new WebChromeClient() {
+            @Override
+            public void onGeolocationPermissionsShowPrompt(String origin, GeolocationPermissions.Callback callback) {
+                callback.invoke(origin, true, false);
+            }
+        });
     }
 
     public interface RunnableWithView<T extends View> {
