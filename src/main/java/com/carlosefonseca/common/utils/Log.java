@@ -159,7 +159,7 @@ public final class Log {
     }
 
     public static int e(String msg) {
-        return sRemoteMinPriority <= ERROR || consoleLogging ? e(tagP(), msg, null) : -1;
+        return sRemoteMinPriority <= ERROR || consoleLogging ? e(tagP(), msg, (Object[])null) : -1;
     }
 
     public static int wtf(String msg) {

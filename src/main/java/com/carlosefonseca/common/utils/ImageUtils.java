@@ -59,7 +59,7 @@ public final class ImageUtils {
             density = c.getResources().getDisplayMetrics().density;
             screenLayout = c.getResources().getConfiguration().screenLayout & Configuration.SCREENLAYOUT_SIZE_MASK;
         } catch (Exception e) {
-            Log.w(TAG, "" + e.getMessage(), null);
+            Log.w(TAG, "" + e.getMessage(), (Object[])null);
         }
     }
 
