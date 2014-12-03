@@ -395,11 +395,14 @@ public final class UrlUtils {
         });
     }
 
-    public static void clickableTextOnTextView(TextView textView, @Nullable String text) {
-        if (text == null) return;
-        text = text.replaceAll("(https?://[^\\s]+)", "<a href='$1'>$1</a>").replaceAll("\\n", "<br/>");
-        textView.setText(Html.fromHtml(text));
-        textView.setMovementMethod(LinkMovementMethod.getInstance());
+    public static void clickableLinksOnTextView(TextView textView, @Nullable String text) {
+        if (text == null) {
+            textView.setText(null);
+        } else {
+            text = text.replaceAll("(https?://[^\\s]+)", "<a href='$1'>$1</a>").replaceAll("\\n", "<br/>");
+            textView.setText(Html.fromHtml(text));
+            textView.setMovementMethod(LinkMovementMethod.getInstance());
+        }
     }
 
     public static Intent sendEmail(@Nullable String to, @Nullable String subject, @Nullable String content) {
