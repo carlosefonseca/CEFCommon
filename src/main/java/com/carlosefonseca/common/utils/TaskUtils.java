@@ -45,12 +45,14 @@ public final class TaskUtils {
 
     public static void logAggregateException(Exception error) {
         if (error != null) {
-            Log.w(TAG, error);
             if (error instanceof AggregateException) {
+                Log.w(TAG, new RuntimeException(error.getMessage()));
                 for (Exception exception : ((AggregateException) error).getErrors()) {
                     Log.w(TAG, "--------");
                     Log.w(TAG, exception);
                 }
+            } else {
+                Log.w(TAG, error);
             }
         }
     }

@@ -50,6 +50,7 @@ public final class DownloadURLTask  {
             url = possiblyShortenedURL;
         }
         connection.connect();
+        Log.d(TAG, url.toString());
 
         if (isFile) {
             // this will be useful so that you can show a typical 0-100% progress bar
