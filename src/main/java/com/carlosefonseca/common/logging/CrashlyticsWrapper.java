@@ -4,8 +4,10 @@ import android.content.Context;
 import com.carlosefonseca.common.utils.CodeUtils;
 import com.carlosefonseca.common.utils.Log;
 
+import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 public class CrashlyticsWrapper implements Log.RemoteLogger {
     private static final java.lang.String TAG = CodeUtils.getTag(CrashlyticsWrapper.class);
@@ -26,12 +28,16 @@ public class CrashlyticsWrapper implements Log.RemoteLogger {
             final Class<?> crashlytics = getCrashlyticsClass();
             final Constructor<?> crashlyticsConstructor = crashlytics.getDeclaredConstructor((Class[]) null);
             Object newCrashlyticsInstance = crashlyticsConstructor.newInstance((Object[]) null);
-            fabric.getDeclaredMethod("with").invoke(null, context, newCrashlyticsInstance);
+            Class<?> kitArray = Class.forName("[Lio.fabric.sdk.android.Kit;");
+            Object[] array = (Object[]) Array.newInstance(Class.forName("io.fabric.sdk.android.Kit"), 1);
+            array[0] = newCrashlyticsInstance;
+            Method withMethod = fabric.getDeclaredMethod("with", Context.class, kitArray);
+            withMethod.invoke(null, context, array);
         } catch (ClassNotFoundException e) {
-            Log.w(TAG, "You should call CrashlyticsExists() first!");
-            Log.e(TAG, "" + e.getMessage(), e);
+            android.util.Log.w(TAG, "You should call CrashlyticsExists() first!");
+            android.util.Log.e(TAG, "" + e.getMessage(), e);
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-            Log.e(TAG, "" + e.getMessage(), e);
+            android.util.Log.e(TAG, "" + e.getMessage(), e);
         }
     }
 
@@ -40,7 +46,7 @@ public class CrashlyticsWrapper implements Log.RemoteLogger {
         return mCrashlyticsClass;
     }
 
-    private Class<?> getFabricClass() throws ClassNotFoundException {
+    private static Class<?> getFabricClass() throws ClassNotFoundException {
         return Class.forName("io.fabric.sdk.android.Fabric");
     }
 
@@ -78,42 +84,70 @@ public class CrashlyticsWrapper implements Log.RemoteLogger {
         return false;
     }
 
-    static class CrashlyticsReflex {
+    static final class CrashlyticsReflex {
+
+        private static Method mSetInt;
+        private static Method mSetDouble;
+        private static Method mSetBool;
+        private static Method mSetString;
+        private static Method mSetUserEmail;
+        private static Method mLog;
+        private static Method mLogException;
+
+        private CrashlyticsReflex() {}
 
         static void setUserEmail(String email) {
-            callMethod("setUserEmail", email);
+            if (mSetUserEmail == null) mSetUserEmail = getMethod("setUserEmail", String.class);
+            callMethod(mSetUserEmail, email);
         }
 
         static void setString(String key, String value) {
-            callMethod("setString", key, value);
+            if (mSetString == null) mSetString = getMethod("setString", String.class, String.class);
+            callMethod(mSetString, key, value);
         }
 
-        static void setBool(String key, Boolean value) {
-            callMethod("setBool", key, value);
+        static void setBool(String key, boolean value) {
+            if (mSetBool == null) mSetBool = getMethod("setBool", String.class, Boolean.TYPE);
+            callMethod(mSetBool, key, value);
         }
 
-        static void setDouble(String key, Double value) {
-            callMethod("setDouble", key, value);
+        static void setDouble(String key, double value) {
+            if (mSetDouble == null) mSetDouble = getMethod("setDouble", String.class, Double.TYPE);
+            callMethod(mSetDouble, key, value);
         }
 
-        static void setInt(String key, Integer value) {
-            callMethod("setInt", key, value);
+        static void setInt(String key, int value) {
+            if (mSetInt == null) mSetInt = getMethod("setInt", String.class, Integer.TYPE);
+            callMethod(mSetInt, key, value);
         }
 
         static void log(String message) {
-            callMethod("log", message);
+            if (mLog == null) mLog = getMethod("log", String.class);
+            callMethod(mLog, message);
         }
 
         static void logException(Throwable throwable) {
-            callMethod("logException", throwable);
+            if (mLogException == null) mLogException = getMethod("logException", Throwable.class);
+            callMethod(mLogException, throwable);
         }
 
-        private static void callMethod(String methodName, Object... args) {
+        private static void callMethod(Method method, Object... args) {
             try {
-                mCrashlyticsClass.getDeclaredMethod(methodName).invoke(null, args);
-            } catch (IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
-                Log.e(TAG, "" + e.getMessage(), e);
+                method.invoke(null, args);
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                android.util.Log.e(TAG, "" + e.getMessage(), e);
             }
+        }
+
+        private static Method getMethod(String methodName, Class... classes) {
+            Method method;
+            try {
+                method = mCrashlyticsClass.getDeclaredMethod(methodName, classes);
+                return method;
+            } catch (NoSuchMethodException e) {
+                android.util.Log.e(TAG, "" + e.getMessage(), e);
+            }
+            return null;
         }
     }
 }
