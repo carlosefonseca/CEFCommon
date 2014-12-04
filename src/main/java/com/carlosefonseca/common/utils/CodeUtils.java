@@ -99,6 +99,10 @@ public final class CodeUtils {
         webSettings.setAppCacheEnabled(true);
         webSettings.setUseWideViewPort(true);
         webSettings.setGeolocationEnabled(true);
+        webSettings.setSupportZoom(true);
+        webSettings.setBuiltInZoomControls(true);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) webSettings.setDisplayZoomControls(false);
+        webView.zoomOut();
         webSettings.setGeolocationDatabasePath(context.getFilesDir() + "/databases/");
 
         // Force links and redirects to open in the WebView instead of in a browser
