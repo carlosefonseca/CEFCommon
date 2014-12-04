@@ -4,6 +4,7 @@ import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
 import android.widget.Toast;
+import bolts.Task;
 import com.carlosefonseca.common.CFApp;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesClient;
@@ -14,6 +15,7 @@ import com.google.android.gms.maps.LocationSource;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 
 public class CFLocationManager implements GooglePlayServicesClient.ConnectionCallbacks,
@@ -29,6 +31,7 @@ public class CFLocationManager implements GooglePlayServicesClient.ConnectionCal
     protected Handler handler;
     private boolean connectionRequested;
     private Set<OnLocationChangedListener> listeners = new HashSet<>();
+    @Nullable private Set<OnLocationChangedListener> oneTimeListeners = new HashSet<>();
     private Location location;
     protected LocationClient mLocationClient;
     private boolean mShouldBeLocating;
@@ -121,12 +124,23 @@ public class CFLocationManager implements GooglePlayServicesClient.ConnectionCal
         Log.d(TAG, "Listeners++: " + listeners.size());
     }
 
+    /**
+     * Adds a listener that will only receive one location.
+     */
+    public void addOneTimeListener(OnLocationChangedListener listener) {
+        if (oneTimeListeners == null) {
+            oneTimeListeners = new HashSet<>();
+        }
+        oneTimeListeners.add(listener);
+        Log.d(TAG, "OneTimeListenerListeners++: " + oneTimeListeners.size());
+    }
+
     public void removeListener(OnLocationChangedListener listener) {
         if (listeners != null && listener != null) {
             listeners.remove(listener);
             Log.d(TAG, "Listeners--: " + listeners.size());
         }
-        if (listeners.isEmpty()) stop();
+        if (listeners == null || listeners.isEmpty()) stop();
     }
 
     /**
@@ -157,6 +171,13 @@ public class CFLocationManager implements GooglePlayServicesClient.ConnectionCal
         for (OnLocationChangedListener listener : listeners) {
             listener.onLocationChanged(location);
         }
+        if (oneTimeListeners != null) {
+            for (Iterator<OnLocationChangedListener> iterator = oneTimeListeners.iterator(); iterator.hasNext(); ) {
+                iterator.next().onLocationChanged(location);
+                iterator.remove();
+            }
+            oneTimeListeners = null;
+        }
     }
 
     public void start() {
@@ -182,6 +203,31 @@ public class CFLocationManager implements GooglePlayServicesClient.ConnectionCal
                    : location;
         }
         return location;
+    }
+
+    public Task<Location> getLastLocationTask() {
+        Location location1 = null;
+        if (mLocationClient != null && mLocationClient.isConnected()) {
+            @Nullable Location googleLoc = mLocationClient.getLastLocation();
+            location1 = location == null || (googleLoc != null && googleLoc.getTime() > location.getTime())
+                        ? googleLoc
+                        : location;
+        }
+
+        if (location1 != null) return Task.forResult(location1);
+
+        if (location != null) return Task.forResult(location);
+
+        final Task<Location>.TaskCompletionSource taskCompletionSource = Task.create();
+
+        addOneTimeListener(new OnLocationChangedListener() {
+            @Override
+            public void onLocationChanged(Location location) {
+                taskCompletionSource.setResult(location);
+            }
+        });
+
+        return taskCompletionSource.getTask();
     }
 
     public int getFrequencyMillis() {
