@@ -129,13 +129,18 @@ public class MSDrawable {
         return this;
     }
 
+    public MSDrawable normal(Drawable drawable) {
+        set(drawable, 0, NORMAL);
+        return this;
+    }
+
     public MSDrawable normal(Shape shape) {
         set(shape, 0, NORMAL);
         return this;
     }
 
     public MSDrawable normalRes(int res) {
-        set((BitmapDrawable) mContext.getResources().getDrawable(res), 0, NORMAL);
+        set(mContext.getResources().getDrawable(res), 0, NORMAL);
         return this;
     }
 
@@ -155,7 +160,7 @@ public class MSDrawable {
     }
 
     public MSDrawable normalRes(int res, int color) {
-        set((BitmapDrawable) mContext.getResources().getDrawable(res), color, NORMAL);
+        set(mContext.getResources().getDrawable(res), color, NORMAL);
         return this;
     }
 
@@ -172,13 +177,18 @@ public class MSDrawable {
         return this;
     }
 
+    public MSDrawable pressed(Drawable drawable) {
+        set(drawable, 0, PRESSED);
+        return this;
+    }
+
     public MSDrawable pressed(Shape shape) {
         set(shape, 0, PRESSED);
         return this;
     }
 
     public MSDrawable pressedRes(int res) {
-        set((BitmapDrawable) mContext.getResources().getDrawable(res), 0, PRESSED);
+        set(mContext.getResources().getDrawable(res), 0, PRESSED);
         return this;
     }
 
@@ -203,7 +213,7 @@ public class MSDrawable {
     }
 
     public MSDrawable pressedRes(int res, int color) {
-        set((BitmapDrawable) mContext.getResources().getDrawable(res), color, PRESSED);
+        set(mContext.getResources().getDrawable(res), color, PRESSED);
         return this;
     }
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -219,13 +229,18 @@ public class MSDrawable {
         return this;
     }
 
+    public MSDrawable selected(Drawable drawable) {
+        set(drawable, 0, SELECTED);
+        return this;
+    }
+
     public MSDrawable selected(Shape shape) {
         set(shape, 0, SELECTED);
         return this;
     }
 
     public MSDrawable selectedRes(int res) {
-        set((BitmapDrawable) mContext.getResources().getDrawable(res), 0, SELECTED);
+        set(mContext.getResources().getDrawable(res), 0, SELECTED);
         return this;
     }
 
@@ -245,7 +260,7 @@ public class MSDrawable {
     }
 
     public MSDrawable selectedRes(int res, int color) {
-        set((BitmapDrawable) mContext.getResources().getDrawable(res), color, SELECTED);
+        set(mContext.getResources().getDrawable(res), color, SELECTED);
         return this;
     }
 
@@ -263,13 +278,18 @@ public class MSDrawable {
         return this;
     }
 
+    public MSDrawable disabled(Drawable drawable) {
+        set(drawable, 0, DISABLED);
+        return this;
+    }
+
     public MSDrawable disabled(Shape shape) {
         set(shape, 0, DISABLED);
         return this;
     }
 
     public MSDrawable disabledRes(int res) {
-        set((BitmapDrawable) mContext.getResources().getDrawable(res), 0, DISABLED);
+        set(mContext.getResources().getDrawable(res), 0, DISABLED);
         return this;
     }
 
@@ -289,7 +309,7 @@ public class MSDrawable {
     }
 
     public MSDrawable disabledRes(int res, int color) {
-        set((BitmapDrawable) mContext.getResources().getDrawable(res), color, DISABLED);
+        set(mContext.getResources().getDrawable(res), color, DISABLED);
         return this;
     }
 
@@ -298,7 +318,7 @@ public class MSDrawable {
     /**
      * Always returns a new instance, but caches contents.
      */
-    public Drawable build() {
+    public StateListDrawable build() {
         switch (mMode) {
             case COLORS:
                 return createFromDrawables(getColor(NORMAL), getColor(PRESSED), getColor(SELECTED), getColor(DISABLED));
@@ -391,12 +411,16 @@ public class MSDrawable {
         StateListDrawable stateListDrawable = new StateListDrawable();
 
         if (disabled == null) {
-            if (selected != null) stateListDrawable.addState(new int[]{state_selected}, selected);
+            if (selected != null) {
+                stateListDrawable.addState(new int[]{state_selected}, selected);
+                stateListDrawable.addState(new int[]{state_checked}, selected);
+            }
             if (pressed != null) stateListDrawable.addState(new int[]{state_pressed}, pressed);
             stateListDrawable.addState(StateSet.WILD_CARD, normal);
         } else {
             if (selected != null) {
                 stateListDrawable.addState(new int[]{state_selected, state_enabled}, selected);
+                stateListDrawable.addState(new int[]{state_checked, state_enabled}, selected);
             }
             if (pressed != null) {
                 stateListDrawable.addState(new int[]{state_pressed, state_enabled}, pressed);
@@ -409,7 +433,7 @@ public class MSDrawable {
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    private void set(BitmapDrawable drawable, int color, int state) {
+    private void set(Drawable drawable, int color, int state) {
         set(drawable, null, null, state, color);
     }
 
@@ -425,16 +449,22 @@ public class MSDrawable {
         set(null, null, null, state, color);
     }
 
-    private void set(@Nullable BitmapDrawable bitmapDrawable, @Nullable Bitmap bitmap, @Nullable Shape shape, int state, int color) {
+    private void set(@Nullable Drawable bitmapDrawable, @Nullable Bitmap bitmap, @Nullable Shape shape, int state, int color) {
         if (bitmapDrawable != null || bitmap != null || shape != null) {
             mMode = Mode.MULTI_ICON;
         }
         mColors[state] = color;
-        mBitmapDrawables[state] = bitmapDrawable;
-        mBitmaps[state] = bitmap;
 //        mShapes[state] = shape;
         mShapeDrawables[state] = shape != null ? new ShapeDrawable(shape) : null;
-        mFinal[state] = null;
+        if (bitmapDrawable instanceof BitmapDrawable) {
+            mBitmapDrawables[state] = (BitmapDrawable) bitmapDrawable;
+            mBitmaps[state] = bitmap;
+            mFinal[state] = null;
+        } else {
+            mBitmapDrawables[state] = null;
+            mBitmaps[state] = null;
+            mFinal[state] = bitmapDrawable;
+        }
     }
 
     private Bitmap getBitmap(int state) {
