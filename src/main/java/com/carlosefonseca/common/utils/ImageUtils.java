@@ -1304,8 +1304,19 @@ public final class ImageUtils {
         }
 
         public static int sizeBitmap(Bitmap bitmap) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) return bitmap.getAllocationByteCount();
-            return bitmap.getRowBytes() * bitmap.getHeight();
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                return bitmap.getAllocationByteCount();
+            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR1) {
+                return bitmap.getByteCount();
+            } else {
+                return bitmap.getRowBytes() * bitmap.getHeight();
+            }
+        }
+
+        @Override
+        protected void entryRemoved(boolean evicted, String key, Bitmap oldValue, Bitmap newValue) {
+            oldValue.recycle();
+            super.entryRemoved(evicted, key, oldValue, newValue);
         }
     }
 
