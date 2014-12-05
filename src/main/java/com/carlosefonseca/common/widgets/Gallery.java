@@ -229,6 +229,7 @@ public class Gallery extends ViewPager {
             return view;
         }
 
+        @Nullable
         private OnClickListener getClickListener() {
             return clickListener;
         }

@@ -8,7 +8,39 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-public class ViewUtils {
+public final class ViewUtils {
+    private ViewUtils() {}
+
+    public static void setPadding(int px, View... views) {
+        for (View view : views) view.setPadding(px, px, px, px);
+    }
+
+    public static void setPaddingTop(View view, int value) {
+        view.setPadding(view.getPaddingLeft(), value, view.getPaddingRight(), view.getPaddingBottom());
+    }
+
+    public static void setPaddingLeft(View view, int value) {
+        view.setPadding(value, view.getPaddingTop(), view.getPaddingRight(), view.getPaddingBottom());
+    }
+
+    public static void setPaddingRight(View view, int value) {
+        view.setPadding(view.getPaddingLeft(), view.getPaddingTop(), value, view.getPaddingBottom());
+    }
+
+    public static void setPaddingBottom(View view, int value) {
+        view.setPadding(view.getPaddingLeft(), view.getPaddingTop(), view.getPaddingRight(), value);
+    }
+
+    /**
+     * Add value to Padding. Does getPaddingX() + X.
+     */
+    public static void setPaddingRelative(View view, int left, int top, int right, int bottom) {
+        view.setPadding(view.getPaddingLeft() + left,
+                        view.getPaddingTop() + top,
+                        view.getPaddingRight() + right,
+                        view.getPaddingBottom() + bottom);
+    }
+
     public static class ButtonHighlighterOnTouchListener implements View.OnTouchListener {
 
         private static final int TRANSPARENT_GREY = Color.argb(0, 185, 185, 185);
