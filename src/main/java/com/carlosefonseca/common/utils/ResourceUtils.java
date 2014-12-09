@@ -17,9 +17,14 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.HashSet;
 
 @SuppressWarnings("UnusedDeclaration")
 public final class ResourceUtils {
+    private static final java.lang.String TAG = CodeUtils.getTag(ResourceUtils.class);
+
     private ResourceUtils() {}
 
     public static String s(int res) {
@@ -282,6 +287,17 @@ public final class ResourceUtils {
      */
     public static int computeDarkerColor(int color, double darkness) {
         return new HSVColor(color).addValue((float) -darkness).color();
+    }
+
+    public static HashSet<String> getAssets(Context context1) {
+        HashSet<String> assets;
+        try {
+            assets = new HashSet<>(Arrays.asList(context1.getAssets().list("")));
+        } catch (IOException e) {
+            Log.e(TAG, "" + e.getMessage(), e);
+            assets = new HashSet<>();
+        }
+        return assets;
     }
 
 

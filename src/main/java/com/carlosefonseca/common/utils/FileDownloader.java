@@ -113,6 +113,16 @@ public final class FileDownloader {
         boolean canRetry() {
             return tries < 5;
         }
+
+        @Override
+        public int hashCode() {
+            return CodeUtils.hashCode(68, file);
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            return o instanceof Download && file.equals(((Download) o).file);
+        }
     }
 
     public static void downloadFiles(final Collection<Download> toDownload) {
