@@ -8,9 +8,10 @@ import bolts.Task;
 import com.carlosefonseca.common.CFApp;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesClient;
-import com.google.android.gms.location.LocationClient;
+import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.LocationSource;
 import org.jetbrains.annotations.Nullable;
 
@@ -21,7 +22,9 @@ import java.util.Set;
 public class CFLocationManager implements GooglePlayServicesClient.ConnectionCallbacks,
                                           GooglePlayServicesClient.OnConnectionFailedListener,
                                           LocationListener,
-                                          LocationSource {
+                                          LocationSource,
+                                          GoogleApiClient.ConnectionCallbacks,
+                                          GoogleApiClient.OnConnectionFailedListener {
     private static final String TAG = CodeUtils.getTag(CFLocationManager.class);
 
     private LocationRequest mRequest;
@@ -33,11 +36,12 @@ public class CFLocationManager implements GooglePlayServicesClient.ConnectionCal
     private Set<OnLocationChangedListener> listeners = new HashSet<>();
     @Nullable private Set<OnLocationChangedListener> oneTimeListeners = new HashSet<>();
     private Location location;
-    protected LocationClient mLocationClient;
     private boolean mShouldBeLocating;
+    protected GoogleApiClient mGoogleApiClient;
 
-    private static void toast(String text) {
+    private static void toastLog(String text) {
         if (CFApp.isTestDevice()) Toast.makeText(CFApp.getContext(), text, Toast.LENGTH_SHORT).show();
+        Log.d(TAG, text);
     }
 
     /* GOOGLE */
@@ -48,15 +52,19 @@ public class CFLocationManager implements GooglePlayServicesClient.ConnectionCal
      * @return True if LocationClient is ready, false if connecting.
      */
     boolean setUpLocationClientIfNeeded() {
-        if (mLocationClient == null) {
-            mLocationClient = new LocationClient(CFApp.getContext(), this, this);
+        if (mGoogleApiClient == null) {
+            mGoogleApiClient = new GoogleApiClient.Builder(CFApp.getContext()).addApi(LocationServices.API)
+                                                                              .addConnectionCallbacks(this)
+                                                                              .addOnConnectionFailedListener(this)
+                                                                              .build();
+            mGoogleApiClient.connect();
         }
 
-        if (mLocationClient.isConnected()) return true;
+        if (mGoogleApiClient.isConnected()) return true;
 
-        if (!mLocationClient.isConnecting()) {
+        if (!mGoogleApiClient.isConnecting()) {
             connectionRequested = true;
-            mLocationClient.connect();
+            mGoogleApiClient.connect();
         }
         return false;
     }
@@ -65,36 +73,39 @@ public class CFLocationManager implements GooglePlayServicesClient.ConnectionCal
     public void onConnected(Bundle connectionHint) {
         connectionRequested = false;
         if (mShouldBeLocating) startLocationUpdates();
-        toast("onConnected");
+        toastLog("GooglePlay: Connected");
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+        toastLog("GooglePlay: Connection Suspended");
     }
 
     private void startLocationUpdates() {
-        mLocationClient.requestLocationUpdates(getLocationRequest(), this);
+        LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, getLocationRequest(), this);
     }
 
     private void stopLocationUpdates() {
-        if (mLocationClient != null && mLocationClient.isConnected()) mLocationClient.removeLocationUpdates(this);
+        LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
     }
 
 
     @Override
     public void onDisconnected() {
         connectionRequested = false;
-        toast("onDisconnected");
+        toastLog("GooglePlay: Disconnected");
     }
 
     @Override
     public void onConnectionFailed(ConnectionResult connectionResult) {
         connectionRequested = false;
-        Toast.makeText(CFApp.getContext(), "Error on Location Services!", Toast.LENGTH_SHORT).show();
-
+        toastLog("GooglePlay: ConnectionFailed!");
     }
 
     public void clear() { }
 
     public boolean hasStarted() {
-        return (mLocationClient != null &&
-                (mLocationClient.isConnected() || mLocationClient.isConnecting() || connectionRequested));
+        return ((mGoogleApiClient.isConnected() || mGoogleApiClient.isConnecting() || connectionRequested));
     }
 
     /* (MAP) LOCATION SOURCE */
@@ -196,8 +207,8 @@ public class CFLocationManager implements GooglePlayServicesClient.ConnectionCal
 
     @Nullable
     public Location getLastLocation() {
-        if (mLocationClient != null && mLocationClient.isConnected()) {
-            @Nullable Location googleLoc = mLocationClient.getLastLocation();
+        if (mGoogleApiClient.isConnected()) {
+            @Nullable Location googleLoc = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
             return location == null || (googleLoc != null && googleLoc.getTime() > location.getTime())
                    ? googleLoc
                    : location;
@@ -207,8 +218,8 @@ public class CFLocationManager implements GooglePlayServicesClient.ConnectionCal
 
     public Task<Location> getLastLocationTask() {
         Location location1 = null;
-        if (mLocationClient != null && mLocationClient.isConnected()) {
-            @Nullable Location googleLoc = mLocationClient.getLastLocation();
+        if (mGoogleApiClient.isConnected()) {
+            @Nullable Location googleLoc = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
             location1 = location == null || (googleLoc != null && googleLoc.getTime() > location.getTime())
                         ? googleLoc
                         : location;
@@ -244,12 +255,9 @@ public class CFLocationManager implements GooglePlayServicesClient.ConnectionCal
 
     public void close() {
         stop();
-        if (mLocationClient != null) {
-            mLocationClient.unregisterConnectionCallbacks(this);
-            mLocationClient.unregisterConnectionFailedListener(this);
-            mLocationClient.disconnect();
-            mLocationClient = null;
-        }
+        mGoogleApiClient.unregisterConnectionCallbacks(this);
+        mGoogleApiClient.unregisterConnectionFailedListener(this);
+        mGoogleApiClient.disconnect();
         listeners = null;
         mapLocationChangedListener = null;
     }
