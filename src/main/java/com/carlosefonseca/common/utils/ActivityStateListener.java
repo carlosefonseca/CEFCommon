@@ -44,9 +44,9 @@ public class ActivityStateListener {
     }
 
     public void onStop() {
-        if (mRunning) {
+        final boolean finishing = mActivity.isFinishing();
+        if (mRunning || finishing) {
             mRunning = false;
-            final boolean finishing = mActivity.isFinishing();
             for (Interface mListener : mListeners) mListener.onStop(finishing);
             if (finishing) mListeners.clear();
         }
@@ -56,5 +56,17 @@ public class ActivityStateListener {
         public void onStart();
 
         public void onStop(boolean isFinishing);
+    }
+
+    public static class SimpleInterface implements Interface {
+        @Override
+        public void onStart() {
+
+        }
+
+        @Override
+        public void onStop(boolean isFinishing) {
+
+        }
     }
 }

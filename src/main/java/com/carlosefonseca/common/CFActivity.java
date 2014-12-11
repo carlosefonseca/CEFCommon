@@ -1,9 +1,9 @@
 package com.carlosefonseca.common;
 
-import android.app.Activity;
 import android.os.Build;
 import android.support.v4.app.FragmentActivity;
 import android.widget.Toast;
+import com.carlosefonseca.common.utils.ActivityStateListener;
 import com.carlosefonseca.common.utils.Log;
 import com.carlosefonseca.common.widgets.LoadingDialog;
 import com.readystatesoftware.systembartint.SystemBarTintManager;
@@ -26,8 +26,9 @@ public class CFActivity extends FragmentActivity {
     protected boolean canRegisterRunnables;
     protected boolean registered;
     protected SystemBarTintManager tintManager;
-    protected LoadingDialog dialog;
+    protected WeakReference<LoadingDialog> dialog;
     private static WeakReference<CFActivity> latestActivity;
+    private ActivityStateListener mActivityStateListener;
 
     @Nullable
     public static CFActivity getLatestActivity() {
@@ -59,15 +60,23 @@ public class CFActivity extends FragmentActivity {
     }
 
     public LoadingDialog getLoadingDialog() {
-        if (dialog == null) {
+        if (dialog == null || dialog.get() == null) {
             Log.d(TAG + ".getDialog", "Creating Dialog");
-            dialog = new LoadingDialog(this, "");
+            dialog = new WeakReference<>(new LoadingDialog(this, ""));
         }
-        return dialog;
+        return dialog.get();
     }
 
+    @Nullable
     public LoadingDialog getLoadingDialogIfExists() {
-        return dialog;
+        return dialog == null ? null : dialog.get();
+    }
+
+    public ActivityStateListener getActivityStateListener() {
+        if (mActivityStateListener == null) {
+            mActivityStateListener = new ActivityStateListener(this);
+        }
+        return mActivityStateListener;
     }
 
     /**
@@ -94,7 +103,7 @@ public class CFActivity extends FragmentActivity {
             EventBus.getDefault().registerSticky(this, RunnableOnActivity.class, RunnableOnActivityWrapper.class);
             registered = true;
         }
-
+        if (mActivityStateListener != null) mActivityStateListener.onStart();
     }
 
     @Override
@@ -106,7 +115,9 @@ public class CFActivity extends FragmentActivity {
     @Override
     protected void onStop() {
         super.onStop();
-        if (dialog != null) dialog.dismiss();
+        if (dialog != null && dialog.get() != null) dialog.get().dismiss();
+        if (isFinishing()) dialog = null;
+        if (mActivityStateListener != null) mActivityStateListener.onStop();
         clearLatestActivityIfSame();
     }
 
@@ -148,7 +159,7 @@ public class CFActivity extends FragmentActivity {
 
 
     public static abstract class RunnableOnActivity {
-        public abstract void run(Activity activity);
+        public abstract void run(CFActivity activity);
     }
 
     protected static class RunnableOnActivityWrapper {
@@ -167,7 +178,7 @@ public class CFActivity extends FragmentActivity {
         return new RunnableOnActivity() {
 
             @Override
-            public void run(Activity activity) {
+            public void run(CFActivity activity) {
                 Toast.makeText(activity, message, time).show();
             }
         };
