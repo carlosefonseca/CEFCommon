@@ -34,6 +34,13 @@ public final class UrlUtils {
 
     private UrlUtils() {}
 
+
+    public static final Pattern phoneMatcher= Pattern.compile("([\\d(+](?:[\\d()./+-]+ ?){6,}[\\d)])");
+    public static final Pattern httpMatcher= Pattern.compile("\\b(https?://[^\\s]+)");
+    public static final Pattern wwwMatcher= Pattern.compile("\\b(www\\.[^\\s]+)");
+    public static final Pattern emailMatcher = Pattern.compile("([A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,4})");
+
+
     public static String urlForEmail(String email) {return "mailto:" + email.trim();}
 
     public static String urlForTel(String number) {return "tel:" + number.trim().replaceAll("\\s*", "");}
@@ -399,10 +406,19 @@ public final class UrlUtils {
         if (text == null) {
             textView.setText(null);
         } else {
-            text = text.replaceAll("(https?://[^\\s]+)", "<a href='$1'>$1</a>").replaceAll("\\n", "<br/>");
+            text = linkifyText(text);
             textView.setText(Html.fromHtml(text));
             textView.setMovementMethod(LinkMovementMethod.getInstance());
         }
+    }
+
+    public static String linkifyText(String text) {
+        text = emailMatcher.matcher(text).replaceAll("<a href='mailto:$1'>$1</a>");
+        text = httpMatcher.matcher(text).replaceAll("<a href='$1'>$1</a>");
+        text = wwwMatcher.matcher(text).replaceAll("<a href='http://$1'>$1</a>");
+        text = phoneMatcher.matcher(text).replaceAll("<a href='tel://$1'>$1</a>");
+        text = text.replaceAll("\\n", "<br/>");
+        return text;
     }
 
     public static Intent sendEmail(@Nullable String to, @Nullable String subject, @Nullable String content) {

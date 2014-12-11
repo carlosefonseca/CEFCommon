@@ -1,5 +1,6 @@
 package com.carlosefonseca.common.utils;
 
+import android.annotation.TargetApi;
 import android.os.AsyncTask;
 import android.os.Build;
 import com.carlosefonseca.apache.commons.collections4.CollectionUtils;
@@ -28,13 +29,26 @@ public final class FileDownloader {
 
     public static AtomicInteger sDownloadCount = new AtomicInteger();
 
+    private static boolean cancelAll;
+
     private FileDownloader() {}
+
+    public static void cancelAll() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+            getThreadPoolExecutor().shutdownNow();
+        }
+        cancelAll = true;
+        sNotifier.canceled();
+        sDownloadCount.set(0);
+    }
 
     public static String syncDownload(Download download) {
         String uri = download.url.replace(" ", "%20");
         File path = download.file;
 //            Log.v(TAG, uri);
         download.tries++;
+
+        if (Thread.currentThread().isInterrupted()) return path.getName();
 
         if (path.exists()) {
             return null;
@@ -54,10 +68,15 @@ public final class FileDownloader {
             urlConnection.setConnectTimeout(Downloader.TIMEOUT_MILLIS);
             urlConnection.setReadTimeout(Downloader.TIMEOUT_MILLIS);
 
+            if (Thread.currentThread().isInterrupted()) return path.getName();
+
             InputStream input = new BufferedInputStream(urlConnection.getInputStream());
             OutputStream output = new FileOutputStream(tempPath);
             try {
-                IOUtils.copy(input, output);
+                if (copy(input, output) == -1) {
+                    Log.i(TAG, String.format("(%d remain) Download of %s INTERRUPTED", sDownloadCount.get() - 1, uri));
+                    return path.getName();
+                }
             } catch (IOException e) {
                 // Network error. May retry
                 Log.i(TAG, String.format("(%d remain) Download of %s failed (will retry): %s", sDownloadCount.get() - 1, uri, e.getMessage()));
@@ -76,13 +95,20 @@ public final class FileDownloader {
                 download(download);
                 return path.getName();
             }
-            Log.v(TAG, String.format("(%d remain) Downloaded %s%s", sDownloadCount.get() - 1, path.getName(), download.tries > 1 ? " " + download.tries + " tries" : "")
-            );
+            Log.v(TAG,
+                  String.format("(%d remain) Downloaded %s%s",
+                                sDownloadCount.get() - 1,
+                                path.getName(),
+                                download.tries > 1 ? " " + download.tries + " tries" : ""));
             return null; // SUCCESS!
         } catch (SocketException e) {
             // Network error. May retry
             Log.i(TAG,
-                  String.format("(%d remain) Failed on  %s (will retry) %s: %s ", sDownloadCount.get() - 1, path.getName(), uri, e.getMessage()));
+                  String.format("(%d remain) Failed on  %s (will retry) %s: %s ",
+                                sDownloadCount.get() - 1,
+                                path.getName(),
+                                uri,
+                                e.getMessage()));
             download(download);
             return path.getName();
         } catch (FileNotFoundException e) {
@@ -93,6 +119,25 @@ public final class FileDownloader {
             Log.i(TAG, "(%d remain) Failed on  %s - %s", sDownloadCount.get() - 1, path.getName(), uri, e);
             return path.getName();
         }
+    }
+
+    /**
+     * @see com.carlosefonseca.common.utils.IOUtils#copyLarge(java.io.InputStream, java.io.OutputStream)
+     */
+    protected static long copy(InputStream input, OutputStream output) throws IOException {
+        final int DEFAULT_BUFFER_SIZE = 1024 * 4;
+        final int EOF = -1;
+
+        byte[] buffer = new byte[DEFAULT_BUFFER_SIZE];
+        long count1 = 0;
+        int n;
+        Thread thread = Thread.currentThread();
+        while (EOF != (n = input.read(buffer))) {
+            if (thread.isInterrupted()) return -1;
+            output.write(buffer, 0, n);
+            count1 += n;
+        }
+        return count1;
     }
 
     public static class Download {
@@ -129,30 +174,30 @@ public final class FileDownloader {
         if (CollectionUtils.isEmpty(toDownload)) return;
 
         if (sDownloadCount.getAndAdd(toDownload.size()) == 0) {
+            cancelAll = false;
             getNotifier().start(sDownloadCount.get());
         }
 
-        CodeUtils.runOnUIThread(new Runnable() {
-            @Override
-            public void run() {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-                    getThreadPoolExecutor();
-                    for (Download download : toDownload)
-                        new Downloader().executeOnExecutor(sThreadPoolExecutor, download);
-                } else {
-                    for (Download download : toDownload) new Downloader().execute(download);
-                }
-            }
-        });
+        downloadList(toDownload);
     }
 
     public static void downloadUrls(final Collection<String> toDownload) {
         if (CollectionUtils.isEmpty(toDownload)) return;
 
         if (sDownloadCount.getAndAdd(toDownload.size()) == 0) {
+            cancelAll = false;
             getNotifier().start(sDownloadCount.get());
         }
 
+        downloadStringList(toDownload);
+    }
+
+    protected static void downloadOne(final String url) {
+        downloadOne(new Download(url));
+    }
+
+    //region DOWNLOAD CODE
+    protected static void downloadStringList(final Collection<String> toDownload) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
             getThreadPoolExecutor();
             if (Build.VERSION.SDK_INT > Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1) {
@@ -160,6 +205,7 @@ public final class FileDownloader {
                     new Downloader().executeOnExecutor(sThreadPoolExecutor, new Download(url));
             } else {
                 CodeUtils.runOnUIThread(new Runnable() {
+                    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
                     @Override
                     public void run() {
                         for (String url : toDownload)
@@ -168,9 +214,54 @@ public final class FileDownloader {
                 });
             }
         } else {
-            for (String url : toDownload) new Downloader().execute(new Download(url));
+            for (String url : toDownload) {
+                if (!cancelAll) new Downloader().execute(new Download(url));
+            }
         }
     }
+
+    protected static void downloadList(final Collection<Download> toDownload) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+            getThreadPoolExecutor();
+            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1) {
+                for (Download url : toDownload)
+                    new Downloader().executeOnExecutor(sThreadPoolExecutor, url);
+            } else {
+                CodeUtils.runOnUIThread(new Runnable() {
+                    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
+                    @Override
+                    public void run() {
+                        for (Download url : toDownload)
+                            new Downloader().executeOnExecutor(sThreadPoolExecutor, url);
+                    }
+                });
+            }
+        } else {
+            for (Download url : toDownload) {
+                if (!cancelAll) new Downloader().execute(url);
+            }
+        }
+    }
+
+    protected static void downloadOne(final Download download) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+            getThreadPoolExecutor();
+            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1) {
+                new Downloader().executeOnExecutor(sThreadPoolExecutor, download);
+            } else {
+                CodeUtils.runOnUIThread(new Runnable() {
+                    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
+                    @Override
+                    public void run() {
+                        new Downloader().executeOnExecutor(sThreadPoolExecutor, download);
+                    }
+                });
+            }
+        } else {
+            if (!cancelAll) new Downloader().execute(download);
+        }
+    }
+    //endregion
 
     static void download(Download toDownload) {
         if (!toDownload.canRetry()) {
@@ -178,22 +269,19 @@ public final class FileDownloader {
             return;
         }
         sDownloadCount.addAndGet(1);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-            getThreadPoolExecutor();
-            new Downloader().executeOnExecutor(sThreadPoolExecutor, toDownload);
-        } else {
-            new Downloader().execute(toDownload);
-        }
+        downloadOne(toDownload);
     }
 
-    private static void getThreadPoolExecutor() {
-        if (sThreadPoolExecutor == null) {
+    private static ThreadPoolExecutor getThreadPoolExecutor() {
+        if (sThreadPoolExecutor == null || sThreadPoolExecutor.isShutdown()) {
+            Log.i("NEW ThreadPoolExecutor");
             sThreadPoolExecutor = new ThreadPoolExecutor(CORE_POOL_SIZE,
                                                          MAX_POOL_SIZE,
                                                          KEEP_ALIVE_TIME,
                                                          TimeUnit.SECONDS,
                                                          new LinkedBlockingQueue<Runnable>(MAX_QUEUE_SIZE));
         }
+        return sThreadPoolExecutor;
     }
 
 
@@ -210,15 +298,17 @@ public final class FileDownloader {
         }
 
         @Override
-        protected void onPostExecute(@SuppressWarnings("ParameterNameDiffersFromOverriddenParameter") String failedFile) {
-            if (failedFile != null) {
-                sNotifier.fileFailed(failedFile);
+        protected void onPostExecute(String failedFile) {
+            if (!cancelAll) {
+                if (failedFile != null) {
+                    sNotifier.fileFailed(failedFile);
 //                Log.d(TAG, "Download of " + failedFile + " failed");
-            }
-            final int i = sDownloadCount.decrementAndGet();
-            sNotifier.queueUpdate(i);
-            if (i == 0) {
-                sNotifier.finished();
+                }
+                final int i = sDownloadCount.decrementAndGet();
+                sNotifier.queueUpdate(i);
+                if (i == 0) {
+                    sNotifier.finished();
+                }
             }
         }
     }
@@ -242,6 +332,8 @@ public final class FileDownloader {
 
         void finished();
 
+        void canceled();
+
         void queueUpdate(int i);
 
         void fileFailed(String failedFile);
@@ -256,6 +348,11 @@ public final class FileDownloader {
         @Override
         public void finished() {
             Log.i(TAG, "Downloads finished");
+        }
+
+        @Override
+        public void canceled() {
+            Log.i(TAG, "Downloads Canceled!");
         }
 
         @Override

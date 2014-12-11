@@ -8,10 +8,8 @@ import com.carlosefonseca.common.CFApp;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
+import java.util.regex.Pattern;
 
 import static com.carlosefonseca.common.utils.CodeUtils.getTag;
 
@@ -78,6 +76,31 @@ public final class FileUtils {
             Log.e(TAG, "" + e.getMessage(), e);
         }
         return new ArrayList<>();
+    }
+
+    public static List<String> extFileList(@Nullable String subfolder, final Pattern pattern) {
+        File dir = CFApp.getContext().getExternalFilesDir(null);
+        if (dir == null) {
+            Log.e(TAG, new RuntimeException("getExternalFilesDir failed"));
+            return Collections.emptyList();
+        }
+        if (subfolder != null) dir = new File(dir, subfolder);
+
+        FilenameFilter filter;
+        String[] files;
+        if (pattern != null) {
+            filter = new FilenameFilter() {
+                @Override
+                public boolean accept(File dir, String filename) {
+                    return pattern.matcher(filename).matches();
+                }
+            };
+            files = dir.list(filter);
+        } else {
+            files = dir.list();
+        }
+
+        return Arrays.asList(files);
     }
 
     /**

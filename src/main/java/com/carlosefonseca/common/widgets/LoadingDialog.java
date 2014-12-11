@@ -61,6 +61,7 @@ public class LoadingDialog extends Dialog {
     private boolean delegateBackToActivity = defaultDelegateBackToActivity;
     private RuntimeException timeoutCounting;
     private Runnable timeoutRunnable;
+    private View cancelButton;
 
     /**
      * Convenience static method to display a Success message and auto dismiss.
@@ -177,6 +178,7 @@ public class LoadingDialog extends Dialog {
         image = (ImageView) findViewById(R.id.image);
         progressView = findViewById(R.id.progressBar1);
         pie = (PieView) findViewById(R.id.pie);
+        cancelButton = findViewById(R.id.cancel);
 
         changeDialog(message, type);
     }
@@ -202,6 +204,20 @@ public class LoadingDialog extends Dialog {
         setText(s);
     }
 
+    public void onCancelButton(@Nullable final OnDismissListener runnable) {
+        if (runnable == null) {
+            cancelButton.setVisibility(View.GONE);
+            cancelButton.setOnClickListener(null);
+        } else {
+            cancelButton.setVisibility(View.VISIBLE);
+            cancelButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    runnable.onDismiss(LoadingDialog.this);
+                }
+            });
+        }
+    }
 
     /**
      * Sets an existing instance to the {@link com.carlosefonseca.common.widgets.LoadingDialog.DialogType#COMPLETED} type, sets the message and
@@ -425,29 +441,16 @@ public class LoadingDialog extends Dialog {
      */
     @Deprecated
     public void setTimeout(int millis) {
-        if (true) return;
-        timeoutCounting = new RuntimeException("Dialog was closed by timeout! Timeout set here");
-        if (timeoutRunnable == null) {
-            timeoutRunnable = new Runnable() {
-                @Override
-                public void run() {
-                    if (timeoutCounting != null && isShowing()) {
-                        dismiss();
-                        Log.w(TAG, timeoutCounting);
-                    }
-                    timeoutCounting = null;
-                }
-            };
-        }
-        handler.removeCallbacks(timeoutRunnable);
-        handler.postDelayed(timeoutRunnable, millis);
+        throw new RuntimeException("Don't use this…");
     }
 
+    @Deprecated
     public void cancelTimeout() {
         handler.removeCallbacks(timeoutRunnable);
         timeoutRunnable = null;
     }
 
+    @Deprecated
     public boolean hasTimeout() {
         return timeoutRunnable != null;
     }
