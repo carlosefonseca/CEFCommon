@@ -306,6 +306,14 @@ public class NavBar extends LinearLayout {
     }
 
     /**
+     * Returns the color in use, either current color or default color.
+     * @return Returns the currently set color or the default color if color is NO_COLOR
+     */
+    public int getColorInUse() {
+        return color != NO_COLOR ? color : defaultNormalColor;
+    }
+
+    /**
      * Returns the currently set text color if set.
      * @return Returns the currently set text color or NO_COLOR if the default color is being used.
      */
@@ -359,6 +367,10 @@ public class NavBar extends LinearLayout {
 
     public static void setDefaultBackDrawable(Drawable defaultBackDrawable) {
         NavBar.defaultBackDrawable = defaultBackDrawable;
+    }
+
+    public static int getDefaultNormalColor() {
+        return defaultNormalColor;
     }
 
     public static void setDefaultColor(int normalColor) {

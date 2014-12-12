@@ -223,18 +223,24 @@ public final class ResourceUtils {
         setBackground(button, createDualStateDrawable(normal, other, state));
     }
 
-    /**
-     * Pressed state. Will use <tt>android.R.attr.state_pressed</tt>.
-     */
+    public static enum State {
+        /**
+         * Pressed state. Will use <tt>android.R.attr.state_pressed</tt>.
+         */
+        PRESSED,
+        /**
+         * Selected state. Will use <tt>android.R.attr.state_selected</tt>.
+         */
+        SELECTED,
+        /**
+         * Both Pressed and Selected states. Will use <tt>android.R.attr.state_pressed</tt> and
+         * <tt>android.R.attr.state_selected</tt>.
+         */
+        BOTH
+    }
+
     public static final int PRESSED = 0;
-    /**
-     * Selected state. Will use <tt>android.R.attr.state_selected</tt>.
-     */
     public static final int SELECTED = 1;
-    /**
-     * Both Pressed and Selected states. Will use <tt>android.R.attr.state_pressed</tt> and
-     * <tt>android.R.attr.state_selected</tt>.
-     */
     public static final int BOTH = 2;
 
     /**
@@ -269,8 +275,10 @@ public final class ResourceUtils {
      */
     public static StateListDrawable createDualStateDrawable(Drawable normal, Drawable other, int state) {
         StateListDrawable stateListDrawable = new StateListDrawable();
-        if (state != SELECTED) stateListDrawable.addState(new int[]{android.R.attr.state_pressed}, other);
-        if (state != PRESSED) {
+        if (state == PRESSED || state == BOTH) {
+            stateListDrawable.addState(new int[]{android.R.attr.state_pressed}, other);
+        }
+        if (state == SELECTED || state == BOTH) {
             stateListDrawable.addState(new int[]{android.R.attr.state_selected}, other);
             stateListDrawable.addState(new int[]{android.R.attr.state_checked}, other);
         }
