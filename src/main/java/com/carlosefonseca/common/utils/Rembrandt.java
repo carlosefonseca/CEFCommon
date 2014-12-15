@@ -52,10 +52,27 @@ public class Rembrandt {
     }
 
     /**
-     * Same as new Rembrandt(context). For Picasso compatibility.
+     * Creates a new instance reusing the context and cache from the argument.
+     * @param rembrandt
+     */
+    public Rembrandt(Rembrandt rembrandt) {
+        mContext = rembrandt.mContext;
+        mCache = rembrandt.mCache;
+    }
+
+    /**
+     * Same as new Rembrandt(context).
      */
     public static Rembrandt with(Context context) {
         return new Rembrandt(context);
+    }
+
+    /**
+     * Same as new Rembrandt(Rembrandt).
+     * @see #Rembrandt(Rembrandt)
+     */
+    public static Rembrandt with(Rembrandt rembrandt) {
+        return new Rembrandt(rembrandt);
     }
 
     public Rembrandt load(@Nullable String url) {
@@ -275,6 +292,11 @@ public class Rembrandt {
     public Rembrandt hideIfNull(boolean hide) {
         mHideIfNull = hide;
         return this;
+    }
+
+    public void destroy() {
+        mCache = null;
+        mMapping = null;
     }
 
     public interface Transform {

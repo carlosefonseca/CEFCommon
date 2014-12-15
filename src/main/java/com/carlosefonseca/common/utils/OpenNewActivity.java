@@ -232,13 +232,12 @@ public class OpenNewActivity implements View.OnClickListener {
                     default:
                 }
 
-                if (finish && activity != null) activity.finish();
-
                 if (bundle != null) {
                     context.startActivity(intent, bundle);
                 } else {
                     context.startActivity(intent);
                 }
+                if (finish && activity != null) activity.finish();
             }
         } else {
             // PRE JELLY BEAN
