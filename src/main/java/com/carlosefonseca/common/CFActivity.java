@@ -1,5 +1,6 @@
 package com.carlosefonseca.common;
 
+import android.content.Intent;
 import android.os.Build;
 import android.support.v4.app.FragmentActivity;
 import android.widget.Toast;
@@ -22,6 +23,8 @@ import static com.carlosefonseca.common.utils.CodeUtils.isMainThread;
 public class CFActivity extends FragmentActivity {
 
     private static final String sTAG = getTag(CFActivity.class);
+    public static final int REQUEST_EXIT = -1234;
+    public static final int REQUEST_EXIT_ALL = -12345;
     protected final String TAG = getTag(this.getClass());
     protected boolean canRegisterRunnables;
     protected boolean registered;
@@ -29,6 +32,22 @@ public class CFActivity extends FragmentActivity {
     protected WeakReference<LoadingDialog> dialog;
     private static WeakReference<CFActivity> latestActivity;
     private ActivityStateListener mActivityStateListener;
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        switch (resultCode) {
+            case REQUEST_EXIT:
+                Log.i(TAG + " (" + sTAG + ")", "Exit Requested!");
+                finish();
+                break;
+            case REQUEST_EXIT_ALL:
+                Log.i(TAG + " (" + sTAG + ")", "Exit All Requested!");
+                setResult(REQUEST_EXIT_ALL);
+                finish();
+                break;
+        }
+    }
 
     @Nullable
     public static CFActivity getLatestActivity() {
