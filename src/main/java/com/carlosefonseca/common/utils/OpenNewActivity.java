@@ -1,8 +1,12 @@
 package com.carlosefonseca.common.utils;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.ActivityOptions;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
+import android.os.Bundle;
 import android.view.View;
 import com.carlosefonseca.common.R;
 import org.jetbrains.annotations.Nullable;
@@ -60,6 +64,11 @@ public class OpenNewActivity implements View.OnClickListener {
     /** A convenience method for just opening an activity, quick and simple, and finishing the current one. */
     public static void finishAndStart(Activity activityToFinish, Class aClass) {
         new OpenNewActivity(activityToFinish, aClass, true).go(null);
+    }
+
+    /** A convenience method for just opening an activity, quick and simple, and finishing the current one. */
+    public static void finishAndStartFade(Activity activityToFinish, Class aClass) {
+        new OpenNewActivity(activityToFinish, aClass, true, TransitionAnimation.FADE).go(null);
     }
 
     /**
@@ -194,6 +203,7 @@ public class OpenNewActivity implements View.OnClickListener {
      * Performs the same as the {@link #onClick(android.view.View)}, it's just smaller.
      * @param view
      */
+    @SuppressLint("NewApi")
     public void go(@Nullable View view) {
         if (context == null && activity == null) Log.e(TAG, "No context!");
         if (context == null) context = activity;
@@ -205,19 +215,49 @@ public class OpenNewActivity implements View.OnClickListener {
 
         Intent intent = new Intent(context, aClass);
         if (flags != null) intent.addFlags(flags);
-        context.startActivity(intent);
-        if (activity != null) {
-            switch (animation) {
-                case FADE:
-                    activity.overridePendingTransition(R.anim.fadein, R.anim.fadeout);
-                    break;
-                case CUSTOM:
-                    activity.overridePendingTransition(enterAnim, exitAnim);
-                    break;
-                case DEFAULT:
-                default:
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+            if (context != null) {
+                Bundle bundle = null;
+                switch (animation) {
+                    case FADE:
+                        bundle = ActivityOptions.makeCustomAnimation(context, R.anim.fade_in, R.anim.fade_out)
+                                                .toBundle();
+                        break;
+                    case CUSTOM:
+                        activity.overridePendingTransition(enterAnim, exitAnim);
+                        bundle = ActivityOptions.makeCustomAnimation(context, enterAnim, exitAnim).toBundle();
+                        break;
+                    case DEFAULT:
+                    default:
+                }
+
+                if (finish && activity != null) activity.finish();
+
+                if (bundle != null) {
+                    context.startActivity(intent, bundle);
+                } else {
+                    context.startActivity(intent);
+                }
             }
-            if (finish) activity.finish();
+        } else {
+            // PRE JELLY BEAN
+            context.startActivity(intent);
+            if (activity != null) {
+                if (finish) activity.finish();
+                switch (animation) {
+                    case FADE:
+                        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
+                            activity.overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
+                        }
+                        break;
+                    case CUSTOM:
+                        activity.overridePendingTransition(enterAnim, exitAnim);
+                        break;
+                    case DEFAULT:
+                    default:
+                }
+            }
         }
     }
 
