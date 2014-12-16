@@ -1,6 +1,7 @@
 package com.carlosefonseca.common.utils;
 
 import com.carlosefonseca.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.text.DecimalFormat;
@@ -45,6 +46,17 @@ public final class UnitUtils {
         PreferencesManager.getSharedPreferences().edit().remove(SYSTEM).apply();
         mSystem = null;
         mDefaultSystem = System.METRIC;
+    }
+
+    @NotNull
+    public static System setNextSystem() {
+        System system = UnitUtils.getSystem();
+        double ordinal = 0;
+        if (system != null) {
+            ordinal = system.ordinal();
+        }
+        UnitUtils.setSystem(UnitUtils.System.values()[((int) ((ordinal + 1) % System.values().length))]);
+        return mSystem;
     }
 
     public enum System {

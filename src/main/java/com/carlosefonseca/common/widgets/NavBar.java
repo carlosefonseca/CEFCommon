@@ -10,6 +10,7 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.ShapeDrawable;
 import android.os.Build;
 import android.util.AttributeSet;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,6 +21,7 @@ import com.carlosefonseca.common.R;
 import com.carlosefonseca.common.utils.CodeUtils;
 import com.carlosefonseca.common.utils.Log;
 import com.carlosefonseca.common.utils.ResourceUtils;
+import com.carlosefonseca.common.utils.ViewUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -95,6 +97,15 @@ public class NavBar extends LinearLayout {
 
     public static void setDefaultTitleDrawable(Drawable t) {
         defaultTitleDrawable = t;
+    }
+
+    public void noBackButton() {
+        backBt.setVisibility(GONE);
+        if (((ViewGroup) getChildAt(0)).getChildCount() == 2) {
+            ViewUtils.setPaddingLeft(titleView, 0);
+            ViewUtils.setPaddingRight(titleView, 0);
+            titleView.setGravity(Gravity.CENTER);
+        }
     }
 
     /**

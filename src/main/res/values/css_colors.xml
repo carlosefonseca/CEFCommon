@@ -171,4 +171,5 @@
 
     <!-- Others that should be standard -->
     <color name="DarkerGray">#333</color>
+    <color name="Gray5">#555</color>
 </resources>
