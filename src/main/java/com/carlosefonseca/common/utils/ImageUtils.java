@@ -959,11 +959,33 @@ public final class ImageUtils {
      * @param resId The original image with alpha channel.
      * @param color The new Color
      * @return Bitmap with new color.
+     * @deprecated Use @{@link #createRecoloredBitmap(android.content.res.Resources, int, int)}
      */
+    @Deprecated
     public static Bitmap createRecoloredBitmap(Context c, int resId, int color) {
         BitmapFactory.Options opts = new BitmapFactory.Options();
         opts.inPreferredConfig = Bitmap.Config.ARGB_8888;
         Bitmap source = BitmapFactory.decodeResource(c.getResources(), resId);
+        return createRecoloredBitmap(source, color);
+    }
+
+    /**
+     * Creates a new bitmap from the original resource and paints the visible parts with the given color.
+     * The alpha channel is the only part of the original resource that is used for the painting.
+     * <p/>
+     * Note: I tried saving a painted file on disk and loading that one each time. Got 1ms improvement but more used
+     * memory for
+     * repeated calls.
+     *
+     * @param r     Resources.
+     * @param resId The original image with alpha channel.
+     * @param color The new Color
+     * @return Bitmap with new color.
+     */
+    public static Bitmap createRecoloredBitmap(Resources r, int resId, int color) {
+        BitmapFactory.Options opts = new BitmapFactory.Options();
+        opts.inPreferredConfig = Bitmap.Config.ARGB_8888;
+        Bitmap source = BitmapFactory.decodeResource(r, resId);
         return createRecoloredBitmap(source, color);
     }
 
@@ -975,9 +997,38 @@ public final class ImageUtils {
      * @param resId   The original image with alpha channel.
      * @param color   The new Color
      * @return Bitmap with new color.
+     * @deprecated Use {@link #createRecoloredDrawable(android.content.res.Resources, int, int)}
      */
+    @Deprecated
     public static BitmapDrawable createRecoloredDrawable(Context context, int resId, int color) {
-        return new BitmapDrawable(context.getResources(), createRecoloredBitmap(context, resId, color));
+        return createRecoloredDrawable(context.getResources(), resId, color);
+    }
+
+    /**
+     * Wraps {@link #createRecoloredBitmap(android.content.Context, int, int)} in a {@link
+     * android.graphics.drawable.BitmapDrawable}.
+     *
+     * @param resources Resources
+     * @param resId     The original image with alpha channel.
+     * @param color     The new Color
+     * @return Bitmap with new color.
+     */
+    public static BitmapDrawable createRecoloredDrawable(Resources resources, int resId, int color) {
+        return new BitmapDrawable(resources, createRecoloredBitmap(resources, resId, color));
+    }
+
+    /**
+     * Wraps {@link #createRecoloredBitmap(android.graphics.Bitmap, int)} in a {@link
+     * android.graphics.drawable.BitmapDrawable}.
+     *
+     * @param bitmap The original image with alpha channel.
+     * @param color  The new Color
+     * @return Bitmap with new color.
+     * @deprecated {@link #createRecoloredDrawable(android.content.res.Resources, android.graphics.Bitmap, int)}
+     */
+    @Deprecated
+    public static BitmapDrawable createRecoloredDrawable(Context context, Bitmap bitmap, int color) {
+        return createRecoloredDrawable(context.getResources(), bitmap, color);
     }
 
     /**
@@ -988,8 +1039,8 @@ public final class ImageUtils {
      * @param color  The new Color
      * @return Bitmap with new color.
      */
-    public static BitmapDrawable createRecoloredDrawable(Context context, Bitmap bitmap, int color) {
-        return new BitmapDrawable(context.getResources(), createRecoloredBitmap(bitmap, color));
+    public static BitmapDrawable createRecoloredDrawable(Resources resources, Bitmap bitmap, int color) {
+        return new BitmapDrawable(resources, createRecoloredBitmap(bitmap, color));
     }
 
 

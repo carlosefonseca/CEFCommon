@@ -325,9 +325,9 @@ public final class ResourceUtils {
         public HSVColor addRGB(int value) {
             int color = color();
             int argb = Color.argb(Color.alpha(color),
-                                  Color.red(color) + value,
-                                  Color.green(color) + value,
-                                  Color.blue(color) + value);
+                                  Math.min(0xFF, Color.red(color) + value),
+                                  Math.min(0xFF, Color.green(color) + value),
+                                  Math.min(0xFF, Color.blue(color) + value));
             Color.colorToHSV(argb, hsv);
             return this;
         }

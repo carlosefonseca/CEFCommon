@@ -39,7 +39,15 @@ public final class LocalizationUtils {
      * @param languageCode "pt", "en",…
      */
     public static String languageOwnName(String languageCode) {
-        final Locale locale = new Locale(languageCode);
-        return locale.getDisplayLanguage(locale);
+        Locale l = getLocale(languageCode);
+        return l.getDisplayName(l);
+    }
+
+    protected static Locale getLocale(String languageCode) {
+        if (languageCode.length() == 5 && languageCode.charAt(2) == '-') {
+            return new Locale(languageCode.substring(0, 2), languageCode.substring(3));
+        } else {
+            return new Locale(languageCode);
+        }
     }
 }
