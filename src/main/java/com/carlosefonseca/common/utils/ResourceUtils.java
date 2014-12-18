@@ -223,6 +223,18 @@ public final class ResourceUtils {
         setBackground(button, createDualStateDrawable(normal, other, state));
     }
 
+    /**
+     * Checks if the color is too bright.
+     *
+     * @param color The Color.
+     * @param ratio A value between 0 and 1.
+     * @return True if R,G and B are above the threshold
+     */
+    public static boolean channelsAboveThreshold(int color, double ratio) {
+        ratio = 255 * ratio;
+        return Color.red(color) > ratio && Color.green(color) > ratio && Color.blue(color) > ratio;
+    }
+
     public static enum State {
         /**
          * Pressed state. Will use <tt>android.R.attr.state_pressed</tt>.

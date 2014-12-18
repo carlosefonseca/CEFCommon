@@ -3,6 +3,7 @@ package com.carlosefonseca.common.test;
 import android.app.Activity;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import com.carlosefonseca.common.utils.MSDrawable;
@@ -21,10 +22,10 @@ public class MSDrawableTest extends Activity {
         linearLayout0.setOrientation(LinearLayout.HORIZONTAL);
 
         final LinearLayout linearLayout1 = new LinearLayout(this);
-        linearLayout0.addView(linearLayout1, 100, LinearLayout.MarginLayoutParams.MATCH_PARENT);
+        linearLayout0.addView(linearLayout1, 100, ViewGroup.LayoutParams.MATCH_PARENT);
 
         final LinearLayout linearLayout2 = new LinearLayout(this);
-        linearLayout0.addView(linearLayout2, 100, LinearLayout.MarginLayoutParams.MATCH_PARENT);
+        linearLayout0.addView(linearLayout2, 100, ViewGroup.LayoutParams.MATCH_PARENT);
 
 
         MSDrawable msDrawable = new MSDrawable(this).normalColor(Color.RED).pressedColor(Color.GREEN).selectedColor(Color.BLUE);

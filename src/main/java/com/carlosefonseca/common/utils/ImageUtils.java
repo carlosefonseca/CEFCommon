@@ -1363,12 +1363,6 @@ public final class ImageUtils {
                 return bitmap.getRowBytes() * bitmap.getHeight();
             }
         }
-
-        @Override
-        protected void entryRemoved(boolean evicted, String key, Bitmap oldValue, Bitmap newValue) {
-            oldValue.recycle();
-            super.entryRemoved(evicted, key, oldValue, newValue);
-        }
     }
 
 

@@ -1,6 +1,7 @@
 package com.carlosefonseca.common.utils;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.drawable.*;
 import android.graphics.drawable.shapes.Shape;
@@ -35,7 +36,7 @@ import static android.R.attr.*;
 @SuppressWarnings("UnusedDeclaration")
 public class MSDrawable {
 
-    private final Context mContext;
+    private final Resources mResources;
 
     public MSDrawable asBackground(View view) {
         Drawable background = build();
@@ -70,7 +71,25 @@ public class MSDrawable {
     Bitmap[] mBitmaps = new Bitmap[STATE_COUNT];
     Drawable[] mFinal = new Drawable[STATE_COUNT];
 
-    public MSDrawable(Context context) { this.mContext = context;}
+    /**
+     * Create a new builder that is able to access resources. Is the same as MSDrawable(context.getResources())
+     */
+    public MSDrawable(Context context) { this(context.getResources());}
+
+    /**
+     * Create a new builder that is able to access resources
+     */
+    public MSDrawable(Resources resources) {
+        mResources = resources;
+    }
+
+    /**
+     * Create a new builder that will not access any resources
+     */
+    public MSDrawable() {
+        mResources = null;
+    }
+
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -90,7 +109,7 @@ public class MSDrawable {
      */
     public MSDrawable icon(int iconRes) {
         mMode = Mode.SINGLE_ICON;
-        mIcon = ((BitmapDrawable) mContext.getResources().getDrawable(iconRes)).getBitmap();
+        mIcon = ((BitmapDrawable) mResources.getDrawable(iconRes)).getBitmap();
         return this;
     }
 
@@ -140,7 +159,7 @@ public class MSDrawable {
     }
 
     public MSDrawable normalRes(int res) {
-        set(mContext.getResources().getDrawable(res), 0, NORMAL);
+        set(mResources.getDrawable(res), 0, NORMAL);
         return this;
     }
 
@@ -160,7 +179,7 @@ public class MSDrawable {
     }
 
     public MSDrawable normalRes(int res, int color) {
-        set(mContext.getResources().getDrawable(res), color, NORMAL);
+        set(mResources.getDrawable(res), color, NORMAL);
         return this;
     }
 
@@ -188,7 +207,7 @@ public class MSDrawable {
     }
 
     public MSDrawable pressedRes(int res) {
-        set(mContext.getResources().getDrawable(res), 0, PRESSED);
+        set(mResources.getDrawable(res), 0, PRESSED);
         return this;
     }
 
@@ -213,7 +232,7 @@ public class MSDrawable {
     }
 
     public MSDrawable pressedRes(int res, int color) {
-        set(mContext.getResources().getDrawable(res), color, PRESSED);
+        set(mResources.getDrawable(res), color, PRESSED);
         return this;
     }
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -240,7 +259,7 @@ public class MSDrawable {
     }
 
     public MSDrawable selectedRes(int res) {
-        set(mContext.getResources().getDrawable(res), 0, SELECTED);
+        set(mResources.getDrawable(res), 0, SELECTED);
         return this;
     }
 
@@ -260,7 +279,7 @@ public class MSDrawable {
     }
 
     public MSDrawable selectedRes(int res, int color) {
-        set(mContext.getResources().getDrawable(res), color, SELECTED);
+        set(mResources.getDrawable(res), color, SELECTED);
         return this;
     }
 
@@ -289,7 +308,7 @@ public class MSDrawable {
     }
 
     public MSDrawable disabledRes(int res) {
-        set(mContext.getResources().getDrawable(res), 0, DISABLED);
+        set(mResources.getDrawable(res), 0, DISABLED);
         return this;
     }
 
@@ -309,7 +328,7 @@ public class MSDrawable {
     }
 
     public MSDrawable disabledRes(int res, int color) {
-        set(mContext.getResources().getDrawable(res), color, DISABLED);
+        set(mResources.getDrawable(res), color, DISABLED);
         return this;
     }
 
@@ -352,13 +371,13 @@ public class MSDrawable {
 
         if (mColors[state] != 0) {
             if (mIcon != null) {
-                mFinal[state] = ImageUtils.createRecoloredDrawable(mContext, mIcon, mColors[state]);
+                mFinal[state] = ImageUtils.createRecoloredDrawable(mResources, mIcon, mColors[state]);
             } else if (mShape != null) {
                 mFinal[state] = recoloredShape(new ShapeDrawable(mShape), mColors[state]);
             }
         } else if (state == NORMAL) {
             if (mIcon != null) {
-                mFinal[state] = new BitmapDrawable(mContext.getResources(), mIcon);
+                mFinal[state] = new BitmapDrawable(mResources, mIcon);
             } else if (mShape != null) {
                 mFinal[state] = new ShapeDrawable(mShape);
             }
@@ -386,7 +405,7 @@ public class MSDrawable {
         return mFinal[state] != null
                ? (BitmapDrawable) mFinal[state]
                : mColors[state] != 0
-                 ? ImageUtils.createRecoloredDrawable(mContext, getBitmap(state), mColors[state])
+                 ? ImageUtils.createRecoloredDrawable(mResources, getBitmap(state), mColors[state])
                  : getDrawable(state);
     }
 
@@ -474,6 +493,6 @@ public class MSDrawable {
     private BitmapDrawable getDrawable(int state) {
         return mBitmapDrawables[state] != null
                ? mBitmapDrawables[state]
-               : new BitmapDrawable(mContext.getResources(), mBitmaps[state]);
+               : new BitmapDrawable(mResources, mBitmaps[state]);
     }
 }
