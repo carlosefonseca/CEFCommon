@@ -25,6 +25,8 @@ public class OpenNewActivity implements View.OnClickListener {
 
     private static final String TAG = CodeUtils.getTag(OpenNewActivity.class);
     private Integer flags;
+    private Intent intent;
+    private Intent mExtras;
 
     public enum TransitionAnimation {
         /**
@@ -215,6 +217,7 @@ public class OpenNewActivity implements View.OnClickListener {
 
         Intent intent = new Intent(context, aClass);
         if (flags != null) intent.addFlags(flags);
+        if (mExtras != null) intent.putExtras(mExtras);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
             if (context != null) {
@@ -260,6 +263,10 @@ public class OpenNewActivity implements View.OnClickListener {
         }
     }
 
+    public Intent getExtras() {
+        if (mExtras == null) mExtras = new Intent();
+        return mExtras;
+    }
 
     public static final View.OnClickListener back = new View.OnClickListener() {
         @Override
