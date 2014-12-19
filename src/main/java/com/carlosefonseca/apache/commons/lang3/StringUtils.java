@@ -16,6 +16,8 @@
  */
 package com.carlosefonseca.apache.commons.lang3;
 
+import org.jetbrains.annotations.Nullable;
+
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.text.Normalizer;
@@ -6184,7 +6186,7 @@ public class StringUtils {
      * @see ObjectUtils#toString(Object, String)
      * @see String#valueOf(Object)
      */
-    public static String defaultString(final String str, final String defaultStr) {
+    public static String defaultString(@Nullable final String str, final String defaultStr) {
         return str == null ? defaultStr : str;
     }
 

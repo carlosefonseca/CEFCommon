@@ -24,7 +24,7 @@ public class PreferencesManager {
     }
 
     //region SETTERS
-    public static void setParameter(@Nullable Context context, String key, String value) {
+    public static void setParameter(@Nullable Context context, String key, @Nullable String value) {
         getSharedPreferences(context).edit().putString(key, value).apply();
     }
 
