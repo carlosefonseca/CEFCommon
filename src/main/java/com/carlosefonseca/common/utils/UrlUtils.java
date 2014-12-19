@@ -54,7 +54,7 @@ public final class UrlUtils {
     /**
      * Takes any string but only returns those that start with HTTP. Returns null otherwise.
      */
-    @Nullable public static String filterHttp(String url) {
+    @Nullable public static String filterHttp(@Nullable String url) {
         return url != null && url.startsWith("http") ? url : null;
     }
 
