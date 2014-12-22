@@ -142,6 +142,7 @@ public class GalleryPlus extends FrameLayout {
      */
     public void setAspectRatio(@Nullable Double aspectRatio) {
         this.aspectRatio = aspectRatio;
+        requestLayout();
     }
 
     public void setAspectRatioFromImage(File image) {

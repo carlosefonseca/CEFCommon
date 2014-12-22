@@ -134,17 +134,17 @@ public class Gallery extends ViewPager {
             this(context, null);
         }
 
-        protected GalleryAdapter(Context context, ImageView.ScaleType scaleType) {
+        protected GalleryAdapter(Context context, @Nullable ImageView.ScaleType scaleType) {
             this(context, scaleType, null);
         }
 
-        protected GalleryAdapter(Context context, ImageView.ScaleType scaleType, @Nullable Rembrandt rembrandt) {
+        protected GalleryAdapter(Context context, @Nullable ImageView.ScaleType scaleType, @Nullable Rembrandt rembrandt) {
             this.scaleType = scaleType;
             this.rembrandt = rembrandt == null ? new Rembrandt(context) : rembrandt;
             layoutInflater = LayoutInflater.from(context);
         }
 
-        public void setClickListener(OnClickListener clickListener) {
+        public void setClickListener(@Nullable OnClickListener clickListener) {
             this.clickListener = clickListener;
         }
 

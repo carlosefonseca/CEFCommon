@@ -307,7 +307,7 @@ public class StringUtils {
      * @return {@code true} if the CharSequence is null, empty or whitespace
      * @since 3.0 Changed signature from isBlank(String) to isBlank(CharSequence)
      */
-    public static boolean isBlank(final CharSequence cs) {
+    public static boolean isBlank(@Nullable final CharSequence cs) {
         int strLen;
         if (cs == null || (strLen = cs.length()) == 0) {
             return true;
@@ -336,7 +336,7 @@ public class StringUtils {
      * not empty and not null and not whitespace
      * @since 3.0 Changed signature from isNotBlank(String) to isNotBlank(CharSequence)
      */
-    public static boolean isNotBlank(final CharSequence cs) {
+    public static boolean isNotBlank(@Nullable final CharSequence cs) {
         return !StringUtils.isBlank(cs);
     }
 
