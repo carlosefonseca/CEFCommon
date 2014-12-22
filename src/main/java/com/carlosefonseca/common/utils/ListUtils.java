@@ -341,7 +341,7 @@ public final class ListUtils {
         return integers;
     }
 
-    public static boolean containsIgnoreCase(Collection<String> list, String string) {
+    public static boolean containsIgnoreCase(Collection<String> list, @Nullable String string) {
         for (String s : list) {
             if (s.equalsIgnoreCase(string)) {
                 return true;
