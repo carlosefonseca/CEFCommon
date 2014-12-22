@@ -167,6 +167,7 @@ public final class ImageUtils {
         return decodeSampledBitmapFromFile(path.getAbsolutePath(), reqWidth, reqHeight);
     }
 
+    @Nullable
     public static Bitmap getCachedPhoto(@Nullable File file, int widthDp, int heightDp, @Nullable String sizeName) {
         return getCachedPhotoPx(file, ((int) (widthDp * density)), (int) (heightDp * density), sizeName);
     }
