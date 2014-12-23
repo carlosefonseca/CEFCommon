@@ -526,7 +526,7 @@ public class StringUtils {
      * {@code null} if whitespace, empty or null String input
      * @since 2.0
      */
-    public static String stripToNull(String str) {
+    public static String stripToNull(@Nullable String str) {
         if (str == null) {
             return null;
         }

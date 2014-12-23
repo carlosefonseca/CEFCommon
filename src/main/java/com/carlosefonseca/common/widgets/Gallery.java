@@ -196,35 +196,33 @@ public class Gallery extends ViewPager {
                     }
                 }
             }
-            if (view != null) {
-                final ImageView imageView = (ImageView) view.findViewById(R.id.image);
+            final ImageView imageView = (ImageView) view.findViewById(R.id.image);
 
-                if (urlList != null) {
-                    String url = urlList.get(position);
-                    view.setTag(url);
-                    rembrandt.load(url);
-                } else if (imageList != null) {
-                    File file = imageList.get(position);
-                    view.setTag(file);
-                    rembrandt.load(file);
-                }
-                rembrandt.fadeIn(imageView).continueWith(new Continuation<Void, Void>() {
-                    @Override
-                    public Void then(Task<Void> task) throws Exception {
-                        if (task.getError() != null) {
-                            imageView.setBackgroundColor(Color.GRAY);
-                        } else {
-                            imageView.setBackgroundColor(Color.TRANSPARENT);
-                        }
-                        return null;
-                    }
-                }, Task.UI_THREAD_EXECUTOR).continueWith(TaskUtils.LogErrorContinuation);
-
-                imageView.setTag(position);
-                view.setOnClickListener(this);
-
-                container.addView(view);
+            if (urlList != null) {
+                String url = urlList.get(position);
+                view.setTag(url);
+                rembrandt.load(url);
+            } else if (imageList != null) {
+                File file = imageList.get(position);
+                view.setTag(file);
+                rembrandt.load(file);
             }
+            rembrandt.fadeIn(imageView).continueWith(new Continuation<Void, Void>() {
+                @Override
+                public Void then(Task<Void> task) throws Exception {
+                    if (task.getError() != null) {
+                        imageView.setBackgroundColor(Color.GRAY);
+                    } else {
+                        imageView.setBackgroundColor(Color.TRANSPARENT);
+                    }
+                    return null;
+                }
+            }, Task.UI_THREAD_EXECUTOR).continueWith(TaskUtils.LogErrorContinuation);
+
+            imageView.setTag(position);
+            view.setOnClickListener(this);
+
+            container.addView(view);
 
             return view;
         }

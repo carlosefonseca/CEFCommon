@@ -45,7 +45,6 @@ public class Rembrandt {
     private Transform mTransform;
     private OnBitmap mNotify;
     private boolean mHideIfNull;
-    private Boolean canWrite;
 
     public Rembrandt(Context context) {
         mContext = context;
@@ -53,7 +52,6 @@ public class Rembrandt {
 
     /**
      * Creates a new instance reusing the context and cache from the argument.
-     * @param rembrandt
      */
     public Rembrandt(Rembrandt rembrandt) {
         mContext = rembrandt.mContext;
@@ -170,10 +168,14 @@ public class Rembrandt {
                 int mWidth = view.getLayoutParams().width == WRAP_CONTENT ? 0 : Math.max(view.getMeasuredWidth(), 0);
                 int mHeight = view.getLayoutParams().height == WRAP_CONTENT ? 0 : Math.max(view.getMeasuredHeight(), 0);
 
+                if (mWidth == 0 || mHeight == 0) {
+                    mWidth = 0;
+                    mHeight = 0;
+                }
+
                 Bitmap bitmap;
                 if (url != null) {
                     if (!ImageUtils.isImage(url)) {
-//                        throw new RuntimeException("Url is not an image: " + url);
                         Log.w(TAG, "Url is not an image: " + url);
                         return null;
                     }
@@ -183,7 +185,6 @@ public class Rembrandt {
                         bitmap = bitmapFromFile(url, mWidth, mHeight);
                     }
                 } else {
-//                    final int measuredHeight = view.getMeasuredHeight();
                     bitmap = ImageUtils.getCachedPhotoPx(file, mWidth, mHeight, null);
                 }
                 if (bitmap != null) {
@@ -206,7 +207,6 @@ public class Rembrandt {
                     if (placeholder != 0) view.setImageResource(placeholder);
                     if (bitmapTask.getError() != null) {
                         Log.w(TAG, bitmapTask.getError());
-//                        throw bitmapTask.getError();
                     }
                     return null;
                 }
@@ -231,7 +231,6 @@ public class Rembrandt {
         if (cachedPhoto != null) return cachedPhoto;
         Log.i(TAG, "Downloading image " + url);
         Bitmap bitmap = NetworkingUtils.loadBitmap(url);
-//        new ImageUtils.ImageWriter(fullPath, bitmap).execute();
         if (bitmap != null && fullPath != null) ImageUtils.writeImageInBackground(fullPath, bitmap);
         return bitmap;
     }

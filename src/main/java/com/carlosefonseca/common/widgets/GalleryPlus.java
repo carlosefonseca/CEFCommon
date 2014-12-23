@@ -3,6 +3,7 @@ package com.carlosefonseca.common.widgets;
 import android.content.Context;
 import android.support.v4.view.ViewPager;
 import android.util.AttributeSet;
+import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import com.carlosefonseca.common.R;
@@ -73,6 +74,7 @@ public class GalleryPlus extends FrameLayout {
         if (aspectRatio != null) {
             final int h = (int) (getMeasuredWidth() * aspectRatio);
             galleryView.getLayoutParams().height = h;
+            galleryView.setLayoutParams(galleryView.getLayoutParams());
             setMeasuredDimension(widthMeasureSpec, h);
         }
     }
@@ -137,12 +139,21 @@ public class GalleryPlus extends FrameLayout {
 
     /**
      * Ex: 3/5 <-> height / width
-     *
-     * @param aspectRatio
      */
     public void setAspectRatio(@Nullable Double aspectRatio) {
         this.aspectRatio = aspectRatio;
+        ViewGroup.LayoutParams layoutParams = getLayoutParams();
+        if (layoutParams != null) {
+            if (aspectRatio != null) {
+                layoutParams.height = (int) (aspectRatio * layoutParams.width);
+                galleryView.getLayoutParams().height = (int) (aspectRatio * layoutParams.width);
+            } else {
+                layoutParams.height = ViewGroup.LayoutParams.WRAP_CONTENT;
+                galleryView.getLayoutParams().height = ViewGroup.LayoutParams.WRAP_CONTENT;
+            }
+        }
         requestLayout();
+        invalidate();
     }
 
     public void setAspectRatioFromImage(File image) {
