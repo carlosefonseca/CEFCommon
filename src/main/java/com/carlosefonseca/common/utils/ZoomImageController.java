@@ -15,6 +15,7 @@ public class ZoomImageController extends ZoomViewController<ImageView> {
         super(activity);
     }
 
+    @Override
     protected ImageView createExpandedView() {
         return new ImageView(getContext());
     }

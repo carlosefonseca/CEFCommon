@@ -14,6 +14,7 @@ import android.widget.ImageView;
 import android.widget.Scroller;
 import bolts.Continuation;
 import bolts.Task;
+import com.carlosefonseca.apache.commons.collections4.CollectionUtils;
 import com.carlosefonseca.common.R;
 import com.carlosefonseca.common.utils.*;
 import org.jetbrains.annotations.NotNull;
@@ -21,10 +22,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 public class Gallery extends ViewPager {
 
@@ -78,6 +76,11 @@ public class Gallery extends ViewPager {
         return adapter;
     }
 
+    @Override
+    public GalleryAdapter getAdapter() {
+        return (GalleryAdapter) super.getAdapter();
+    }
+
     public void setupWithImageList(Collection<File> imageList) {
         GalleryAdapter adapter = getOrCreateAdapter();
         adapter.withFileList(imageList);
@@ -96,8 +99,13 @@ public class Gallery extends ViewPager {
         this.rightMargin = rightMargin;
     }
 
+    /**
+     * Sets a click listener on the images.
+     *
+     * @param listener
+     */
     @Override
-    public void setOnClickListener(OnClickListener listener) {
+    public void setOnClickListener(@Nullable OnClickListener listener) {
         getOrCreateAdapter().setClickListener(listener);
     }
 
@@ -122,7 +130,8 @@ public class Gallery extends ViewPager {
         private LinkedList<View> recycledViews = new LinkedList<View>();
         private LayoutInflater layoutInflater;
         @Nullable private OnClickListener clickListener;
-        protected int gallery_layout = R.layout.gallery_styled_image_view;
+        //        protected int gallery_layout = R.layout.gallery_styled_image_view;
+        protected int gallery_layout = R.layout.gallery_page;
         private ImageView.ScaleType scaleType;
 
         @Override
@@ -186,25 +195,23 @@ public class Gallery extends ViewPager {
 
         @Override
         public Object instantiateItem(ViewGroup container, final int position) {
-            View view = recycledViews.poll();
+            final ImageView imageView;
+            GalleryPage view = (GalleryPage) recycledViews.poll();
             if (view == null) {
-                view = layoutInflater.inflate(gallery_layout, container, false);
-                if (scaleType != null) {
-                    ((ImageView) ((ViewGroup) view).getChildAt(0)).setScaleType(scaleType);
-                    if (scaleType == ImageView.ScaleType.FIT_XY || scaleType == ImageView.ScaleType.CENTER_CROP) {
-                        ((ViewGroup) view).getChildAt(0).getLayoutParams().width = ViewGroup.LayoutParams.MATCH_PARENT;
-                    }
-                }
+                view = (GalleryPage) layoutInflater.inflate(gallery_layout, container, false);
+                imageView = view.imageView;
+                if (scaleType != null) view.setScaleType(scaleType);
+            } else {
+                imageView = view.imageView;
             }
-            final ImageView imageView = (ImageView) view.findViewById(R.id.image);
 
             if (urlList != null) {
                 String url = urlList.get(position);
-                view.setTag(url);
+                view.set(url, position);
                 rembrandt.load(url);
             } else if (imageList != null) {
                 File file = imageList.get(position);
-                view.setTag(file);
+                view.set(file, position);
                 rembrandt.load(file);
             }
             rembrandt.fadeIn(imageView).continueWith(new Continuation<Void, Void>() {
@@ -219,7 +226,6 @@ public class Gallery extends ViewPager {
                 }
             }, Task.UI_THREAD_EXECUTOR).continueWith(TaskUtils.LogErrorContinuation);
 
-            imageView.setTag(position);
             view.setOnClickListener(this);
 
             container.addView(view);
@@ -237,11 +243,28 @@ public class Gallery extends ViewPager {
             container.removeView((View) object);
             recycledViews.add((View) object);
         }
-    }
 
+        public boolean isFileList() { return CollectionUtils.isNotEmpty(this.imageList); }
+
+        public boolean isUrlList() { return CollectionUtils.isNotEmpty(this.urlList); }
+
+        @Nullable
+        public List<File> getImageList() {
+            return imageList;
+        }
+
+        @Nullable
+        public List<String> getUrlList() {
+            return urlList;
+        }
+    }
 
     public interface OnItemClickListener<T> {
         void onClick(T item);
+    }
+
+    public interface OnViewItemClickListener<T> {
+        void onClick(View v, T item);
     }
 
     public <T> void setupWithUrlsForObjects(List<String> urls,
@@ -251,7 +274,38 @@ public class Gallery extends ViewPager {
         setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                clickListener.onClick(objects.get((Integer) v.getTag()));
+                // View tag stores the original object
+                // Image View tag stores the position
+                int position = (int) v.findViewById(R.id.image).getTag();
+                clickListener.onClick(objects.get(position));
+            }
+        });
+    }
+
+    public void setupWithFiles(List<File> files, final OnViewItemClickListener<File> clickListener) {
+        setupWithImageList(files);
+        setOnFileItemClickListener(clickListener);
+    }
+
+    public void setupWithUrls(List<String> list, final OnViewItemClickListener<String> clickListener) {
+        setupWithUrlList(list);
+        setOnUrlItemClickListener(clickListener);
+    }
+
+    protected void setOnFileItemClickListener(final OnViewItemClickListener<File> clickListener) {
+        setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                clickListener.onClick(v, ((GalleryPage) v).file);
+            }
+        });
+    }
+
+    protected void setOnUrlItemClickListener(final OnViewItemClickListener<String> clickListener) {
+        setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                clickListener.onClick(v, ((GalleryPage) v).url);
             }
         });
     }

@@ -59,6 +59,7 @@ public final class ImageUtils {
             density = c.getResources().getDisplayMetrics().density;
             screenLayout = c.getResources().getConfiguration().screenLayout & Configuration.SCREENLAYOUT_SIZE_MASK;
         } catch (Exception e) {
+            //noinspection ConstantConditions
             Log.w(TAG, "" + e.getMessage(), (Object[])null);
         }
     }
@@ -112,8 +113,8 @@ public final class ImageUtils {
 
 
     /**
-     * @param c
-     * @param path
+     * @param c Context
+     * @param path Path
      * @param reqWidth  Pixels
      * @param reqHeight Pixels
      * @throws IOException
@@ -128,8 +129,12 @@ public final class ImageUtils {
         if (reqWidth > 0 || reqHeight > 0) {
             options = new BitmapFactory.Options();
             options.inJustDecodeBounds = true;
-            options.inPurgeable = true;
-            options.inInputShareable = true;
+            if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT) {
+                //noinspection deprecation
+                options.inPurgeable = true;
+                //noinspection deprecation
+                options.inInputShareable = true;
+            }
             BitmapFactory.decodeStream(stream, null, options);
 
             // Calculate inSampleSize
@@ -213,14 +218,12 @@ public final class ImageUtils {
 
     @Deprecated
     @Nullable
-    private static Bitmap getPhotoFromFileOrAssets(File file, int widthDp, int heightDp) {
-        final Bitmap bitmap = tryPhotoFromFileOrAssets(file, widthDp, heightDp);
-        if (bitmap == null) Log.w(TAG, "IMAGE DOES NOT EXIST " + file);
-        return bitmap;
+    private static Bitmap getPhotoFromFileOrAssets(@Nullable File file, int widthDp, int heightDp) {
+        return getPhotoFromFileOrAssetsPx(file, dp2px(widthDp), dp2px(heightDp));
     }
 
     @Nullable
-    private static Bitmap getPhotoFromFileOrAssetsPx(File file, int width, int height) {
+    private static Bitmap getPhotoFromFileOrAssetsPx(@Nullable File file, int width, int height) {
         final Bitmap bitmap = tryPhotoFromFileOrAssetsPx(file, width, height);
         if (bitmap == null) Log.w(TAG, "IMAGE DOES NOT EXIST " + file);
         return bitmap;
@@ -229,14 +232,7 @@ public final class ImageUtils {
     @Deprecated
     @Nullable
     static Bitmap tryPhotoFromFileOrAssets(@Nullable File file, int widthDp, int heightDp) {
-        if (file == null) return null;
-        Bitmap bitmap = null;
-        if (file.exists()) {
-            bitmap = getPhotoFromFile(file.getAbsolutePath(), widthDp, heightDp); // DP's
-        } else if (getImagesOnAssets().contains(file.getName())) {
-            bitmap = getPhotoFromAssets(file.getName(), widthDp, heightDp); // PIXELS
-        }
-        return bitmap;
+        return tryPhotoFromFileOrAssetsPx(file, dp2px(widthDp), dp2px(heightDp));
     }
 
     @Nullable
@@ -266,8 +262,12 @@ public final class ImageUtils {
         Bitmap bitmap = null;
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inJustDecodeBounds = true;
-        options.inPurgeable = true;
-        options.inInputShareable = true;
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT) {
+            //noinspection deprecation
+            options.inPurgeable = true;
+            //noinspection deprecation
+            options.inInputShareable = true;
+        }
         if (file.exists()) {
             BitmapFactory.decodeFile(file.getAbsolutePath(), options);
         } else if (getImagesOnAssets().contains(file.getName())) {
@@ -289,7 +289,7 @@ public final class ImageUtils {
 
     @Nullable
     public static Bitmap getPhotoFromFileOrAssets(File file) {
-        return getPhotoFromFileOrAssets(file, -1, -1);
+        return getPhotoFromFileOrAssetsPx(file, -1, -1);
     }
 
     public static class BitmapCanvas {
@@ -313,7 +313,7 @@ public final class ImageUtils {
         public void run(Bitmap bmp);
     }
 
-    public static void getCachedPhotoAsync(final File file,
+    public static void getCachedPhotoAsync(@Nullable final File file,
                                            final int widthDp,
                                            final int heightDp,
                                            final RunnableWithBitmap runnable) {
@@ -342,6 +342,7 @@ public final class ImageUtils {
                 @Override
                 protected Bitmap doInBackground(Void... params) {
                     File fullPath = ResourceUtils.getFullPath(getLastSegmentOfURL(filenameOrUrl));
+                    if (fullPath == null) throw new RuntimeException("FullPath is null :\\");
                     Bitmap cachedPhoto = getCachedPhoto(fullPath, widthDp, heightDp, null);
                     if (cachedPhoto != null) return cachedPhoto;
                     try {
@@ -369,7 +370,7 @@ public final class ImageUtils {
     @Nullable
     public static Bitmap getPhotoFromFileOrAssets(String filenameOrUrl) {
         if (filenameOrUrl == null) return null;
-        return getPhotoFromFileOrAssets(getFileFromUrlOrPath(filenameOrUrl), -1, -1);
+        return getPhotoFromFileOrAssetsPx(getFileFromUrlOrPath(filenameOrUrl), -1, -1);
     }
 
 
@@ -439,10 +440,10 @@ public final class ImageUtils {
 
     /**
      *
-     * @param name
+     * @param name File name
      * @param width Pixels
      * @param height Pixels
-     * @return
+     * @return Bitmap or null
      */
     @Nullable
     public static Bitmap getPhotoFromAssets(String name, int width, int height) {
@@ -553,7 +554,7 @@ public final class ImageUtils {
     public static HashSet<String> getImagesOnAssets() {
         if (imagesOnAssets == null) {
             try {
-                imagesOnAssets = new HashSet<String>(Arrays.asList(CFApp.getContext().getAssets().list("")));
+                imagesOnAssets = new HashSet<>(Arrays.asList(CFApp.getContext().getAssets().list("")));
             } catch (IOException e) {
                 Log.e(TAG, "" + e.getMessage(), e);
             }
@@ -587,6 +588,7 @@ public final class ImageUtils {
 
     static void writeImageInBackground(final File file, final Bitmap bitmap) {
         Task.callInBackground(new Callable<Object>() {
+            @Nullable
             @Override
             public Object call() throws Exception {
                 try {
@@ -753,8 +755,12 @@ public final class ImageUtils {
         // First decode with inJustDecodeBounds=true to check dimensions
         final BitmapFactory.Options options = new BitmapFactory.Options();
         options.inJustDecodeBounds = true;
-        options.inPurgeable = true;
-        options.inInputShareable = true;
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT) {
+            //noinspection deprecation
+            options.inPurgeable = true;
+            //noinspection deprecation
+            options.inInputShareable = true;
+        }
         BitmapFactory.decodeFile(path, options);
 
         // Calculate inSampleSize
@@ -795,8 +801,12 @@ public final class ImageUtils {
         } else {
             Log.v(TAG, "Loading from cache " + path);
             final BitmapFactory.Options options = new BitmapFactory.Options();
-            options.inPurgeable = true;
-            options.inInputShareable = true;
+            if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT) {
+                //noinspection deprecation
+                options.inPurgeable = true;
+                //noinspection deprecation
+                options.inInputShareable = true;
+            }
             bitmap = BitmapFactory.decodeFile(cacheFile.getAbsolutePath(), options);
         }
         return bitmap;

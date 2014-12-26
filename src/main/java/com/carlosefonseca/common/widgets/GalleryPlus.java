@@ -1,13 +1,16 @@
 package com.carlosefonseca.common.widgets;
 
+import android.app.Activity;
 import android.content.Context;
 import android.support.v4.view.ViewPager;
 import android.util.AttributeSet;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import com.carlosefonseca.common.R;
 import com.carlosefonseca.common.utils.ImageUtils;
+import com.carlosefonseca.common.utils.ZoomZoomableRembrandtController;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
@@ -21,6 +24,7 @@ public class GalleryPlus extends FrameLayout {
     private ImageView arrowRightView;
     private boolean hideIfEmpty;
     @Nullable private Double aspectRatio;
+    private ZoomZoomableRembrandtController zoomRembrandtController;
 
     public GalleryPlus(Context context) {
         super(context);
@@ -96,6 +100,11 @@ public class GalleryPlus extends FrameLayout {
         afterSetup(imageList);
     }
 
+    public void setupWithFiles(List<File> files, Gallery.OnViewItemClickListener<File> clickListener) {
+        galleryView.setupWithFiles(files, clickListener);
+        afterSetup(files);
+    }
+
     public void setupWithUrlList(Collection<String> imageList) {
         galleryView.setupWithUrlList(imageList);
         afterSetup(imageList);
@@ -115,6 +124,12 @@ public class GalleryPlus extends FrameLayout {
         setArrowsForPage(galleryView.getCurrentItem());
     }
 
+    /**
+     * Sets a click listener on the images of the Gallery.
+     *
+     * @param listener
+     * @see com.carlosefonseca.common.widgets.Gallery#setOnClickListener(android.view.View.OnClickListener)
+     */
     @Override
     public void setOnClickListener(OnClickListener listener) {
         galleryView.setOnClickListener(listener);
@@ -167,5 +182,32 @@ public class GalleryPlus extends FrameLayout {
 
     public Gallery getGalleryView() {
         return galleryView;
+    }
+
+    public void setBasicZoom(@Nullable Activity activity) {
+        if (activity != null) {
+            if (zoomRembrandtController == null) {
+                ViewGroup rootView = (ViewGroup) activity.getWindow().getDecorView().getRootView();
+                zoomRembrandtController = new ZoomZoomableRembrandtController(rootView);
+            }
+            if (galleryView.getAdapter().isUrlList()) {
+                galleryView.setOnUrlItemClickListener(new Gallery.OnViewItemClickListener<String>() {
+                    @Override
+                    public void onClick(View v, String item) {
+                        zoomRembrandtController.zoomFromView(((GalleryPage) v).getImageView(), item);
+                    }
+                });
+            } else if (galleryView.getAdapter().isFileList()) {
+                galleryView.setOnFileItemClickListener(new Gallery.OnViewItemClickListener<File>() {
+                    @Override
+                    public void onClick(View v, File item) {
+                        zoomRembrandtController.zoomFromView(((GalleryPage) v).getImageView(), item);
+                    }
+                });
+            }
+        } else {
+            galleryView.setOnClickListener(null);
+            zoomRembrandtController = null;
+        }
     }
 }

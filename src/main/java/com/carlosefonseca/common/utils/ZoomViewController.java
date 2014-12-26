@@ -186,7 +186,7 @@ public abstract class ZoomViewController<T extends View> {
     // TODO: make configurable
     private View getFadeView() {
         if (mFadeView == null) {
-            mFadeView = new View(getContext());
+            mFadeView = new View(mContext);
             ShapeDrawable mDrawable = getRadialOverlayDrawable(mContainer);
 
             ResourceUtils.setBackground(mFadeView, mDrawable);

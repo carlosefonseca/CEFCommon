@@ -12,6 +12,7 @@ import android.view.View;
 import com.carlosefonseca.common.utils.CodeUtils;
 import com.carlosefonseca.common.utils.Log;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class ZoomableImageView extends View {
     private static final String TAG = CodeUtils.getTag(ZoomableImageView.class);
@@ -92,7 +93,7 @@ public class ZoomableImageView extends View {
         screenDensity = context.getResources().getDisplayMetrics().density;
 
         initPaints();
-        gestureDetector = new GestureDetector(new MyGestureDetector());
+        gestureDetector = new GestureDetector(context, new MyGestureDetector());
     }
 
     public ZoomableImageView(Context context, AttributeSet attrs) {
@@ -100,7 +101,7 @@ public class ZoomableImageView extends View {
 
         screenDensity = context.getResources().getDisplayMetrics().density;
         initPaints();
-        gestureDetector = new GestureDetector(new MyGestureDetector());
+        gestureDetector = new GestureDetector(context, new MyGestureDetector());
 
         defaultScale = ZoomableImageView.DEFAULT_SCALE_FIT_INSIDE;
     }
@@ -134,12 +135,31 @@ public class ZoomableImageView extends View {
                     matrix.setScale(scale, scale);
                     matrix.postTranslate(0, initY);
                 } else {
-                    scale = (float) containerHeight / imgHeight;
-                    float newWidth = imgWidth * scale;
-                    initX = (containerWidth - (int) newWidth) / 2;
+                    if (imgHeight > containerHeight) {
+                        scale = (float) containerHeight / imgHeight;
+                        float newWidth = imgWidth * scale;
+                        initX = (containerWidth - (int) newWidth) / 2;
 
-                    matrix.setScale(scale, scale);
-                    matrix.postTranslate(initX, 0);
+                        matrix.setScale(scale, scale);
+                        matrix.postTranslate(initX, 0);
+                    } else {
+                        // imagem é mais pequena que o container
+                        float scaleW = (float) containerWidth / imgWidth;
+                        float scaleH = (float) containerHeight / imgHeight;
+
+                        if (scaleW < scaleH) {
+                            scale = scaleW;
+                            float newHeight = imgHeight * scale;
+                            initY = (containerHeight - (int) newHeight) / 2;
+                        } else {
+                            scale = scaleH;
+                            float newWidth = imgWidth * scale;
+                            initX = (containerWidth - (int) newWidth) / 2;
+                        }
+                        matrix.setScale(scale, scale);
+                        matrix.postTranslate(initX, initY);
+
+                    }
                 }
 
                 curX = initX;
@@ -149,10 +169,10 @@ public class ZoomableImageView extends View {
                 minScale = scale;
             } else {
                 if (imgWidth > containerWidth) {
-                    initY = (containerHeight - (int) imgHeight) / 2;
+                    initY = (containerHeight - imgHeight) / 2;
                     matrix.postTranslate(0, initY);
                 } else {
-                    initX = (containerWidth - (int) imgWidth) / 2;
+                    initX = (containerWidth - imgWidth) / 2;
                     matrix.postTranslate(initX, 0);
                 }
 
@@ -349,7 +369,7 @@ public class ZoomableImageView extends View {
         point.set(x / 2, y / 2);
     }
 
-    public void setImageBitmap(Bitmap b) {
+    public void setImageBitmap(@Nullable Bitmap b) {
         if (b != null) {
             imgBitmap = b;
 
@@ -374,12 +394,31 @@ public class ZoomableImageView extends View {
                     matrix.setScale(scale, scale);
                     matrix.postTranslate(0, initY);
                 } else {
-                    scale = (float) containerHeight / imgHeight;
-                    float newWidth = imgWidth * scale;
-                    initX = (containerWidth - (int) newWidth) / 2;
+                    if (imgHeight > containerHeight) {
+                        scale = (float) containerHeight / imgHeight;
+                        float newWidth = imgWidth * scale;
+                        initX = (containerWidth - (int) newWidth) / 2;
 
-                    matrix.setScale(scale, scale);
-                    matrix.postTranslate(initX, 0);
+                        matrix.setScale(scale, scale);
+                        matrix.postTranslate(initX, 0);
+                    } else {
+                        // imagem é mais pequena que o container
+                        float scaleW = (float) containerWidth / imgWidth;
+                        float scaleH = (float) containerHeight / imgHeight;
+
+                        if (scaleW < scaleH) {
+                            scale = scaleW;
+                            float newHeight = imgHeight * scale;
+                            initY = (containerHeight - (int) newHeight) / 2;
+                        } else {
+                            scale = scaleH;
+                            float newWidth = imgWidth * scale;
+                            initX = (containerWidth - (int) newWidth) / 2;
+                        }
+                        matrix.setScale(scale, scale);
+                        matrix.postTranslate(initX, initY);
+
+                    }
                 }
 
                 curX = initX;
@@ -393,16 +432,16 @@ public class ZoomableImageView extends View {
                     if (imgHeight > containerHeight) {
                         initY = 0;
                     } else {
-                        initY = (containerHeight - (int) imgHeight) / 2;
+                        initY = (containerHeight - imgHeight) / 2;
                     }
 
                     matrix.postTranslate(0, initY);
                 } else {
-                    initX = (containerWidth - (int) imgWidth) / 2;
+                    initX = (containerWidth - imgWidth) / 2;
                     if (imgHeight > containerHeight) {
                         initY = 0;
                     } else {
-                        initY = (containerHeight - (int) imgHeight) / 2;
+                        initY = (containerHeight - imgHeight) / 2;
                     }
                     matrix.postTranslate(initX, 0);
                 }
@@ -416,6 +455,7 @@ public class ZoomableImageView extends View {
 
             invalidate();
         } else {
+            imgBitmap = null;
             Log.d(TAG, "bitmap is null");
         }
     }

@@ -17,6 +17,8 @@
 package com.carlosefonseca.apache.commons.collections4;
 
 
+import org.jetbrains.annotations.Nullable;
+
 import java.lang.reflect.Array;
 import java.util.*;
 
@@ -1067,7 +1069,7 @@ public class CollectionUtils {
      * @return true if empty or null
      * @since 3.2
      */
-    public static boolean isEmpty(final Collection<?> coll) {
+    public static boolean isEmpty(@Nullable final Collection<?> coll) {
         return coll == null || coll.isEmpty();
     }
 
@@ -1080,7 +1082,7 @@ public class CollectionUtils {
      * @return true if non-null and non-empty
      * @since 3.2
      */
-    public static boolean isNotEmpty(final Collection<?> coll) {
+    public static boolean isNotEmpty(@Nullable final Collection<?> coll) {
         return !isEmpty(coll);
     }
 

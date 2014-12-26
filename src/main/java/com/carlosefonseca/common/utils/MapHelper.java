@@ -31,7 +31,6 @@ public class MapHelper {
     protected Marker myLocationMarker;
 
     int color = Color.BLACK;
-    protected Typeface typeface = Typeface.DEFAULT_BOLD;
 
     protected LatLngBounds.Builder latLngBoundsBuilder;
     protected LatLngBounds latLngBounds;
@@ -69,7 +68,7 @@ public class MapHelper {
         p.setAntiAlias(true);
         p.setTextSize(number > 99 ? 15 : 20);
         p.setTextAlign(Paint.Align.CENTER);
-        p.setTypeface(typeface);
+        p.setTypeface(Typeface.DEFAULT_BOLD);
 
         Rect bounds = new Rect();
         String ntxt = "" + number;

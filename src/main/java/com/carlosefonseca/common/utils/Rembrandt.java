@@ -219,9 +219,14 @@ public class Rembrandt {
     }
 
     @Nullable
-    private static Bitmap bitmapFromFile(String url, int measuredWidth, int measuredHeight) {
+    public static Bitmap bitmapFromFile(String url, int widthPx, int heightPx) {
         final File file1 = url.startsWith("/") ? new File(url) : ResourceUtils.getFullPath(url);
-        return ImageUtils.getCachedPhoto(file1, measuredWidth, measuredHeight, null);
+        return bitmapFromFile(file1, widthPx, heightPx);
+    }
+
+    @Nullable
+    public static Bitmap bitmapFromFile(@Nullable File file, int widthPx, int heightPx) {
+        return ImageUtils.getCachedPhotoPx(file, widthPx, heightPx, null);
     }
 
     @Nullable

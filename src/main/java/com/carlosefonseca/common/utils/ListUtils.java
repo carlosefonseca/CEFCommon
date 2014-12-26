@@ -19,6 +19,7 @@ public final class ListUtils {
         return list != null && !list.isEmpty() ? list.get(0) : null;
     }
 
+    @Nullable
     public static <T> T last(@Nullable List<T> list) {
         return list != null && !list.isEmpty() ? list.get(list.size() - 1) : null;
     }
@@ -43,7 +44,6 @@ public final class ListUtils {
 
     /**
      * Returns a list containing all objects.
-     * @see #list(java.util.Collection[])
      */
     @SafeVarargs
     public static <T> ArrayList<T> list(T... objects) {

@@ -19,6 +19,7 @@ public class RembrandtView extends ImageView {
 
     boolean hideIfNull;
     private String url;
+    private File file;
 
     @Nullable private Double aspectRatio;
 
@@ -28,9 +29,9 @@ public class RembrandtView extends ImageView {
         this(context, new Rembrandt(context));
     }
 
-    public RembrandtView(Context context, Rembrandt rembrandt) {
+    public RembrandtView(Context context, @Nullable Rembrandt rembrandt) {
         super(context);
-        this.mRembrandt = rembrandt;
+        this.mRembrandt = rembrandt == null ? Rembrandt.with(context) : rembrandt;
     }
 
     public RembrandtView(Context context, AttributeSet attrs) {
@@ -68,15 +69,31 @@ public class RembrandtView extends ImageView {
     public synchronized bolts.Task<Void> setImageUrl(String url, boolean animated) {
         if (CodeUtils.equals(url, this.url)) return Task.forResult(null);
         this.url = url;
+        this.file = null;
         if (!animated) {
             return getRembrandt().load(url).hideIfNull(hideIfNull).placeholder(placeholder).into(this);
         } else if (this.url != null) {
             return getRembrandt().load(url).hideIfNull(hideIfNull).placeholder(placeholder).xFade(this);
         } else {
+            //noinspection ConstantConditions
             return getRembrandt().load(url).hideIfNull(hideIfNull).placeholder(placeholder).fadeIn(this);
         }
-//        return this;
     }
+
+    public synchronized bolts.Task<Void> setImageFile(File file, boolean animated) {
+        if (CodeUtils.equals(file, this.file)) return Task.forResult(null);
+        this.file = file;
+        this.url = null;
+        if (!animated) {
+            return getRembrandt().load(file).hideIfNull(hideIfNull).placeholder(placeholder).into(this);
+        } else if (this.file != null) {
+            return getRembrandt().load(file).hideIfNull(hideIfNull).placeholder(placeholder).xFade(this);
+        } else {
+            //noinspection ConstantConditions
+            return getRembrandt().load(file).hideIfNull(hideIfNull).placeholder(placeholder).fadeIn(this);
+        }
+    }
+
     public RembrandtView setCrossFadeImageUrl(String url) {
         if (CodeUtils.equals(url, this.url)) return this;
         this.url = url;

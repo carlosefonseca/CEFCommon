@@ -8,6 +8,7 @@ import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.ShapeDrawable;
+import android.graphics.drawable.StateListDrawable;
 import android.os.Build;
 import android.util.AttributeSet;
 import android.view.Gravity;
@@ -24,6 +25,8 @@ import com.carlosefonseca.common.utils.ResourceUtils;
 import com.carlosefonseca.common.utils.ViewUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import static com.carlosefonseca.common.utils.ResourceUtils.createDualStateDrawable;
 
 /**
  * The Navigation Bar for MySight.
@@ -352,10 +355,14 @@ public class NavBar extends LinearLayout {
     }
 
     public void setBackgroundOnView(View v) {
+        ResourceUtils.setBackground(v, getButtonBackground());
+    }
+
+    public StateListDrawable getButtonBackground() {
         final int color1 = color != NO_COLOR ? color : defaultNormalColor;
         final int color2 = color != NO_COLOR ? pressedColor : defaultPressedColor;
 
-        ResourceUtils.setDualColorBackground(v, color1, color2, ResourceUtils.PRESSED);
+        return createDualStateDrawable(color1, color2, ResourceUtils.PRESSED);
     }
 
     /**

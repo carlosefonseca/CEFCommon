@@ -17,6 +17,8 @@
 package com.carlosefonseca.apache.commons.lang3;
 
 
+import org.jetbrains.annotations.Nullable;
+
 import java.lang.reflect.Array;
 import java.util.HashMap;
 import java.util.Map;
@@ -450,7 +452,7 @@ public class ArrayUtils {
      *
      * @param array  the array to reverse, may be {@code null}
      */
-    public static void reverse(final Object[] array) {
+    public static void reverse(@Nullable final Object[] array) {
         if (array == null) {
             return;
         }

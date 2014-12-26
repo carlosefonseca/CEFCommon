@@ -8,6 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebView;
 import com.carlosefonseca.common.utils.CodeUtils;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * A fragment that displays a WebView.
@@ -90,7 +91,7 @@ public class CFWebViewFragment extends Fragment {
         return mIsWebViewAvailable ? mWebView : null;
     }
 
-    public static Bundle getBundleForUrl(String url) {
+    public static Bundle getBundleForUrl(@Nullable String url) {
         Bundle bundle = new Bundle(1);
         bundle.putString(URL_KEY, url);
         return bundle;

@@ -333,11 +333,10 @@ public final class UrlUtils {
      * Checks for apps that handle the URL in the following order: Facebook, Twitter, Instagram, Maps, anything else.
      * @return True if the URL was handled and something opened; False if the URL could not be handled.
      */
-    public static boolean tryAll(Context context, String url) {
-        if (url == null) throw new RuntimeException("URL is null!");
-        return Facebook.tryOpenUrl(context, url) || Twitter.tryOpenProfileFromURL(context, url) ||
-               Instagram.tryOpenProfileFromURL(context, url) || Coordinates.tryOpenUrl(context, url) ||
-               UrlUtils.tryStartIntentForUrl(context, url);
+    public static boolean tryAll(Context context, @Nullable String url) {
+        return url != null && (Facebook.tryOpenUrl(context, url) || Twitter.tryOpenProfileFromURL(context, url) ||
+                               Instagram.tryOpenProfileFromURL(context, url) || Coordinates.tryOpenUrl(context, url) ||
+                               UrlUtils.tryStartIntentForUrl(context, url));
     }
 
     private static Pattern unfurlPattern;

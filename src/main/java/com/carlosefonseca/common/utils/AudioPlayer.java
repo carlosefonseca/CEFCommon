@@ -140,6 +140,7 @@ public class AudioPlayer {
             currentMediaPlayer = null;
             queue.clear();
         }
+        EventBus.getDefault().removeStickyEvent(AudioPlayer.AudioPlayerNotification.class);
     }
 
     /**
