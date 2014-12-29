@@ -17,6 +17,8 @@
 package com.carlosefonseca.apache.commons.lang3;
 
 
+import org.jetbrains.annotations.Nullable;
+
 import java.io.IOException;
 import java.io.Serializable;
 
@@ -452,7 +454,7 @@ public class ObjectUtils {
      * @return a negative value if c1 &lt; c2, zero if c1 = c2
      *  and a positive value if c1 &gt; c2
      */
-    public static <T extends Comparable<? super T>> int compare(final T c1, final T c2) {
+    public static <T extends Comparable<? super T>> int compare(@Nullable final T c1, @Nullable final T c2) {
         return compare(c1, c2, false);
     }
 

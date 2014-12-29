@@ -45,6 +45,7 @@ public class Rembrandt {
     private Transform mTransform;
     private OnBitmap mNotify;
     private boolean mHideIfNull;
+    @Nullable private Point maxSize;
 
     public Rembrandt(Context context) {
         mContext = context;
@@ -115,7 +116,7 @@ public class Rembrandt {
             run = Task.forResult(null);
         } else {
             view.setVisibility(View.VISIBLE);
-            run = run(view, mUrl, mFile, placeholder, animation, mMapping, mTransform, mNotify, mCache);
+            run = run(view, mUrl, mFile, maxSize, placeholder, animation, mMapping, mTransform, mNotify, mCache);
         }
         mUrl = null;
         mFile = null;
@@ -126,6 +127,7 @@ public class Rembrandt {
     private static Task<Void> run(final ImageView view,
                                   @Nullable final String url,
                                   final File file,
+                                  @Nullable final Point maxSize,
                                   final int placeholder,
                                   final short animation,
                                   final HashMap<ImageView, String> mapping,
@@ -165,8 +167,14 @@ public class Rembrandt {
                     Log.v(TAG, "CANCELED Image loading of " + url);
                     return null;
                 }
-                int mWidth = view.getLayoutParams().width == WRAP_CONTENT ? 0 : Math.max(view.getMeasuredWidth(), 0);
-                int mHeight = view.getLayoutParams().height == WRAP_CONTENT ? 0 : Math.max(view.getMeasuredHeight(), 0);
+                int mWidth = maxSize != null
+                             ? maxSize.x
+                             : view.getLayoutParams().width == WRAP_CONTENT ? 0 : Math.max(view.getMeasuredWidth(), 0);
+                int mHeight = maxSize != null
+                              ? maxSize.y
+                              : view.getLayoutParams().height == WRAP_CONTENT
+                                ? 0
+                                : Math.max(view.getMeasuredHeight(), 0);
 
                 if (mWidth == 0 || mHeight == 0) {
                     mWidth = 0;
@@ -302,6 +310,11 @@ public class Rembrandt {
     public void destroy() {
         mCache = null;
         mMapping = null;
+    }
+
+    public Rembrandt maxSize(int widthPixels, int heightPixels) {
+        this.maxSize = new Point(widthPixels, heightPixels);
+        return this;
     }
 
     public interface Transform {

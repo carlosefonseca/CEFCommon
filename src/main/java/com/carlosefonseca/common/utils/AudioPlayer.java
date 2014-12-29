@@ -44,7 +44,7 @@ public class AudioPlayer {
 
         public enum Status { PLAY, PAUSE, STOP}
 
-        public AudioPlayerNotification(Status status, @Nullable File file, MediaPlayer mediaPlayer) {
+        public AudioPlayerNotification(Status status, @Nullable File file, @Nullable MediaPlayer mediaPlayer) {
             this.status = status;
             this.file = file;
             this.mediaPlayer = mediaPlayer;
@@ -166,11 +166,13 @@ public class AudioPlayer {
     @Deprecated
     public static void addPlayerListener(AudioPlayerListener l) {
         if (!playerListeners.contains(l)) playerListeners.add(l);
+        throw new RuntimeException("Deprecated");
     }
 
     @Deprecated
     public static void removePlayerListener(AudioPlayerListener l) {
         playerListeners.remove(l);
+        throw new RuntimeException("Deprecated");
     }
 
     @Nullable

@@ -33,10 +33,9 @@ public final class TaskUtils {
      * @return True if there are errors, false otherwise.
      */
     public static boolean hasErrors(String tag, String msg, Task<?> task) {
-        final Exception error = task.getError();
-        if (error != null) {
+        if (task.isFaulted()) {
             Log.w(tag, msg);
-            TaskUtils.logAggregateException(error);
+            TaskUtils.logAggregateException(task.getError());
             return true;
         }
         return false;
@@ -55,6 +54,23 @@ public final class TaskUtils {
                 Log.w(TAG, error);
             }
         }
+    }
+
+    @Nullable
+    public static String logAggregateExceptionToString(Exception error) {
+        if (error != null) {
+            if (error instanceof AggregateException) {
+                StringBuilder s = new StringBuilder(error.getMessage());
+                for (Exception exception : ((AggregateException) error).getErrors()) {
+                    s.append("--------");
+                    s.append(exception);
+                }
+                return s.toString();
+            } else {
+                return error.getMessage();
+            }
+        }
+        return null;
     }
 
     private TaskUtils() {}
@@ -128,5 +144,17 @@ public final class TaskUtils {
                 }
             }
         };
+    }
+
+    public static <T> String toString(Task<T> task) {
+        if (task == null) return "null";
+        if (task.isCompleted()) return "[Task completed: " + task.getResult() + "]";
+        if (task.isFaulted()) {
+            return "[Task is Faulted: " + logAggregateExceptionToString(task.getError());
+        }
+        if (task.isCancelled()) {
+            return "[Task was canceled]";
+        }
+        return "[Task: Unknown state R:" + task.getResult() + ", E:" + task.getError().getMessage();
     }
 }
