@@ -39,7 +39,7 @@ public class CFLocationManager implements GooglePlayServicesClient.ConnectionCal
     @Nullable private Set<OnLocationChangedListener> oneTimeListeners = new HashSet<>();
     private Location location;
     private boolean mShouldBeLocating;
-    protected GoogleApiClient mGoogleApiClient;
+    @Nullable protected GoogleApiClient mGoogleApiClient;
     private boolean isLocating;
 
     private ResultCallback<Status> startStatusResultCallback = new ResultCallback<Status>() {
@@ -87,21 +87,21 @@ public class CFLocationManager implements GooglePlayServicesClient.ConnectionCal
      * @return True if LocationClient is ready, false if connecting.
      */
     boolean setUpLocationClientIfNeeded() {
+        return getGAC().isConnected();
+    }
+
+    private GoogleApiClient getGAC() {
         if (mGoogleApiClient == null) {
             mGoogleApiClient = new GoogleApiClient.Builder(CFApp.getContext()).addApi(LocationServices.API)
                                                                               .addConnectionCallbacks(this)
                                                                               .addOnConnectionFailedListener(this)
                                                                               .build();
-            mGoogleApiClient.connect();
         }
-
-        if (mGoogleApiClient.isConnected()) return true;
-
-        if (!mGoogleApiClient.isConnecting()) {
+        if (!mGoogleApiClient.isConnected()) {
             connectionRequested = true;
             mGoogleApiClient.connect();
         }
-        return false;
+        return mGoogleApiClient;
     }
 
     @Override
@@ -118,16 +118,22 @@ public class CFLocationManager implements GooglePlayServicesClient.ConnectionCal
 
     private void startLocationUpdates() {
         if (isLocating) Log.d(TAG, "It's already locating but ok…");
-        if (mGoogleApiClient.isConnected()) {
+        if (getGAC().isConnected()) {
             LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, getLocationRequest(), this)
                                              .setResultCallback(startStatusResultCallback);
+        } else {
+            mShouldBeLocating = true;
         }
     }
 
     private void stopLocationUpdates() {
-        if (mGoogleApiClient.isConnected()) {
+        mShouldBeLocating = false;
+        if (mGoogleApiClient == null) return;
+        if (getGAC().isConnected()) {
             LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this)
                                              .setResultCallback(stopStatusResultCallback);
+        } else {
+            mShouldBeLocating = false;
         }
     }
 
@@ -147,7 +153,9 @@ public class CFLocationManager implements GooglePlayServicesClient.ConnectionCal
     public void clear() { }
 
     public boolean hasStarted() {
-        return mGoogleApiClient.isConnected() || mGoogleApiClient.isConnecting() || connectionRequested || isLocating;
+        return mGoogleApiClient != null &&
+               ((mGoogleApiClient.isConnected() || mGoogleApiClient.isConnecting() || connectionRequested ||
+                 isLocating));
     }
 
     /* (MAP) LOCATION SOURCE */
@@ -235,9 +243,7 @@ public class CFLocationManager implements GooglePlayServicesClient.ConnectionCal
     public void start() {
         if (mShouldBeLocating) return;
         mShouldBeLocating = true;
-        if (setUpLocationClientIfNeeded()) {
-            startLocationUpdates();
-        }
+        startLocationUpdates();
     }
 
     public void stop() {
@@ -248,7 +254,7 @@ public class CFLocationManager implements GooglePlayServicesClient.ConnectionCal
 
     @Nullable
     public Location getLastLocation() {
-        if (mGoogleApiClient.isConnected()) {
+        if (getGAC().isConnected()) {
             @Nullable Location googleLoc = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
             return location == null || (googleLoc != null && googleLoc.getTime() > location.getTime())
                    ? googleLoc
@@ -266,7 +272,7 @@ public class CFLocationManager implements GooglePlayServicesClient.ConnectionCal
      */
     public Task<Location> getLastLocationTask() {
         Location location1 = null;
-        if (mGoogleApiClient.isConnected()) {
+        if (getGAC().isConnected()) {
             @Nullable Location googleLoc = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
             location1 = location == null || (googleLoc != null && googleLoc.getTime() > location.getTime())
                         ? googleLoc
@@ -303,9 +309,12 @@ public class CFLocationManager implements GooglePlayServicesClient.ConnectionCal
 
     public void close() {
         stop();
-        mGoogleApiClient.unregisterConnectionCallbacks(this);
-        mGoogleApiClient.unregisterConnectionFailedListener(this);
-        mGoogleApiClient.disconnect();
+        if (mGoogleApiClient != null) {
+            mGoogleApiClient.unregisterConnectionCallbacks(this);
+            mGoogleApiClient.unregisterConnectionFailedListener(this);
+            mGoogleApiClient.disconnect();
+        }
+        oneTimeListeners = null;
         listeners = null;
         mapLocationChangedListener = null;
     }
