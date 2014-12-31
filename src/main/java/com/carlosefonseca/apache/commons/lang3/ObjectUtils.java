@@ -34,6 +34,11 @@ import java.io.Serializable;
  * @version $Id: ObjectUtils.java 1583781 2014-04-01 20:54:53Z niallp $
  */
 //@Immutable
+@SuppressWarnings({"SimplifiableIfStatement",
+                   "PointlessBooleanExpression",
+                   "UnusedDeclaration",
+                   "ObjectEquality",
+                   "deprecation"})
 public class ObjectUtils {
 
     /**
@@ -109,6 +114,8 @@ public class ObjectUtils {
      *  or {@code null} if there are no non-null values
      * @since 3.0
      */
+    @SafeVarargs
+    @Nullable
     public static <T> T firstNonNull(final T... values) {
         if (values != null) {
             for (final T val : values) {
@@ -255,6 +262,7 @@ public class ObjectUtils {
      * @return the default toString text, or {@code null} if
      *  {@code null} passed in
      */
+    @Nullable
     public static String identityToString(final Object object) {
         if (object == null) {
             return null;
@@ -407,6 +415,8 @@ public class ObjectUtils {
      *   <li>If all the comparables are null, null is returned.
      *  </ul>
      */
+    @SafeVarargs
+    @Nullable
     public static <T extends Comparable<? super T>> T min(final T... values) {
         T result = null;
         if (values != null) {
@@ -432,6 +442,8 @@ public class ObjectUtils {
      *   <li>If all the comparables are null, null is returned.
      *  </ul>
      */
+    @SafeVarargs
+    @Nullable
     public static <T extends Comparable<? super T>> T max(final T... values) {
         T result = null;
         if (values != null) {
@@ -471,7 +483,7 @@ public class ObjectUtils {
      *  and a positive value if c1 &gt; c2
      * @see java.util.Comparator#compare(Object, Object)
      */
-    public static <T extends Comparable<? super T>> int compare(final T c1, final T c2, final boolean nullGreater) {
+    public static <T extends Comparable<? super T>> int compare(@Nullable final T c1, @Nullable final T c2, final boolean nullGreater) {
         if (c1 == c2) {
             return 0;
         } else if (c1 == null) {

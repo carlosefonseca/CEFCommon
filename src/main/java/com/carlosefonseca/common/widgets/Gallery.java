@@ -87,7 +87,7 @@ public class Gallery extends ViewPager {
         adapter.notifyDataSetChanged();
     }
 
-    public void setupWithUrlList(Collection<String> imageList) {
+    public void setupWithUrlList(@Nullable Collection<String> imageList) {
         GalleryAdapter adapter = getOrCreateAdapter();
         adapter.withUrlList(imageList);
         adapter.notifyDataSetChanged();
@@ -163,8 +163,8 @@ public class Gallery extends ViewPager {
             return this;
         }
 
-        public GalleryAdapter withUrlList(Collection<String> imageList) {
-            this.urlList = new ArrayList<>(imageList);
+        public GalleryAdapter withUrlList(@Nullable Collection<String> imageList) {
+            this.urlList = imageList == null ? new ArrayList<String>() : new ArrayList<>(imageList);
             ListUtils.removeNullElements(this.urlList);
             this.imageList = null;
             return this;

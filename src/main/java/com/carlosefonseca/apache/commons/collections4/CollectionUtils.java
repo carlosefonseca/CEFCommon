@@ -33,6 +33,10 @@ import java.util.*;
  * @version $Id: CollectionUtils.java 1540639 2013-11-11 08:54:12Z tn $
  * @since 1.0
  */
+@SuppressWarnings({"UnusedDeclaration",
+                   "UnnecessaryContinue",
+                   "UtilityClassWithoutPrivateConstructor",
+                   "NonFinalUtilityClass"})
 public class CollectionUtils {
 
     /**
@@ -136,6 +140,7 @@ public class CollectionUtils {
             newList = new ArrayList<O>(elements.size());
         }
 
+        @Override
         public Iterator<O> iterator() {
             return elements.iterator();
         }
@@ -434,6 +439,7 @@ public class CollectionUtils {
      * @param predicate  the predicate to use, may be null
      * @return the first element of the collection which matches the predicate or null if none could be found
      */
+    @Nullable
     public static <T> T find(final Iterable<T> collection, final Predicate<? super T> predicate) {
         if (collection != null && predicate != null) {
             for (final T item : collection) {
@@ -456,6 +462,7 @@ public class CollectionUtils {
      * @param closure    the closure to perform, may be null
      * @return closure
      */
+    @Nullable
     public static <T, C extends Closure<? super T>> C forAllDo(final Iterable<T> collection, final C closure) {
         if (collection != null && closure != null) {
             for (final T element : collection) {
@@ -477,6 +484,7 @@ public class CollectionUtils {
      * @return closure
      * @since 4.0
      */
+    @Nullable
     public static <T, C extends Closure<? super T>> C forAllDo(final Iterator<T> iterator, final C closure) {
         if (iterator != null && closure != null) {
             while (iterator.hasNext()) {
@@ -498,6 +506,7 @@ public class CollectionUtils {
      * @return the last element in the collection, or null if either collection or closure is null
      * @since 4.0
      */
+    @Nullable
     public static <T, C extends Closure<? super T>> T forAllButLastDo(final Iterable<T> collection, final C closure) {
         return collection != null && closure != null ? forAllButLastDo(collection.iterator(), closure) : null;
     }
@@ -514,6 +523,7 @@ public class CollectionUtils {
      * @return the last element in the collection, or null if either iterator or closure is null
      * @since 4.0
      */
+    @Nullable
     public static <T, C extends Closure<? super T>> T forAllButLastDo(final Iterator<T> iterator, final C closure) {
         if (iterator != null && closure != null) {
             while (iterator.hasNext()) {

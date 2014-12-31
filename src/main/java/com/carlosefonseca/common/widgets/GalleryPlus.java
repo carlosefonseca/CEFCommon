@@ -97,27 +97,27 @@ public class GalleryPlus extends FrameLayout {
 
     public void setupWithImageList(Collection<File> imageList) {
         galleryView.setupWithImageList(imageList);
-        afterSetup(imageList);
+        afterSetup();
     }
 
     public void setupWithFiles(List<File> files, Gallery.OnViewItemClickListener<File> clickListener) {
         galleryView.setupWithFiles(files, clickListener);
-        afterSetup(files);
+        afterSetup();
     }
 
-    public void setupWithUrlList(Collection<String> imageList) {
+    public void setupWithUrlList(@Nullable Collection<String> imageList) {
         galleryView.setupWithUrlList(imageList);
-        afterSetup(imageList);
+        afterSetup();
     }
 
     public <T> void setupWithUrlsForObjects(List<String> urls,
                                             List<T> objects,
                                             Gallery.OnItemClickListener<T> clickListener) {
         galleryView.setupWithUrlsForObjects(urls, objects, clickListener);
-        afterSetup(urls);
+        afterSetup();
     }
 
-    protected void afterSetup(Collection<?> urls) {
+    protected void afterSetup() {
 //        setSingleImage(urls.size() < 2);
         hideIfEmpty(galleryView.getAdapter().getCount());
 //        hideIfEmpty(urls.size());

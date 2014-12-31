@@ -415,7 +415,7 @@ public final class CodeUtils {
     /**
      * Null-safe equivalent of {@code a.equals(b)}.
      */
-    public static boolean equals(@Nullable Object a, Object b) {
+    public static boolean equals(@Nullable Object a, @Nullable Object b) {
         return (a == null) ? (b == null) : a.equals(b);
     }
 

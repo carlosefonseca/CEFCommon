@@ -358,6 +358,9 @@ public class NavBar extends LinearLayout {
         ResourceUtils.setBackground(v, getButtonBackground());
     }
 
+    /**
+     * @return A drawable based on the current navbar background that also handles a pressed state.
+     */
     public StateListDrawable getButtonBackground() {
         final int color1 = color != NO_COLOR ? color : defaultNormalColor;
         final int color2 = color != NO_COLOR ? pressedColor : defaultPressedColor;

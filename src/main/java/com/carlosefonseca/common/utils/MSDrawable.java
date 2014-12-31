@@ -19,17 +19,27 @@ import static android.R.attr.*;
  * Use {@link #icon(android.graphics.Bitmap)} to set the icon for all states. You can then set colors with {@link
  * #normalColor(int)} and friends.
  * <p/>
- * Use {@link #normal(android.graphics.drawable.BitmapDrawable)} and friends to use different bitmap drawables for each state.
+ * Use {@link #normal(android.graphics.drawable.BitmapDrawable)} and friends to use different bitmap drawables for each
+ * state.
  * <p/>
- * Use {@link #normal(android.graphics.drawable.BitmapDrawable, int)} and friends to use different bitmap drawables for each state and also
+ * Use {@link #normal(android.graphics.drawable.BitmapDrawable, int)} and friends to use different bitmap drawables for
+ * each state and also
  * tint them.
  * <p/>
- * Use {@link #normal(android.graphics.drawable.shapes.Shape)} and friends to use different shape drawables for each state.
+ * Use {@link #normal(android.graphics.drawable.shapes.Shape)} and friends to use different shape drawables for each
+ * state.
  * <p/>
- * Use {@link #normal(android.graphics.drawable.shapes.Shape, int)} and friends to use different shape drawables for each state and also
+ * Use {@link #normal(android.graphics.drawable.shapes.Shape, int)} and friends to use different shape drawables for
+ * each state and also
  * tint them.
  * <p/>
- * Use {@link #normalColor(int)} (without using {@link #icon(android.graphics.Bitmap)}) to only do colors.
+ * Use {@link #normalColor(int)} and friends (without using {@link #icon(android.graphics.Bitmap)}) to only do solid
+ * colors.
+ * <p/>
+ * Use {@link #normalRes(int)} and friends to create a drawable from a Resource ID, without tinting.
+ * <p/>
+ * Use {@link #normalRes(int, int)} and friends to create a drawable from a Resource ID and then tint it.
+ * If color is 0 or {@link android.graphics.Color#TRANSPARENT}, it will not tint.
  * <p/>
  * In all cases, call {@link #build()} when you're done setting stuff.
  */

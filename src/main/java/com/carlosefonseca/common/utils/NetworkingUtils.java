@@ -300,7 +300,7 @@ public final class NetworkingUtils {
     };
 
     @SuppressWarnings("UnusedDeclaration")
-    public static String getLastSegmentOfURL(String url) {
+    public static String getLastSegmentOfURL(@NotNull String url) {
         if (url.endsWith("/")) url = url.substring(0, url.length() - 1);
         return url.substring(url.lastIndexOf("/") + 1);
     }
