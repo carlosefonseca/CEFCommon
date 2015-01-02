@@ -15,6 +15,8 @@ import android.view.animation.Animation;
 import android.widget.ImageView;
 import com.nineoldandroids.animation.Animator;
 import com.nineoldandroids.animation.ValueAnimator;
+import com.nineoldandroids.util.IntProperty;
+import com.nineoldandroids.util.Property;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -205,4 +207,35 @@ public final class AnimationUtils {
 
         }
     }
+
+    static Property<View, Integer> WIDTH = new IntProperty<View>("width") {
+        @Override
+        public void setValue(View object, int value) {
+            if (object != null) {
+                object.getLayoutParams().width = value;
+                object.requestLayout();
+            }
+        }
+
+        @Override
+        public Integer get(View object) {
+            return object.getLayoutParams().width;
+        }
+    };
+
+    static Property<View, Integer> HEIGHT = new IntProperty<View>("height") {
+        @Override
+        public void setValue(View object, int value) {
+            if (object != null) {
+                object.getLayoutParams().height = value;
+                object.requestLayout();
+            }
+        }
+
+        @Override
+        public Integer get(View object) {
+            return object.getLayoutParams().height;
+        }
+    };
+
 }

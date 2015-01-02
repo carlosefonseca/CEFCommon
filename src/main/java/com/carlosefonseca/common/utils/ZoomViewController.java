@@ -1,10 +1,5 @@
 package com.carlosefonseca.common.utils;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
-import android.animation.AnimatorSet;
-import android.animation.ObjectAnimator;
-import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.*;
@@ -14,10 +9,14 @@ import android.os.Build;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateDecelerateInterpolator;
+import com.nineoldandroids.animation.Animator;
+import com.nineoldandroids.animation.AnimatorListenerAdapter;
+import com.nineoldandroids.animation.AnimatorSet;
+import com.nineoldandroids.animation.ObjectAnimator;
 
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
+import static com.carlosefonseca.common.utils.AnimationUtils.HEIGHT;
 
-@TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
 public abstract class ZoomViewController<T extends View> {
     private final Context mContext;
     private final ViewGroup mContainer;
@@ -119,11 +118,11 @@ public abstract class ZoomViewController<T extends View> {
         // Construct and run the parallel animation of the four translation and scale properties
         // (X, Y, SCALE_X, and SCALE_Y).
         AnimatorSet set = new AnimatorSet();
-        set.play(ObjectAnimator.ofFloat(expandedView, View.X, startBounds.left, finalBounds.left))
-           .with(ObjectAnimator.ofFloat(expandedView, View.Y, startBounds.top, finalBounds.top))
-           .with(ObjectAnimator.ofFloat(expandedView, View.SCALE_X, startScale, 1f))
-           .with(ObjectAnimator.ofFloat(expandedView, View.SCALE_Y, startScale, 1f))
-           .with(ObjectAnimator.ofFloat(mFadeView, View.ALPHA, 1f));
+        set.play(ObjectAnimator.ofFloat(expandedView, "x", startBounds.left, finalBounds.left))
+           .with(ObjectAnimator.ofFloat(expandedView, "y", startBounds.top, finalBounds.top))
+           .with(ObjectAnimator.ofInt(expandedView, AnimationUtils.WIDTH, startBounds.width(), finalBounds.width()))
+           .with(ObjectAnimator.ofInt(expandedView, HEIGHT, startBounds.height(), finalBounds.height()))
+           .with(ObjectAnimator.ofFloat(mFadeView, "alpha", 1f));
         set.setDuration(mShortAnimationDuration);
         set.setInterpolator(new AccelerateDecelerateInterpolator());
         set.addListener(new AnimatorListenerAdapter() {
@@ -153,17 +152,17 @@ public abstract class ZoomViewController<T extends View> {
                 // Animate the four positioning/sizing properties in parallel, back to their
                 // original values.
                 AnimatorSet set = new AnimatorSet();
-                set.play(ObjectAnimator.ofFloat(expandedView, View.X, startBounds.left))
-                   .with(ObjectAnimator.ofFloat(expandedView, View.Y, startBounds.top))
-                   .with(ObjectAnimator.ofFloat(expandedView, View.SCALE_X, startScaleFinal))
-                   .with(ObjectAnimator.ofFloat(expandedView, View.SCALE_Y, startScaleFinal))
-                   .with(ObjectAnimator.ofFloat(mFadeView, View.ALPHA, 0f));
+                set.play(ObjectAnimator.ofFloat(expandedView, "x", startBounds.left))
+                   .with(ObjectAnimator.ofFloat(expandedView, "y", startBounds.top))
+                   .with(ObjectAnimator.ofFloat(expandedView, "scaleX", startScaleFinal))
+                   .with(ObjectAnimator.ofFloat(expandedView, "scaleY", startScaleFinal))
+                   .with(ObjectAnimator.ofFloat(mFadeView, "alpha", 0f));
                 set.setDuration(mShortAnimationDuration);
                 set.setInterpolator(new AccelerateDecelerateInterpolator());
                 set.addListener(new AnimatorListenerAdapter() {
                     @Override
                     public void onAnimationEnd(Animator animation) {
-                        thumbView.setAlpha(1f);
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) thumbView.setAlpha(1f);
                         expandedView.setVisibility(View.GONE);
                         mFadeView.setVisibility(View.GONE);
                         mCurrentAnimator = null;
@@ -171,7 +170,7 @@ public abstract class ZoomViewController<T extends View> {
 
                     @Override
                     public void onAnimationCancel(Animator animation) {
-                        thumbView.setAlpha(1f);
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) thumbView.setAlpha(1f);
                         expandedView.setVisibility(View.GONE);
                         mFadeView.setVisibility(View.GONE);
                         mCurrentAnimator = null;
