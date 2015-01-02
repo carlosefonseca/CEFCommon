@@ -116,7 +116,8 @@ import java.util.regex.Pattern;
 @SuppressWarnings({"UnusedDeclaration",
                    "PointlessBooleanExpression",
                    "ForLoopReplaceableByForEach",
-                   "SimplifiableIfStatement"})
+                   "SimplifiableIfStatement",
+                   "StringBufferReplaceableByString"})
 public class StringUtils {
     // Performance testing notes (JDK 1.4, Jul03, scolebourne)
     // Whitespace:
@@ -5748,7 +5749,6 @@ public class StringUtils {
      * @see #uncapitalize(String)
      * @since 2.0
      */
-    @Nullable
     public static String capitalize(@Nullable final String str) {
         int strLen;
         if (str == null || (strLen = str.length()) == 0) {

@@ -11,7 +11,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * The subscriber is stored in a WeakReference to avoid cyclic retentions.
  * It also tracks whether or not it is already registered, so there's no problem in calling (un)register twice.
  */
-public class EventBusRegister implements ActivityStateListener.Interface {
+public class EventBusRegister extends ActivityStateListener.SimpleInterface {
     private final Class<?>[] eventTypes;
     WeakReference<Object> subscriber;
     AtomicBoolean registered = new AtomicBoolean(false);
@@ -30,9 +30,8 @@ public class EventBusRegister implements ActivityStateListener.Interface {
             if (eventTypes.length == 1) {
                 EventBus.getDefault().register(this.subscriber.get(), eventTypes[0]);
             } else {
-                EventBus.getDefault().register(this.subscriber.get(), eventTypes[0], ArrayUtils.subarray(eventTypes,
-                                                                                                         1,
-                                                                                                         eventTypes.length));
+                Class<?>[] subarray = ArrayUtils.subarray(eventTypes, 1, eventTypes.length);
+                EventBus.getDefault().register(this.subscriber.get(), eventTypes[0], subarray);
             }
         }
     }

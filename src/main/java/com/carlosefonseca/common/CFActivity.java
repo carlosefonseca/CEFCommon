@@ -2,6 +2,7 @@ package com.carlosefonseca.common;
 
 import android.content.Intent;
 import android.os.Build;
+import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.widget.Toast;
 import com.carlosefonseca.common.utils.ActivityStateListener;
@@ -34,6 +35,24 @@ public class CFActivity extends FragmentActivity {
     private ActivityStateListener mActivityStateListener;
 
     @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        if (mActivityStateListener != null) mActivityStateListener.onCreate(savedInstanceState);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (mActivityStateListener != null) mActivityStateListener.onDestroy();
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        if (mActivityStateListener != null) mActivityStateListener.onSaveInstanceState(outState);
+    }
+
+    @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         switch (resultCode) {
@@ -47,6 +66,7 @@ public class CFActivity extends FragmentActivity {
                 finish();
                 break;
         }
+        if (mActivityStateListener != null) mActivityStateListener.onActivityResult(requestCode, resultCode, data);
     }
 
     @Nullable

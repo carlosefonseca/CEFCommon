@@ -1,6 +1,8 @@
 package com.carlosefonseca.common.utils;
 
 import android.app.Activity;
+import android.content.Intent;
+import android.os.Bundle;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -34,6 +36,11 @@ public class ActivityStateListener {
         mListeners.remove(listener);
     }
 
+
+    public void onCreate(Bundle savedInstanceState) {
+        for (Interface mListener : mListeners) mListener.onCreate(savedInstanceState);
+    }
+
     public void onStart() {
         if (!mRunning) {
             mRunning = true;
@@ -42,7 +49,6 @@ public class ActivityStateListener {
             }
         }
     }
-
     public void onStop() {
         final boolean finishing = mActivity.isFinishing();
         if (mRunning || finishing) {
@@ -52,21 +58,67 @@ public class ActivityStateListener {
         }
     }
 
+    public void onPause() {
+        for (Interface mListener : mListeners) mListener.onPause();
+    }
+
+    public void onResume() {
+        for (Interface mListener : mListeners) mListener.onResume();
+    }
+
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        for (Interface mListener : mListeners) mListener.onActivityResult(requestCode, resultCode, data);
+    }
+
+    public void onSaveInstanceState(Bundle outState) {
+        for (Interface mListener : mListeners) mListener.onSaveInstanceState(outState);
+    }
+
+    public void onDestroy() {
+        for (Interface mListener : mListeners) mListener.onDestroy();
+    }
+
     public interface Interface {
+        public void onCreate(Bundle savedInstanceState);
+
         public void onStart();
 
         public void onStop(boolean isFinishing);
+
+        public void onPause();
+
+        public void onResume();
+
+        public void onActivityResult(int requestCode, int resultCode, Intent data);
+
+        public void onSaveInstanceState(Bundle outState);
+
+        public void onDestroy();
     }
 
     public static class SimpleInterface implements Interface {
         @Override
-        public void onStart() {
-
-        }
+        public void onCreate(Bundle savedInstanceState) { }
 
         @Override
-        public void onStop(boolean isFinishing) {
+        public void onStart() { }
 
-        }
+        @Override
+        public void onStop(boolean isFinishing) { }
+
+        @Override
+        public void onPause() { }
+
+        @Override
+        public void onResume() { }
+
+        @Override
+        public void onActivityResult(int requestCode, int resultCode, Intent data) { }
+
+        @Override
+        public void onSaveInstanceState(Bundle outState) { }
+
+        @Override
+        public void onDestroy() { }
     }
 }

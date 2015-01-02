@@ -40,7 +40,7 @@ dependencies {
     compile 'com.nineoldandroids:library:2.4.0'
     compile 'de.greenrobot:eventbus:2.0.2'
     compile 'com.readystatesoftware.systembartint:systembartint:1.0.4'
-    compile 'fr.avianey:bolts-android-api:1.1.0'
+    compile 'com.parse.bolts:bolts-android:1.1.4'
     compile 'com.facebook.rebound:rebound:0.3.6'
     //    compile 'commons-io:commons-io:2.4'
     //    compile 'org.apache.commons:commons-lang3:3.3.2'

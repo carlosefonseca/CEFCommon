@@ -3,7 +3,7 @@ package com.carlosefonseca.common.utils;
 import android.os.Handler;
 import android.os.Looper;
 
-public class RepeatWhileOnActivity implements ActivityStateListener.Interface {
+public class RepeatWhileOnActivity extends ActivityStateListener.SimpleInterface {
 
     protected Runnable mRunnable;
     protected long mTime;

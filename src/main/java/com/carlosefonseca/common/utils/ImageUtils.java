@@ -222,6 +222,15 @@ public final class ImageUtils {
         return getPhotoFromFileOrAssetsPx(file, dp2px(widthDp), dp2px(heightDp));
     }
 
+    /**
+     * Same as {@link #tryPhotoFromFileOrAssetsPx(java.io.File, int, int)} but logs a warning if the image was not
+     * found.
+     *
+     * @param file   The path to the image file.
+     * @param width  Desired width in pixels.
+     * @param height Desired height in pixels.
+     * @return Scaled and rotated image or null if no image was found.
+     */
     @Nullable
     private static Bitmap getPhotoFromFileOrAssetsPx(@Nullable File file, int width, int height) {
         final Bitmap bitmap = tryPhotoFromFileOrAssetsPx(file, width, height);
@@ -234,6 +243,18 @@ public final class ImageUtils {
     static Bitmap tryPhotoFromFileOrAssets(@Nullable File file, int widthDp, int heightDp) {
         return tryPhotoFromFileOrAssetsPx(file, dp2px(widthDp), dp2px(heightDp));
     }
+
+    /**
+     * Obtains an image, scaled down to be at least the requested size and rotated according to the EXIF on the
+     * file.
+     * <p/>
+     * If the file doesn't exist, looks for the same filename on the app's assets.
+     *
+     * @param file     The path to the image file.
+     * @param widthPx  Desired width in pixels.
+     * @param heightPx Desired height in pixels.
+     * @return Scaled and rotated image or null if no image was found.
+     */
 
     @Nullable
     static Bitmap tryPhotoFromFileOrAssetsPx(@Nullable File file, int widthPx, int heightPx) {
@@ -689,11 +710,10 @@ public final class ImageUtils {
     }
     /**
      * Obtains an image, scaled down to be at least the requested size and rotated according to the EXIF on the file.<br/>
-     * It's aware of the device density.
      *
      * @param path   The path to the image file.
-     * @param width  Desired width in DP's.
-     * @param height Desired height in DP's.
+     * @param width  Desired width in pixels.
+     * @param height Desired height in pixels.
      * @return Scaled and rotated image or null if no image was found.
      */
     @SuppressWarnings("SuspiciousNameCombination")
