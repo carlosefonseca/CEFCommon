@@ -85,7 +85,6 @@ public final class UnitUtils {
         mSystem = system;
     }
 
-    @Nullable
     public static System getSystem() {
         if (mSystem != null) return mSystem;
 

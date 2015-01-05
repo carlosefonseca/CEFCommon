@@ -162,8 +162,17 @@ public class CFLocation extends Location implements Comparable<CFLocation> {
     }
 
     @Nullable
-    public static String reverseGeocodeLocality(Context context, double lat, double lon, Locale locale) throws IOException {
+    public static String reverseGeocodeLocality(Context context, double lat, double lon, @NotNull Locale locale)
+            throws IOException {
         try {
+            //noinspection ConstantConditions
+            if (locale == null) {
+                Log.w(TAG, "LOCALE IS NULL!");
+                locale = Locale.getDefault();
+                if (locale == null) {
+                    locale = Locale.ENGLISH;
+                }
+            }
             List<Address> fromLocation = new Geocoder(context, locale).getFromLocation(lat, lon, 1);
             Address a = fromLocation.get(0);
             String msg = a.getLocality() != null
@@ -175,7 +184,7 @@ public class CFLocation extends Location implements Comparable<CFLocation> {
                              : a.getMaxAddressLineIndex() > 0 ? a.getAddressLine(a.getMaxAddressLineIndex() - 1)
                                                                  .replaceFirst("[\\d-]+", "")
                                                                  .trim() : a.getCountryName();
-            Log.d("reverseGeocodeLocality", msg + " - " + fromLocation.toString());
+            Log.d("reverseGeocodeLocality", locale.getDisplayLanguage() + ": " + msg + " - " + fromLocation.toString());
             return msg;
         } catch (IOException e) {
             Log.w(TAG, "" + e.getMessage(), e);
