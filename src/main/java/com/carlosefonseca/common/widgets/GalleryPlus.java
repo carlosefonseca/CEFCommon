@@ -10,7 +10,6 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import com.carlosefonseca.common.R;
 import com.carlosefonseca.common.utils.ImageUtils;
-import com.carlosefonseca.common.utils.ZoomZoomZoom;
 import com.carlosefonseca.common.utils.ZoomZoomableRembrandtController;
 import org.jetbrains.annotations.Nullable;
 
@@ -214,7 +213,8 @@ public class GalleryPlus extends FrameLayout {
 
     public void setupWithZoomForFiles(List<File> images, Activity activity) {
         ViewGroup rootView = (ViewGroup) activity.getWindow().getDecorView().getRootView();
-        final ZoomZoomZoom zoomRembrandtController = new ZoomZoomZoom(rootView);
+//        final ZoomZoomZoom zoomRembrandtController = new ZoomZoomZoom(rootView);
+        zoomRembrandtController = new ZoomZoomableRembrandtController(rootView);
         this.setupWithFiles(images, new Gallery.OnViewItemClickListener<File>() {
             @Override
             public void onClick(View v, File item) {
