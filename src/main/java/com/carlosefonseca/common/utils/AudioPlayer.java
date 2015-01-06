@@ -10,7 +10,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Queue;
 
@@ -27,15 +26,6 @@ public class AudioPlayer {
     private static File currentFile;
 
     private static Queue<MediaPlayerWrapper> queue = new LinkedList<>();
-
-    @Deprecated
-    private static final ArrayList<AudioPlayerListener> playerListeners = new ArrayList<>();
-
-    @Deprecated
-    public interface AudioPlayerListener {
-        void onAudioStart(MediaPlayer mediaPlayer, @Nullable File file);
-        void onAudioStop(MediaPlayer mediaPlayer, @Nullable File file);
-    }
 
     public static class AudioPlayerNotification {
         public final Status status;
@@ -73,6 +63,14 @@ public class AudioPlayer {
         public static void PostStop(File file) {
             EventBus.getDefault().postSticky(new AudioPlayerNotification(Status.STOP, file, null));
         }
+
+        public static void register(Object object) {
+            EventBus.getDefault().register(object, AudioPlayerNotification.class);
+        }
+
+        public static void unregister(Object object) {
+            EventBus.getDefault().unregister(object, AudioPlayerNotification.class);
+        }
     }
 
 //    // SINGLETON CRAP
@@ -99,15 +97,12 @@ public class AudioPlayer {
     private static void play(@NotNull MediaPlayer mediaPlayer, @Nullable File file) {
         stop();
 
+        currentFile = file;
         currentMediaPlayer = mediaPlayer;
         currentMediaPlayer.setOnCompletionListener(onEnd.instance);
         currentMediaPlayer.start();
 
-        currentFile = file;
 
-        for (AudioPlayerListener playerListener : playerListeners) {
-            playerListener.onAudioStart(mediaPlayer, file);
-        }
         AudioPlayerNotification.PostStart(currentFile, mediaPlayer);
 
         Log.v(TAG, "" + (file != null ? file.getName() : "???") + " Playing.");
@@ -129,15 +124,32 @@ public class AudioPlayer {
         }
     }
 
+    /**
+     * Starts playing the file, stopping another that was playing.
+     */
+    public static void playOrResumeFile(File audioFile) {
+        if (!audioFile.exists()) {
+            Log.i(TAG, "File " + audioFile + " doesn't exist.");
+            CodeUtils.toast("File " + audioFile + " doesn't exist.");
+            return;
+        }
+        if (currentFile != null && currentFile.equals(audioFile) && currentMediaPlayer != null &&
+            !currentMediaPlayer.isPlaying()) {
+            resume();
+        } else {
+            MediaPlayer mediaPlayerForFile = getMediaPlayerForFile(c, audioFile);
+            if (mediaPlayerForFile != null) {
+                play(mediaPlayerForFile, audioFile);
+            }
+        }
+    }
+
     public static void stop() {
         if (isPlaying()) {
-            assert currentMediaPlayer != null;
-            currentMediaPlayer.stop();
-            for (AudioPlayerListener playerListener : playerListeners) {
-                playerListener.onAudioStop(currentMediaPlayer, currentFile);
-            }
+            if (currentMediaPlayer != null) currentMediaPlayer.stop();
             AudioPlayerNotification.PostStop(currentFile);
             currentMediaPlayer = null;
+            currentFile = null;
             queue.clear();
         }
         EventBus.getDefault().removeStickyEvent(AudioPlayer.AudioPlayerNotification.class);
@@ -162,18 +174,6 @@ public class AudioPlayer {
         }
     }
 
-
-    @Deprecated
-    public static void addPlayerListener(AudioPlayerListener l) {
-        if (!playerListeners.contains(l)) playerListeners.add(l);
-        throw new RuntimeException("Deprecated");
-    }
-
-    @Deprecated
-    public static void removePlayerListener(AudioPlayerListener l) {
-        playerListeners.remove(l);
-        throw new RuntimeException("Deprecated");
-    }
 
     @Nullable
     public static MediaPlayerWrapper getWrappedMediaPlayerForFile(Context c, File audioFile) {
@@ -260,14 +260,10 @@ public class AudioPlayer {
     static class onEnd implements MediaPlayer.OnCompletionListener {
         static onEnd instance = new onEnd();
 
-        private onEnd() {
-        }
+        private onEnd() { }
 
         @Override
         public void onCompletion(MediaPlayer mediaPlayer) {
-            for (AudioPlayerListener playEndListener : playerListeners) {
-                playEndListener.onAudioStop(mediaPlayer, currentFile);
-            }
             AudioPlayerNotification.PostStop(currentFile);
             play();
         }
