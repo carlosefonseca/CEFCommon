@@ -8,7 +8,8 @@ import org.jetbrains.annotations.Nullable;
 import java.util.regex.Pattern;
 
 import static android.util.Log.*;
-import static com.carlosefonseca.apache.commons.lang3.StringUtils.isEmpty;
+import static com.carlosefonseca.apache.commons.lang3.StringUtils.defaultString;
+import static com.carlosefonseca.apache.commons.lang3.StringUtils.isNotEmpty;
 
 @SuppressWarnings("UnusedDeclaration")
 public final class Log {
@@ -93,42 +94,43 @@ public final class Log {
         if (consoleLogging) android.util.Log.i(tag(1), key + ": " + value);
     }
 
-/*
-    private static int log(int priority, String tag, String msg, @Nullable Throwable tr) {
-        if (remoteLogger == null || priority < sRemoteMinPriority || !remoteLogger.log(priority, tag, msg, tr)) {
-            // If no remoteLogger, too low to do remote log or if remote log didn't log to logcat: do android log
-            if (consoleLogging || priority >= android.util.Log.ERROR) {
-                android.util.Log.println(priority, tag, msg == null ? "<no message given>" : msg);
-                if (tr != null) android.util.Log.println(priority, tag, getStackTraceString(tr));
-            }
-        }
-        return priority;
-    }
-*/
-
+    /**
+     * Logs something to remote logger or to console.
+     *
+     * @param priority One of {@link android.util.Log}.
+     * @param tag      Tag for log.
+     * @param frm      Text to log or a format string.
+     * @param args     Arguments for the format string and/or a throwable to log (throwable must be last argument)
+     * @return The priority.
+     */
     private static int log(int priority, String tag, String frm, @Nullable Object... args) {
-        String msg = null;
         boolean logged = false;
 
+        // last arg is a throwable?
         Throwable tr = ((args != null) && (args.length > 0) && (args[args.length - 1] instanceof Throwable))
                        ? (Throwable) args[args.length - 1]
                        : null;
 
-        if (remoteLogger != null && priority >= sRemoteMinPriority) {
-            msg = isEmpty(frm)
-                  ? "<no message given>"
-                  : args != null && args.length - (tr != null ? 1 : 0) > 0 ? String.format(frm, args) : frm;
-            logged = remoteLogger.log(priority, tag, msg, tr);
-        }
 
-        if (!logged && (consoleLogging || priority >= android.util.Log.ERROR)) {
-            if (msg == null) {
-                msg = isEmpty(frm)
-                      ? "<no message given>"
-                      : args != null && args.length - (tr != null ? 1 : 0) > 0 ? String.format(frm, args) : frm;
+        if ((remoteLogger != null && priority >= sRemoteMinPriority) || consoleLogging ||
+            priority >= android.util.Log.ERROR) {
+
+            // create a message, either with format and args, or just format, of with fallback string.
+            String msg = defaultString(isNotEmpty(frm) && args != null && args.length - (tr != null ? 1 : 0) > 0
+                                       ? String.format(frm, args)
+                                       : frm, "<no message given>");
+
+            // optional remote log
+            if (remoteLogger != null && priority >= sRemoteMinPriority) {
+                logged = remoteLogger.log(priority, tag, msg, tr);
             }
-            android.util.Log.println(priority, tag, msg == null ? "<no message given>" : msg);
-            if (tr != null) android.util.Log.println(priority, tag, getStackTraceString(tr));
+
+            // if didn't remote log but consoleLogging enabled or error, do a console log
+            if (!logged && (consoleLogging || priority >= android.util.Log.ERROR)) {
+                // log to console using plain android Log.
+                android.util.Log.println(priority, tag, msg);
+                if (tr != null) android.util.Log.println(priority, tag, getStackTraceString(tr));
+            }
         }
         return priority;
     }

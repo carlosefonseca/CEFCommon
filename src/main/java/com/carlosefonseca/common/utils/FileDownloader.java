@@ -42,6 +42,8 @@ public final class FileDownloader {
         sDownloadCount.set(0);
     }
 
+    @SuppressWarnings("ResultOfMethodCallIgnored")
+    @Nullable
     public static String syncDownload(Download download) {
         String uri = download.url.replace(" ", "%20");
         File path = download.file;
@@ -89,7 +91,12 @@ public final class FileDownloader {
             }
 
             if (!tempPath.renameTo(path)) {
-                Log.w(TAG, new RuntimeException("RENAME FAILED " + tempPath.getName() + " -> " + path.getName()));
+                Log.w(TAG,
+                      "RENAME FAILED %s (%d) -> %s (%d)",
+                      tempPath.getAbsolutePath(),
+                      tempPath.length(),
+                      path.getAbsolutePath(),
+                      path.length());
                 tempPath.delete();
                 path.delete();
                 download(download);
@@ -122,6 +129,7 @@ public final class FileDownloader {
     }
 
     /**
+     * Copy, modified to return -1 if the thread is interrupted.
      * @see com.carlosefonseca.common.utils.IOUtils#copyLarge(java.io.InputStream, java.io.OutputStream)
      */
     protected static long copy(InputStream input, OutputStream output) throws IOException {
