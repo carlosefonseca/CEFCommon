@@ -45,9 +45,9 @@ public final class LocalizationUtils {
      * Returns the name of the language, as it is in its own language. (Português, English,…)
      * @param languageCode "pt", "en",…
      */
-    public static String languageOwnName(String languageCode) {
-        Locale l = getLocale(languageCode);
-        return l.getDisplayName(l);
+    @Nullable
+    public static String languageOwnName(@Nullable String languageCode) {
+        return languageCode == null ? null : getLocale(languageCode).getDisplayName(getLocale(languageCode));
     }
 
     /**
@@ -56,7 +56,7 @@ public final class LocalizationUtils {
      * @param languageCode Possible formats: "pt" or "pt_pt" or "pt-pt". Case insensitive.
      * @return A Locale.
      */
-    public static Locale getLocale(String languageCode) {
+    public static Locale getLocale(@NotNull String languageCode) {
         if (languageCode.length() == 5 && (languageCode.charAt(2) == '-' || languageCode.charAt(2) == '_')) {
             return new Locale(languageCode.substring(0, 2), languageCode.substring(3));
         } else {
