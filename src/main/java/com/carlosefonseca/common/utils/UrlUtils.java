@@ -35,8 +35,8 @@ public final class UrlUtils {
     private UrlUtils() {}
 
 
-    public static final Pattern phoneMatcher= Pattern.compile("[+(]?(\\d[()]?[- .]?[()]?){8,}\\d");
-    // Previously: (fails with years like 1990-2000
+    public static final Pattern phoneMatcher= Pattern.compile("([+(]?(?:\\d[()]?[- .]?[()]?){8,}\\d)");
+    // Previously failed with numbers 1990-2000 (years)
     // public static final Pattern phoneMatcher= Pattern.compile("([\\d(+](?:[\\d()./+-]+ ?){6,}[\\d)])");
     public static final Pattern httpMatcher= Pattern.compile("\\b(https?://[^\\s]+)");
     public static final Pattern wwwMatcher= Pattern.compile("\\b(www\\.[^\\s]+)");
