@@ -64,6 +64,23 @@ public class TripleTapTouchListener implements View.OnTouchListener {
         mTouchSlopSquare = touchSlop * touchSlop;
     }
 
+    public TripleTapTouchListener(View view, OnTripleTapListener tripleTapListener) {
+        if (tripleTapListener == null) {
+            throw new InvalidParameterException("Listener is null");
+        }
+        mTripleTapListener = tripleTapListener;
+
+        final ViewConfiguration configuration = ViewConfiguration.get(view.getContext());
+        int touchSlop = configuration.getScaledDoubleTapSlop();
+        mTouchSlopSquare = touchSlop * touchSlop;
+        view.setClickable(true);
+        view.setOnTouchListener(this);
+    }
+
+    public static TripleTapTouchListener set(View view, OnTripleTapListener tripleTapTouchListener) {
+        return new TripleTapTouchListener(view, tripleTapTouchListener);
+    }
+
     @Override
     public boolean onTouch(View v, MotionEvent ev) {
         synchronized (lock) {
