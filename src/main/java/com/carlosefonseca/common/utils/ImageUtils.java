@@ -35,8 +35,8 @@ import java.util.regex.Pattern;
 import static android.os.Build.VERSION.SDK_INT;
 import static android.os.Build.VERSION_CODES.ICE_CREAM_SANDWICH;
 import static com.carlosefonseca.common.utils.CodeUtils.getTag;
-import static com.carlosefonseca.common.utils.NetworkingUtils.getLastSegmentOfURL;
 import static com.carlosefonseca.common.utils.NetworkingUtils.getFileFromUrlOrPath;
+import static com.carlosefonseca.common.utils.NetworkingUtils.getLastSegmentOfURL;
 
 /**
  * Util methods for manipulating images.
@@ -771,6 +771,7 @@ public final class ImageUtils {
      * @param reqHeight Minimum height px.
      * @return Scaled image.
      */
+    @Nullable
     public static Bitmap decodeSampledBitmapFromFile(String path, int reqWidth, int reqHeight) {
         // First decode with inJustDecodeBounds=true to check dimensions
         final BitmapFactory.Options options = new BitmapFactory.Options();
@@ -788,6 +789,22 @@ public final class ImageUtils {
 
         // Decode bitmap with inSampleSize set
         options.inJustDecodeBounds = false;
+
+        int width = reqWidth / options.inSampleSize;
+        int height = reqHeight / options.inSampleSize;
+
+        int estimatedBytes = width * 4 * height;
+
+        long freeMem = Runtime.getRuntime().maxMemory() - Runtime.getRuntime().totalMemory();
+        if (estimatedBytes > freeMem) {
+            System.gc();
+            freeMem = Runtime.getRuntime().maxMemory() - Runtime.getRuntime().totalMemory();
+            if (estimatedBytes > freeMem) {
+                Log.w(TAG, "NOT ENOUGH MEMORY! Bitmap size: " + estimatedBytes + " Free Mem: " + freeMem);
+                return null;
+            }
+        }
+
         return BitmapFactory.decodeFile(path, options);
     }
 
@@ -1375,7 +1392,8 @@ public final class ImageUtils {
             // OutOfMemory exception. Stored in kilobytes as LruCache takes an
             // int in its constructor.
             // Use 1/4th of the available memory for this memory cache.
-            super((int) (Runtime.getRuntime().maxMemory() / 4));
+            super((int) ((Runtime.getRuntime().maxMemory() - Runtime.getRuntime().totalMemory()) / 4));
+            Log.i(TAG, "Cache Size: " + maxSize() / 1024f / 1024f + " MB");
         }
 
         @Override
