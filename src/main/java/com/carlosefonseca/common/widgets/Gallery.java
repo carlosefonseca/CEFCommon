@@ -148,6 +148,7 @@ public class Gallery extends ViewPager {
         }
 
         protected GalleryAdapter(Context context, @Nullable ImageView.ScaleType scaleType, @Nullable Rembrandt rembrandt) {
+            if (rembrandt == null) Log.w("REMBRANDT IS NULL!");
             this.scaleType = scaleType;
             this.rembrandt = rembrandt == null ? new Rembrandt(context) : rembrandt;
             layoutInflater = LayoutInflater.from(context);
@@ -214,7 +215,7 @@ public class Gallery extends ViewPager {
                 view.set(file, position);
                 rembrandt.load(file);
             }
-            rembrandt.fadeIn(imageView).continueWith(new Continuation<Void, Void>() {
+            rembrandt.measureFirst().fadeIn(imageView).continueWith(new Continuation<Void, Void>() {
                 @Override
                 public Void then(Task<Void> task) throws Exception {
                     if (task.getError() != null) {

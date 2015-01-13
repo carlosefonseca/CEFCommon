@@ -20,6 +20,11 @@ import android.view.animation.Animation;
 import android.widget.ImageView;
 import bolts.Task;
 import com.carlosefonseca.common.CFApp;
+import com.nostra13.universalimageloader.core.DisplayImageOptions;
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.assist.ImageScaleType;
+import com.nostra13.universalimageloader.core.assist.ImageSize;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
@@ -34,6 +39,8 @@ import java.util.regex.Pattern;
 
 import static android.os.Build.VERSION.SDK_INT;
 import static android.os.Build.VERSION_CODES.ICE_CREAM_SANDWICH;
+import static com.carlosefonseca.common.utils.CodeUtils.getFreeMem;
+import static com.carlosefonseca.common.utils.CodeUtils.getKB;
 import static com.carlosefonseca.common.utils.CodeUtils.getTag;
 import static com.carlosefonseca.common.utils.NetworkingUtils.getFileFromUrlOrPath;
 import static com.carlosefonseca.common.utils.NetworkingUtils.getLastSegmentOfURL;
@@ -58,6 +65,7 @@ public final class ImageUtils {
             displayMetrics = c.getResources().getDisplayMetrics();
             density = c.getResources().getDisplayMetrics().density;
             screenLayout = c.getResources().getConfiguration().screenLayout & Configuration.SCREENLAYOUT_SIZE_MASK;
+            displayWidth = displayMetrics.widthPixels;
         } catch (Exception e) {
             //noinspection ConstantConditions
             Log.w(TAG, "" + e.getMessage(), (Object[])null);
@@ -65,12 +73,24 @@ public final class ImageUtils {
     }
 
     private static HashSet<String> imagesOnAssets;
+    private static int displayWidth;
+    private static DisplayImageOptions sDisplayImageOptions = new DisplayImageOptions.Builder().cacheInMemory(true)
+                                                                                               .imageScaleType(ImageScaleType.EXACTLY)
+                                                                                               .bitmapConfig(Bitmap.Config.RGB_565)
+                                                                                               .considerExifParams(true)
+                                                                                               .cacheOnDisk(true)
+                                                                                               .build();
 
     private ImageUtils() {}
 
     /**
      * Given a {@code BitmapFactory.Options} of an image and the desired size for that image, calculates the adequate
      * InSampleSize value.
+     *
+     * @param reqWidth  Required width in pixels.
+     * @param reqHeight Required height in pixels.
+     * @return In sample size value that fits on both reqWidth and reqHeight. If reqWidth or reqHeight are <= 0,
+     * returns 1.
      */
     static int calculateInSampleSize(BitmapFactory.Options options, int reqWidth, int reqHeight) {
         // Raw height and width of image
@@ -78,9 +98,11 @@ public final class ImageUtils {
         final int width = options.outWidth;
         int inSampleSize = 1;
 
-        if (height > reqHeight && width > reqWidth) {
-            inSampleSize = (int) Math.min(Math.floor((float) height / (float) reqHeight),
-                                          Math.floor((float) width / (float) reqWidth));
+        if (reqWidth > 0 && reqHeight > 0) {
+            if (height > reqHeight && width > reqWidth) {
+                inSampleSize = (int) Math.min(Math.floor((float) height / (float) reqHeight),
+                                              Math.floor((float) width / (float) reqWidth));
+            }
         }
         return inSampleSize;
     }
@@ -112,9 +134,81 @@ public final class ImageUtils {
     }
 
 
+    @Nullable
+    public static Bitmap getPhotoFromFileOrAssets(File file) {
+        return getPhotoFromFileOrAssetsPx(file, -1, -1);
+    }
+
+    @Deprecated
+    @Nullable
+    private static Bitmap getPhotoFromFileOrAssets(@Nullable File file, int widthDp, int heightDp) {
+        return getPhotoFromFileOrAssetsPx(file, dp2px(widthDp), dp2px(heightDp));
+    }
+
+
+    @Nullable
+    public static Bitmap getCachedPhoto(@Nullable File file, int widthDp, int heightDp, @Nullable String sizeName) {
+        return getCachedPhotoPx(file, ((int) (widthDp * density)), (int) (heightDp * density), sizeName);
+    }
+
     /**
-     * @param c Context
-     * @param path Path
+     * Tries to get an image from the cache folder. If not found, tries to get the original image, scale it and save it to the
+     * cache asynchronously.
+     *
+     * @param file     The path to the image mFile.
+     * @param widthPx  Minimum width in DP's.
+     * @param heightPx Minimum height in DP's.
+     * @param sizeName An optional name to use for size of the the cached image.
+     * @return Scaled and rotated image.
+     * @see #getPhotoFromFile
+     */
+    @Nullable
+    public static Bitmap getCachedPhotoPx(@Nullable File file, int widthPx, int heightPx, @Nullable String sizeName) {
+        Bitmap bitmap = null;
+        if (file == null) return null;
+        String name = file.getName();
+        String cacheName;
+        File cacheFile = null;
+
+        if (widthPx > 0 && heightPx > 0) {
+            if (sizeName == null) {
+                cacheName = name.substring(0, name.length() - 4) + "-" + widthPx + "x" + heightPx + ".png";
+            } else {
+                cacheName = name.substring(0, name.length() - 4) + sizeName + ".png";
+            }
+            cacheFile = new File(cacheDir, cacheName);
+            if (cacheFile.exists()) {
+                bitmap = decodeSampledBitmapFromFile(cacheFile);
+                if (bitmap == null) {
+                    Log.d(TAG, "getCachedPhotoPx: Tried cached file " + cacheFile.getName() + " but returned null :(");
+                }
+            }
+        }
+
+        if (bitmap == null) {
+            bitmap = getPhotoFromFileOrAssetsPx(file, widthPx, heightPx);
+            if (bitmap == null) return null;
+            if (cacheFile != null) new ImageWriter(cacheFile, bitmap, widthPx, heightPx).execute();
+        }
+        return bitmap;
+    }
+
+    @Nullable
+    private static Bitmap getPhotoFromAssets(String path) {
+        try {
+            InputStream stream = CFApp.getContext().getAssets().open(path);
+            Bitmap bitmap = BitmapFactory.decodeStream(stream);
+            stream.close();
+            return bitmap;
+        } catch (IOException e) {
+            Log.e(TAG, "" + e.getMessage(), e);
+            return null;
+        }
+    }
+
+    /**
+     * @param c         Context
+     * @param path      Path
      * @param reqWidth  Pixels
      * @param reqHeight Pixels
      * @throws IOException
@@ -140,7 +234,7 @@ public final class ImageUtils {
             // Calculate inSampleSize
             options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
 
-            // Decode bitmap with inSampleSize set
+            // Decode mBitmap with inSampleSize set
             options.inJustDecodeBounds = false;
             stream.reset();
             //	    stream.close();
@@ -153,80 +247,16 @@ public final class ImageUtils {
     }
 
     @Nullable
-    private static Bitmap getPhotoFromAssets(String path) {
-        try {
-            InputStream stream = CFApp.getContext().getAssets().open(path);
-            Bitmap bitmap = BitmapFactory.decodeStream(stream);
-            stream.close();
-            return bitmap;
-        } catch (IOException e) {
-            Log.e(TAG, "" + e.getMessage(), e);
-            return null;
-        }
-    }
-
-
-    @Nullable
     public static Bitmap decodeSampledBitmapFromFile(File path, int reqWidth, int reqHeight) {
         if (path == null) return null;
         return decodeSampledBitmapFromFile(path.getAbsolutePath(), reqWidth, reqHeight);
-    }
-
-    @Nullable
-    public static Bitmap getCachedPhoto(@Nullable File file, int widthDp, int heightDp, @Nullable String sizeName) {
-        return getCachedPhotoPx(file, ((int) (widthDp * density)), (int) (heightDp * density), sizeName);
-    }
-
-    /**
-     * Tries to get an image from the cache folder. If not found, tries to get the original image, scale it and save it to the
-     * cache asynchronously.
-     *
-     * @param file     The path to the image file.
-     * @param widthPx  Minimum width in DP's.
-     * @param heightPx Minimum height in DP's.
-     * @param sizeName An optional name to use for size of the the cached image.
-     * @return Scaled and rotated image.
-     * @see #getPhotoFromFile
-     */
-    @Nullable
-    public static Bitmap getCachedPhotoPx(@Nullable File file, int widthPx, int heightPx, @Nullable String sizeName) {
-        Bitmap bitmap = null;
-        if (file == null) return null;
-        String name = file.getName();
-        String cacheName;
-        File cacheFile = null;
-
-        if (widthPx > 0 && heightPx > 0) {
-            if (sizeName == null) {
-                cacheName = name.substring(0, name.length() - 4) + "-" + widthPx + "x" + heightPx + ".png";
-            } else {
-                cacheName = name.substring(0, name.length() - 4) + sizeName + ".png";
-            }
-            cacheFile = new File(cacheDir, cacheName);
-            if (cacheFile.exists()) {
-                bitmap = BitmapFactory.decodeFile(cacheFile.getAbsolutePath());
-            }
-        }
-
-        if (bitmap == null) {
-            bitmap = getPhotoFromFileOrAssetsPx(file, widthPx, heightPx);
-            if (bitmap == null) return null;
-            if (cacheFile != null) new ImageWriter(cacheFile, bitmap).execute();
-        }
-        return bitmap;
-    }
-
-    @Deprecated
-    @Nullable
-    private static Bitmap getPhotoFromFileOrAssets(@Nullable File file, int widthDp, int heightDp) {
-        return getPhotoFromFileOrAssetsPx(file, dp2px(widthDp), dp2px(heightDp));
     }
 
     /**
      * Same as {@link #tryPhotoFromFileOrAssetsPx(java.io.File, int, int)} but logs a warning if the image was not
      * found.
      *
-     * @param file   The path to the image file.
+     * @param file   The path to the image mFile.
      * @param width  Desired width in pixels.
      * @param height Desired height in pixels.
      * @return Scaled and rotated image or null if no image was found.
@@ -246,11 +276,11 @@ public final class ImageUtils {
 
     /**
      * Obtains an image, scaled down to be at least the requested size and rotated according to the EXIF on the
-     * file.
+     * mFile.
      * <p/>
-     * If the file doesn't exist, looks for the same filename on the app's assets.
+     * If the mFile doesn't exist, looks for the same filename on the app's assets.
      *
-     * @param file     The path to the image file.
+     * @param file     The path to the image mFile.
      * @param widthPx  Desired width in pixels.
      * @param heightPx Desired height in pixels.
      * @return Scaled and rotated image or null if no image was found.
@@ -277,6 +307,7 @@ public final class ImageUtils {
         if (imageBounds == null) return 0;
         return 1.0 * imageBounds.outHeight / imageBounds.outWidth;
     }
+
 
     @Nullable
     static BitmapFactory.Options getImageBounds(File file) {
@@ -305,12 +336,16 @@ public final class ImageUtils {
         return options;
     }
 
-
 //            return 1.0 * options.outHeight / options.outWidth;
 
-    @Nullable
-    public static Bitmap getPhotoFromFileOrAssets(File file) {
-        return getPhotoFromFileOrAssetsPx(file, -1, -1);
+    public static int sizeBitmap(Bitmap bitmap) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            return bitmap.getAllocationByteCount();
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR1) {
+            return bitmap.getByteCount();
+        } else {
+            return bitmap.getRowBytes() * bitmap.getHeight();
+        }
     }
 
     public static class BitmapCanvas {
@@ -396,7 +431,7 @@ public final class ImageUtils {
 
 
     /**
-     * Convenience method to convert filenames or URLs to an existing file on disk that will then be loaded with {@link
+     * Convenience method to convert filenames or URLs to an existing mFile on disk that will then be loaded with {@link
      * #getCachedPhoto(java.io.File, int, int, String)}.
      * <p/>
      * Accepted {@code filenameOrUrl} options:
@@ -417,7 +452,7 @@ public final class ImageUtils {
 
 
     /**
-     * Convenience method to convert filenames or URLs to an existing file on disk that will then be loaded with {@link
+     * Convenience method to convert filenames or URLs to an existing mFile on disk that will then be loaded with {@link
      * #getCachedPhoto(java.io.File, int, int, String)}.
      * <p/>
      * Accepted {@code filenameOrUrl} options:
@@ -438,7 +473,7 @@ public final class ImageUtils {
     }
 
     /**
-     * Convenience method to convert filenames or URLs to an existing file on disk that will then be loaded with {@link
+     * Convenience method to convert filenames or URLs to an existing mFile on disk that will then be loaded with {@link
      * #getResizedIcon(java.io.File, int, int)}.
      * <p/>
      * Accepted {@code filenameOrUrl} options:
@@ -480,7 +515,7 @@ public final class ImageUtils {
      * Tries to get an image from the cache folder. If not found, tries to get the original image, scale it and save it to the
      * cache asynchronously.
      *
-     * @param file     The path to the image file.
+     * @param file     The path to the image mFile.
      * @param widthDp  Minimum width in DP's.
      * @param heightDp Minimum height in DP's.
      * @return Scaled image.
@@ -540,7 +575,7 @@ public final class ImageUtils {
                                 heightDp));
                     }
 
-                    // bitmap size != desired size
+                    // mBitmap size != desired size
                     bitmap = scaleAndCrop(bitmap1, widthPx, heightPx);
                     bitmap1.recycle();
 
@@ -587,21 +622,39 @@ public final class ImageUtils {
      * Saves an image to the cache, asynchronously.
      */
     static class ImageWriter extends AsyncTask<Void, Void, Void> {
-        private final File file;
-        private final Bitmap bitmap;
+        private final File mFile;
+        private final Bitmap mBitmap;
+        private final int mWidth;
+        private final int mHeight;
 
         public ImageWriter(File file, Bitmap bitmap) {
-            this.file = file;
-            this.bitmap = bitmap;
+            mFile = file;
+            mBitmap = bitmap;
+            mWidth = -1;
+            mHeight = -1;
+        }
+
+        public ImageWriter(File file, Bitmap bitmap, int width, int height) {
+            mFile = file;
+            mBitmap = bitmap;
+            mWidth = width;
+            mHeight = height;
         }
 
         @Override
         protected Void doInBackground(Void... voids) {
             try {
-                FileOutputStream out = new FileOutputStream(file);
+                Bitmap bitmap = mBitmap;
+                if (mWidth != -1 && mHeight != -1) {
+                    if (getFreeMem() > sizeBitmap(mBitmap)) {
+                        bitmap = Bitmap.createScaledBitmap(mBitmap, mWidth, mHeight, false);
+                    }
+                }
+                FileOutputStream out = new FileOutputStream(mFile);
                 bitmap.compress(Bitmap.CompressFormat.PNG, 0, out);
+                out.close();
             } catch (Exception e) {
-                Log.e(TAG, "Bitmap file:" + file, e);
+                Log.e(TAG, "Bitmap file:" + mFile, e);
             }
             return null;
         }
@@ -630,88 +683,35 @@ public final class ImageUtils {
 
 
     /**
-     * Obtains an image, scaled down to be at least the requested size and rotated according to the EXIF on the file.<br/>
+     * Obtains an image, scaled down to be at least the requested size and rotated according to the EXIF on the mFile.<br/>
      * It's aware of the device density.
      *
-     * @param path The path to the image file.
+     * @param path The path to the image mFile.
      * @return Scaled and rotated image or null if no image was found.
      */
-    @SuppressWarnings("SuspiciousNameCombination")
     @Nullable
     public static Bitmap getPhotoFromFile(String path) {
-        try {
-            int orientation = getCameraPhotoOrientation(path);
-            Bitmap bitmap = BitmapFactory.decodeFile(path, null);
-            return rotate(bitmap, orientation);
-        } catch (Exception e) {
-            Log.e(TAG, "" + e.getMessage(), e);
-            return null;
-        }
+        return getPhotoFromFilePx(path, 0, 0);
     }
 
     /**
-     * Obtains an image, scaled down to be at least the requested size and rotated according to the EXIF on the file.<br/>
+     * Obtains an image, scaled down to be at least the requested size and rotated according to the EXIF on the mFile.<br/>
      * It's aware of the device density.
      *
-     * @param path   The path to the image file.
-     * @param width  Desired width in DP's.
-     * @param height Desired height in DP's.
+     * @param path   The path to the image mFile.
+     * @param widthDp  Desired width in DP's.
+     * @param heightDp Desired height in DP's.
      * @return Scaled and rotated image or null if no image was found.
      */
-    @SuppressWarnings("SuspiciousNameCombination")
     @Nullable
-    public static Bitmap getPhotoFromFile(String path, int width, int height) {
-        int orientation = getCameraPhotoOrientation(path);
-        Bitmap bitmap;
-        if (width > 0 || height > 0) {
-            if (displayMetrics == null) {
-                Log.w(TAG, "Device density not accurate. Please call setDensity() from an activity before this.");
-            }
-            if (orientation == 90 || orientation == 270) {
-                int x = width;
-                width = height;
-                height = x;
-            }
-
-            width *= density;
-            height *= density;
-
-            bitmap = decodeSampledBitmapFromFile(path, width, height);
-        } else {
-            bitmap = BitmapFactory.decodeFile(path);
-        }
-        /*
-
-        if (bitmap == null) {
-            Log.e(TAG, "Image "+path+" not found.");
-            return null;
-        }
-
-        float originalImgRatio = (float) (1.0 * bitmap.getWidth() / bitmap.getHeight());
-        float desiredSizeRatio = (float) (1.0 * width / height);
-
-        int finalWidth;
-        int finalHeight;
-
-        if (originalImgRatio > desiredSizeRatio) {
-            finalHeight = height;
-            finalWidth = (int) (height * originalImgRatio);
-        } else {
-            finalWidth = width;
-            finalHeight = (int) (finalWidth / originalImgRatio);
-        }
-
-        Log.i(TAG, "getPhoto " + path + " " + width + "x" + height + " -> " + finalWidth + "x" + finalHeight+" orientation: "+orientation);
-        bitmap = Bitmap.createScaledBitmap(bitmap, finalWidth, finalHeight, true);
-        */
-        bitmap = rotate(bitmap, orientation);
-
-        return bitmap;
+    public static Bitmap getPhotoFromFile(String path, int widthDp, int heightDp) {
+        return getPhotoFromFilePx(path, (int) (widthDp * density), (int) (heightDp * density));
     }
+
     /**
-     * Obtains an image, scaled down to be at least the requested size and rotated according to the EXIF on the file.<br/>
+     * Obtains an image, scaled down to be at least the requested size and rotated according to the EXIF on the mFile.<br/>
      *
-     * @param path   The path to the image file.
+     * @param path   The path to the image mFile.
      * @param width  Desired width in pixels.
      * @param height Desired height in pixels.
      * @return Scaled and rotated image or null if no image was found.
@@ -727,52 +727,38 @@ public final class ImageUtils {
                 width = height;
                 height = x;
             }
-
             bitmap = decodeSampledBitmapFromFile(path, width, height);
         } else {
-            bitmap = BitmapFactory.decodeFile(path);
+            bitmap = decodeSampledBitmapFromFile(path, 0, 0);
         }
-        /*
-
-        if (bitmap == null) {
-            Log.e(TAG, "Image "+path+" not found.");
-            return null;
-        }
-
-        float originalImgRatio = (float) (1.0 * bitmap.getWidth() / bitmap.getHeight());
-        float desiredSizeRatio = (float) (1.0 * width / height);
-
-        int finalWidth;
-        int finalHeight;
-
-        if (originalImgRatio > desiredSizeRatio) {
-            finalHeight = height;
-            finalWidth = (int) (height * originalImgRatio);
-        } else {
-            finalWidth = width;
-            finalHeight = (int) (finalWidth / originalImgRatio);
-        }
-
-        Log.i(TAG, "getPhoto " + path + " " + width + "x" + height + " -> " + finalWidth + "x" + finalHeight+" orientation: "+orientation);
-        bitmap = Bitmap.createScaledBitmap(bitmap, finalWidth, finalHeight, true);
-        */
-        bitmap = rotate(bitmap, orientation);
+        if (bitmap != null && orientation != 0) bitmap = rotate(bitmap, orientation);
 
         return bitmap;
     }
 
+    @Nullable
+    public static Bitmap decodeSampledBitmapFromFile(File file) {
+        return decodeSampledBitmapFromFile(file.getAbsolutePath(), 0, 0);
+    }
+
 
     /**
-     * Obtains a scaled down image from the file system.
+     * Obtains a scaled down image from the mFile system.
      * The scaling uses the size parameters to calculate the inSampleSize and, therefore, it will have at least that size.
      *
-     * @param path      The path to the image file.
+     * @param path      The path to the image mFile.
      * @param reqWidth  Minimum width px.
      * @param reqHeight Minimum height px.
      * @return Scaled image.
      */
     @Nullable
     public static Bitmap decodeSampledBitmapFromFile(String path, int reqWidth, int reqHeight) {
+        if (true) {
+            return ImageLoader.getInstance()
+                              .loadImageSync("file://" + path,
+                                             new ImageSize(reqWidth, reqHeight),
+                                             sDisplayImageOptions);
+        }
         // First decode with inJustDecodeBounds=true to check dimensions
         final BitmapFactory.Options options = new BitmapFactory.Options();
         options.inJustDecodeBounds = true;
@@ -787,25 +773,60 @@ public final class ImageUtils {
         // Calculate inSampleSize
         options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
 
-        // Decode bitmap with inSampleSize set
+        // Decode mBitmap with inSampleSize set
         options.inJustDecodeBounds = false;
 
-        int width = reqWidth / options.inSampleSize;
-        int height = reqHeight / options.inSampleSize;
+        int width;
+        int height;
+        int estimatedBytes;
+        while (true) {
+            if (reqWidth > 0 && reqHeight > 0 && options.inSampleSize != 1) {
+                width = reqWidth / options.inSampleSize;
+                height = reqHeight / options.inSampleSize;
+            } else {
+                width = options.outWidth;
+                height = options.outHeight;
+            }
+            estimatedBytes = width * 4 * height;
 
-        int estimatedBytes = width * 4 * height;
+            if (width > displayWidth * 1.5 && CFApp.isTestDevice()) {
+                Log.w(TAG,
+                      new RuntimeException(String.format(
+                              "You're loading an image of width %d px but the screen size is only %d.",
+                              options.outWidth,
+                              displayMetrics.widthPixels)));
+            }
 
-        long freeMem = Runtime.getRuntime().maxMemory() - Runtime.getRuntime().totalMemory();
-        if (estimatedBytes > freeMem) {
-            System.gc();
-            freeMem = Runtime.getRuntime().maxMemory() - Runtime.getRuntime().totalMemory();
-            if (estimatedBytes > freeMem) {
-                Log.w(TAG, "NOT ENOUGH MEMORY! Bitmap size: " + estimatedBytes + " Free Mem: " + freeMem);
-                return null;
+
+            if (hasEnoughMemory(estimatedBytes)) {
+                Bitmap bitmap = BitmapFactory.decodeFile(path, options);
+                long freeMem = getFreeMem();
+//                Log.d(TAG, String.format("FreeMem: %d", freeMem / 1024));
+                return bitmap;
+            } else {
+                options.inSampleSize *= 2;
+                Log.w(TAG, String.format("Reducing sample size to " + options.inSampleSize));
+                options.inJustDecodeBounds = true;
+                BitmapFactory.decodeFile(path, options);
+//                String s = options.inSampleSize != 1 ? String.format("(%dx%d)", options.outWidth, options.outHeight) : "";
+//                Log.w(TAG, String.format("Will not decode mFile %s at %dx%d %s", path, width, height, s));
+//                return null;
             }
         }
+    }
 
-        return BitmapFactory.decodeFile(path, options);
+    protected static boolean hasEnoughMemory(int estimatedBytes) {
+        long freeMem = getFreeMem();
+        Log.d(TAG, String.format("FreeMem: %d New Bitmap: %d", freeMem / 1024, estimatedBytes / 1024));
+        if (estimatedBytes > freeMem) {
+            System.gc();
+            freeMem = getFreeMem();
+            if (estimatedBytes > freeMem) {
+                Log.w(TAG, "NOT ENOUGH MEMORY! Bitmap size: " + estimatedBytes + " Free Mem: " + freeMem);
+                return false;
+            }
+        }
+        return true;
     }
 
 
@@ -816,7 +837,7 @@ public final class ImageUtils {
      * EXIF.
      *
      * @param c    A context (not the application one)
-     * @param path The path to the image file.
+     * @param path The path to the image mFile.
      * @param side The side of the final image.
      * @return Image
      * @see #getSquareThumbnail(android.content.Context, String, int) Non-cached version.
@@ -828,23 +849,18 @@ public final class ImageUtils {
         String name = new File(path).getName();
         File cacheFile = new File(cacheDir, name.substring(0, name.length() - 4) + side + ".png");
         if (!cacheFile.exists()) {
-            try {
-                bitmap = getSquareThumbnail(c, path, side);
-                new ImageWriter(cacheFile, bitmap).execute();
-            } catch (Exception e) {
-                Log.e(TAG, "Error generating thumbnail", e);
-                return null;
+            bitmap = getSquareThumbnail(c, path, side);
+            if (bitmap != null) {
+                try {
+                    new ImageWriter(cacheFile, bitmap).execute();
+                } catch (Exception e) {
+                    Log.e(TAG, "Error generating thumbnail", e);
+                    return null;
+                }
             }
         } else {
             Log.v(TAG, "Loading from cache " + path);
-            final BitmapFactory.Options options = new BitmapFactory.Options();
-            if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT) {
-                //noinspection deprecation
-                options.inPurgeable = true;
-                //noinspection deprecation
-                options.inInputShareable = true;
-            }
-            bitmap = BitmapFactory.decodeFile(cacheFile.getAbsolutePath(), options);
+            bitmap = decodeSampledBitmapFromFile(cacheFile);
         }
         return bitmap;
     }
@@ -855,25 +871,28 @@ public final class ImageUtils {
      * EXIF.
      *
      * @param c    A context (not the application one)
-     * @param path The path to the image file.
+     * @param path The path to the image mFile.
      * @param side The side of the final image.
      * @see #getCachedSquareThumbnail(android.content.Context, String, int) Disk-cached version.
      */
+    @Nullable
     private static Bitmap getSquareThumbnail(Context c, String path, int side) {
         Bitmap bitmap = decodeSampledBitmapFromFile(path, side, side);
-        bitmap = cropSquare(bitmap);
-        bitmap = Bitmap.createScaledBitmap(bitmap, side, side, true);
-        bitmap = rotate(bitmap, path);
+        if (bitmap != null) {
+            bitmap = cropSquare(bitmap);
+            bitmap = Bitmap.createScaledBitmap(bitmap, side, side, true);
+            bitmap = rotate(bitmap, path);
+        }
         return bitmap;
     }
 
     /**
      * Creates a square, cropped image from the center of the source image.
      *
-     * @param bitmap Source bitmap.
+     * @param bitmap Source mBitmap.
      * @return New image.
      */
-    public static Bitmap cropSquare(Bitmap bitmap) {
+    public static Bitmap cropSquare(@NotNull Bitmap bitmap) {
         int originalWidth = bitmap.getWidth();
         int originalHeight = bitmap.getHeight();
         int x, y, side;
@@ -892,7 +911,7 @@ public final class ImageUtils {
     }
 
 
-    public static Rect getCenterSquare(Bitmap bitmap) {
+    public static Rect getCenterSquare(@NotNull Bitmap bitmap) {
         int originalWidth = bitmap.getWidth();
         int originalHeight = bitmap.getHeight();
         int x, y, side;
@@ -909,7 +928,7 @@ public final class ImageUtils {
     }
 
     @Deprecated
-    public static Bitmap getThumbnail(Bitmap bitmap, int side) {
+    public static Bitmap getThumbnail(@NotNull Bitmap bitmap, int side) {
         int iw = bitmap.getWidth();
         int ih = bitmap.getHeight();
         int x, y, w, h;
@@ -968,27 +987,32 @@ public final class ImageUtils {
      *
      * @param bitmap The source image.
      * @param path   The path on disk.
-     * @return A rotated bitmap.
+     * @return A rotated mBitmap.
      */
-    public static Bitmap rotate(Bitmap bitmap, String path) {
+    public static Bitmap rotate(@NotNull Bitmap bitmap, String path) {
         int orientation = getCameraPhotoOrientation(path);
         bitmap = rotate(bitmap, orientation);
-
         return bitmap;
     }
 
     /**
      * Rotates an image by a given number of degrees.
      *
-     * @param bitmap      The source bitmap.
+     * @param bitmap      The source mBitmap.
      * @param orientation The amount of degrees to rotate.
-     * @return Rotated bitmap.
+     * @return Rotated mBitmap.
      */
-    public static Bitmap rotate(Bitmap bitmap, int orientation) {
+    @NotNull
+    public static Bitmap rotate(@NotNull Bitmap bitmap, int orientation) {
+        System.gc();
+        if (getFreeMem() <= sizeBitmap(bitmap)) {
+            Log.w(TAG, "No free memory to rotate bitmap");
+            return bitmap;
+        }
         if (orientation != 0) {
             Matrix matrix = new Matrix();
             matrix.postRotate(orientation);
-            // create a new bitmap from the original using the matrix to transform the result
+            // create a new mBitmap from the original using the matrix to transform the result
             Bitmap bitmap1 = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
             bitmap.recycle();
             return bitmap1;
@@ -997,10 +1021,10 @@ public final class ImageUtils {
     }
 
     /**
-     * Creates a new bitmap from the original resource and paints the visible parts with the given color.
+     * Creates a new mBitmap from the original resource and paints the visible parts with the given color.
      * The alpha channel is the only part of the original resource that is used for the painting.
      * <p/>
-     * Note: I tried saving a painted file on disk and loading that one each time. Got 1ms improvement but more used memory for
+     * Note: I tried saving a painted mFile on disk and loading that one each time. Got 1ms improvement but more used memory for
      * repeated calls.
      *
      * @param c     A context.
@@ -1011,17 +1035,14 @@ public final class ImageUtils {
      */
     @Deprecated
     public static Bitmap createRecoloredBitmap(Context c, int resId, int color) {
-        BitmapFactory.Options opts = new BitmapFactory.Options();
-        opts.inPreferredConfig = Bitmap.Config.ARGB_8888;
-        Bitmap source = BitmapFactory.decodeResource(c.getResources(), resId);
-        return createRecoloredBitmap(source, color);
+        return createRecoloredBitmap(c.getResources(), resId, color);
     }
 
     /**
-     * Creates a new bitmap from the original resource and paints the visible parts with the given color.
+     * Creates a new mBitmap from the original resource and paints the visible parts with the given color.
      * The alpha channel is the only part of the original resource that is used for the painting.
      * <p/>
-     * Note: I tried saving a painted file on disk and loading that one each time. Got 1ms improvement but more used
+     * Note: I tried saving a painted mFile on disk and loading that one each time. Got 1ms improvement but more used
      * memory for
      * repeated calls.
      *
@@ -1093,7 +1114,7 @@ public final class ImageUtils {
 
 
     /**
-     * Creates a new bitmap from the original resource and paints the visible parts with the given color.
+     * Creates a new mBitmap from the original resource and paints the visible parts with the given color.
      * The alpha channel is the only part of the original resource that is used for the painting.
      *
      * @param source A context.
@@ -1114,10 +1135,10 @@ public final class ImageUtils {
     }
 
     /**
-     * Creates a new bitmap from the original resource and paints the visible parts with the given color.
+     * Creates a new mBitmap from the original resource and paints the visible parts with the given color.
      * The alpha channel is the only part of the original resource that is used for the painting.
      * <p/>
-     * Note: I tried saving a painted file on disk and loading that one each time. Got 1ms improvement but more used memory for
+     * Note: I tried saving a painted mFile on disk and loading that one each time. Got 1ms improvement but more used memory for
      * repeated calls.
      *
      * @param c     A context.
@@ -1134,7 +1155,7 @@ public final class ImageUtils {
 
 
     /**
-     * Creates a new bitmap from the original resource and paints the visible parts with the given color.
+     * Creates a new mBitmap from the original resource and paints the visible parts with the given color.
      * The alpha channel is the only part of the original resource that is used for the painting.
      *
      * @param source A context.
@@ -1201,10 +1222,10 @@ public final class ImageUtils {
     }
 
     /**
-     * Creates a bitmap with a circle of a certain size and color.
+     * Creates a mBitmap with a circle of a certain size and color.
      *
-     * @param iconSizePx The size of the bitmap/diameter of the circle, in pixels.
-     * @param color      The color of the bitmap.
+     * @param iconSizePx The size of the mBitmap/diameter of the circle, in pixels.
+     * @param color      The color of the mBitmap.
      */
     public static Bitmap getCircleBitmap(int iconSizePx, int color) {
         Bitmap bitmap = Bitmap.createBitmap(iconSizePx, iconSizePx, Bitmap.Config.ARGB_8888);
@@ -1217,8 +1238,8 @@ public final class ImageUtils {
      * Wraps {@link #getCircleBitmap(int, int)} in a {@link android.graphics.drawable.BitmapDrawable}.
      *
      * @param res        A resources.
-     * @param iconSizeDp The size of the bitmap/diameter of the circle, in DP.
-     * @param color      The color of the bitmap.
+     * @param iconSizeDp The size of the mBitmap/diameter of the circle, in DP.
+     * @param color      The color of the mBitmap.
      */
     public static BitmapDrawable getCircleBitmapDrawable(Resources res, int iconSizeDp, int color) {
         return new BitmapDrawable(res, getCircleBitmap(dp2px(iconSizeDp), color));
@@ -1239,10 +1260,10 @@ public final class ImageUtils {
     }
 
     /**
-     * Draws a bitmap on top of another, in the middle. Modifies the bottom bitmap.
+     * Draws a mBitmap on top of another, in the middle. Modifies the bottom mBitmap.
      *
-     * @param bottom The bitmap that will be bellow.
-     * @param top    The bitmap that will be on top.
+     * @param bottom The mBitmap that will be bellow.
+     * @param top    The mBitmap that will be on top.
      */
     public static Bitmap drawOnMiddle(Bitmap bottom, Bitmap top) {
         if (bottom == null) throw new InvalidParameterException("Bottom is null!");
@@ -1259,18 +1280,18 @@ public final class ImageUtils {
 
 
     /**
-     * Asynchronously obtains a bitmap from disk and places it on an ImageView with a quick fade-in effect.
+     * Asynchronously obtains a mBitmap from disk and places it on an ImageView with a quick fade-in effect.
      * <p/>
      * You must use an {@link android.support.v4.util.LruCache} that implements {@link android.support.v4.util.LruCache#create(Object)}
      * so it will obtain
-     * the bitmap.
+     * the mBitmap.
      *
-     * @param file        A reference to the file that will be passed to the LruCache.
-     * @param view        The view that will receive the bitmap.
+     * @param file        A reference to the mFile that will be passed to the LruCache.
+     * @param view        The view that will receive the mBitmap.
      * @param cache       The LruCache implementation (see {@link com.carlosefonseca.common.utils.ImageUtils.SizedImageCache} for
      *                    an
      *                    example).
-     * @param placeholder A placeholder that will be set in case there is no bitmap to place.
+     * @param placeholder A placeholder that will be set in case there is no mBitmap to place.
      */
     @Nullable
     public static AsyncTask<Void, Void, Bitmap> setImageAsyncFadeIn(final String file,
@@ -1281,18 +1302,18 @@ public final class ImageUtils {
     }
 
     /**
-     * Asynchronously obtains a bitmap from disk and places it on an ImageView with a quick fade-in effect.
+     * Asynchronously obtains a mBitmap from disk and places it on an ImageView with a quick fade-in effect.
      * <p/>
      * You must use an {@link LruCache} that implements {@link android.support.v4.util.LruCache#create(Object)} so it will obtain
-     * the bitmap.
+     * the mBitmap.
      *
-     * @param file         A reference to the file that will be passed to the LruCache.
-     * @param view         The view that will receive the bitmap.
+     * @param file         A reference to the mFile that will be passed to the LruCache.
+     * @param view         The view that will receive the mBitmap.
      * @param cache        The LruCache implementation (see {@link com.carlosefonseca.common.utils.ImageUtils.SizedImageCache}
      *                     for
      *                     an
      *                     example).
-     * @param placeholder  A placeholder that will be set in case there is no bitmap to place.
+     * @param placeholder  A placeholder that will be set in case there is no mBitmap to place.
      */
     @Nullable
     public static AsyncTask<Void, Void, Bitmap> setImageAsyncFadeIn(final String file,
@@ -1386,37 +1407,38 @@ public final class ImageUtils {
      */
 
     public static class BitmapCache extends LruCache<String, Bitmap> {
+        static final String TAG = CodeUtils.getTag(BitmapCache.class);
 
         public BitmapCache() {
             // Get max available VM memory, exceeding this amount will throw an
             // OutOfMemory exception. Stored in kilobytes as LruCache takes an
             // int in its constructor.
             // Use 1/4th of the available memory for this memory cache.
-            super((int) ((Runtime.getRuntime().maxMemory() - Runtime.getRuntime().totalMemory()) / 4));
-            Log.i(TAG, "Cache Size: " + maxSize() / 1024f / 1024f + " MB");
+            super((int) (CodeUtils.getFreeMem() / 5));
         }
 
         @Override
         protected int sizeOf(String key, Bitmap bitmap) {
-            // The cache size will be measured in kilobytes rather than
-            // number of items.
+            // The cache size will be measured in bytes rather than number of items.
             return sizeBitmap(bitmap);
         }
 
-        public static int sizeBitmap(Bitmap bitmap) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-                return bitmap.getAllocationByteCount();
-            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR1) {
-                return bitmap.getByteCount();
-            } else {
-                return bitmap.getRowBytes() * bitmap.getHeight();
-            }
+        @Override
+        public void trimToSize(int maxSize) {
+            int sizeB4 = this.size();
+            super.trimToSize(maxSize);
+            Log.d(TAG, "trimToSize. Before: " + getKB(sizeB4) + " Now: " + getKB(this.size()));
+        }
+
+        @Override
+        protected void entryRemoved(boolean evicted, String key, Bitmap oldValue, Bitmap newValue) {
+            Log.d(TAG, "entryRemoved. Current Size: " + this.size());
         }
     }
 
 
     /**
-     * Redraws the bitmap in a new size. Scales the bitmap keeping the aspect ratio.
+     * Redraws the mBitmap in a new size. Scales the mBitmap keeping the aspect ratio.
      */
     public static Bitmap resizeBitmapCanvas(Bitmap bitmap, int desiredWidth, int desiredHeight) {
         if (bitmap.getWidth() == desiredWidth && bitmap.getHeight() == desiredHeight) return bitmap;
