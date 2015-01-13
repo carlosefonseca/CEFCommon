@@ -14,13 +14,13 @@ apply plugin: 'com.github.dcendents.android-maven'
 version '1.0.2'
 group 'com.carlosefonseca'
 
-uploadArchives {
-    repositories {
-        mavenDeployer {
-            repository(url: mvnRepoUrl)
-        }
-    }
-}
+//uploadArchives {
+//    repositories {
+//        mavenDeployer {
+//            repository(url: mvnRepoUrl)
+//        }
+//    }
+//}
 
 
 
