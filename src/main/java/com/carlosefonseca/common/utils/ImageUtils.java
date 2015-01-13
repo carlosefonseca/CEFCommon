@@ -204,7 +204,12 @@ public final class ImageUtils {
             }
             cacheFile = new File(cacheDir, cacheName);
             if (cacheFile.exists()) {
-                bitmap = BitmapFactory.decodeFile(cacheFile.getAbsolutePath());
+                try {
+                    bitmap = BitmapFactory.decodeFile(cacheFile.getAbsolutePath());
+                } catch (OutOfMemoryError e) {
+                    Log.e(TAG, "" + e.getMessage(), e);
+                    bitmap = null;
+                }
             }
         }
 
@@ -311,6 +316,16 @@ public final class ImageUtils {
     @Nullable
     public static Bitmap getPhotoFromFileOrAssets(File file) {
         return getPhotoFromFileOrAssetsPx(file, -1, -1);
+    }
+
+    public static int sizeBitmap(Bitmap bitmap) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            return bitmap.getAllocationByteCount();
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR1) {
+            return bitmap.getByteCount();
+        } else {
+            return bitmap.getRowBytes() * bitmap.getHeight();
+        }
     }
 
     public static class BitmapCanvas {
@@ -488,71 +503,76 @@ public final class ImageUtils {
      */
     @Nullable
     public static Bitmap getResizedIcon(@Nullable File file, final int widthDp, final int heightDp) {
-        Bitmap bitmap = null;
-        if (file == null) return null;
-        String name = file.getName();
-        String cacheName;
+        try {
+            Bitmap bitmap = null;
+            if (file == null) return null;
+            String name = file.getName();
+            String cacheName;
 
-        cacheName = name.substring(0, name.length() - 4) + "-" + widthDp + "x" + heightDp + ".png";
+            cacheName = name.substring(0, name.length() - 4) + "-" + widthDp + "x" + heightDp + ".png";
 
-        File cacheFile = new File(cacheDir, cacheName);
-        if (cacheFile.exists()) {
-            bitmap = BitmapFactory.decodeFile(cacheFile.getAbsolutePath());
-        }
-
-        if (bitmap == null) {   // cache doesn't exist
-
-            Bitmap bitmap1 = null;
-            if (file.exists()) {
-                // Load full size from sd
-                bitmap1 = BitmapFactory.decodeFile(file.getAbsolutePath());
-            } else if (getImagesOnAssets().contains(name)) {
-                // Load full size from assets
-                bitmap1 = getPhotoFromAssets(name);
+            File cacheFile = new File(cacheDir, cacheName);
+            if (cacheFile.exists()) {
+                bitmap = BitmapFactory.decodeFile(cacheFile.getAbsolutePath());
             }
 
-            if (bitmap1 != null) {
+            if (bitmap == null) {   // cache doesn't exist
 
-                if (widthDp != -1 || heightDp != -1) {
-                    // desired size
-                    int widthPx;
-                    int heightPx;
-                    if (bitmap1.getWidth() >= bitmap1.getHeight()) {
-                        widthPx = (int) (widthDp * density);
-                        heightPx = /*heightDp != -1 ? (int) (heightDp * density) :*/ widthPx * bitmap1.getHeight() /
-                                                                                     bitmap1.getWidth();
-                    } else {
-                        heightPx = (int) (heightDp * density);
-                        widthPx = /*widthDp != -1 ? (int) (widthDp * density) : */heightPx * bitmap1.getWidth() /
-                                                                                  bitmap1.getHeight();
-                    }
-
-                    if (widthPx == bitmap1.getWidth() && heightPx == bitmap1.getHeight()) {
-                        return bitmap1;
-                    }
-
-                    if (widthPx == 0 && heightPx == 0) {
-                        throw new IllegalArgumentException(String.format(
-                                "width(%d) and height(%d) must be > 0. Provided values: widthDp:%d heightDp:%d",
-                                widthPx,
-                                heightPx,
-                                widthDp,
-                                heightDp));
-                    }
-
-                    // bitmap size != desired size
-                    bitmap = scaleAndCrop(bitmap1, widthPx, heightPx);
-                    bitmap1.recycle();
-
-                    new ImageWriter(cacheFile, bitmap).execute();
-                } else {
-                    bitmap = bitmap1;
+                Bitmap bitmap1 = null;
+                if (file.exists()) {
+                    // Load full size from sd
+                    bitmap1 = BitmapFactory.decodeFile(file.getAbsolutePath());
+                } else if (getImagesOnAssets().contains(name)) {
+                    // Load full size from assets
+                    bitmap1 = getPhotoFromAssets(name);
                 }
-            } else {
-                Log.w(TAG, "IMAGE DOES NOT EXIST " + file);
+
+                if (bitmap1 != null) {
+
+                    if (widthDp != -1 || heightDp != -1) {
+                        // desired size
+                        int widthPx;
+                        int heightPx;
+                        if (bitmap1.getWidth() >= bitmap1.getHeight()) {
+                            widthPx = (int) (widthDp * density);
+                            heightPx = /*heightDp != -1 ? (int) (heightDp * density) :*/ widthPx * bitmap1.getHeight() /
+                                                                                         bitmap1.getWidth();
+                        } else {
+                            heightPx = (int) (heightDp * density);
+                            widthPx = /*widthDp != -1 ? (int) (widthDp * density) : */heightPx * bitmap1.getWidth() /
+                                                                                      bitmap1.getHeight();
+                        }
+
+                        if (widthPx == bitmap1.getWidth() && heightPx == bitmap1.getHeight()) {
+                            return bitmap1;
+                        }
+
+                        if (widthPx == 0 && heightPx == 0) {
+                            throw new IllegalArgumentException(String.format(
+                                    "width(%d) and height(%d) must be > 0. Provided values: widthDp:%d heightDp:%d",
+                                    widthPx,
+                                    heightPx,
+                                    widthDp,
+                                    heightDp));
+                        }
+
+                        // bitmap size != desired size
+                        bitmap = scaleAndCrop(bitmap1, widthPx, heightPx);
+                        bitmap1.recycle();
+
+                        new ImageWriter(cacheFile, bitmap).execute();
+                    } else {
+                        bitmap = bitmap1;
+                    }
+                } else {
+                    Log.w(TAG, "IMAGE DOES NOT EXIST " + file);
+                }
             }
+            return bitmap;
+        } catch (OutOfMemoryError e) {
+            Log.e(TAG, "" + e.getMessage(), e);
+            return null;
         }
-        return bitmap;
     }
 
     public static Bitmap scaleAndCrop(Bitmap bitmap1, int widthPx, int heightPx) {
@@ -662,24 +682,25 @@ public final class ImageUtils {
     @Nullable
     public static Bitmap getPhotoFromFile(String path, int width, int height) {
         int orientation = getCameraPhotoOrientation(path);
-        Bitmap bitmap;
-        if (width > 0 || height > 0) {
-            if (displayMetrics == null) {
-                Log.w(TAG, "Device density not accurate. Please call setDensity() from an activity before this.");
-            }
-            if (orientation == 90 || orientation == 270) {
-                int x = width;
-                width = height;
-                height = x;
-            }
+        Bitmap bitmap = null;
+        try {
+            if (width > 0 || height > 0) {
+                if (displayMetrics == null) {
+                    Log.w(TAG, "Device density not accurate. Please call setDensity() from an activity before this.");
+                }
+                if (orientation == 90 || orientation == 270) {
+                    int x = width;
+                    width = height;
+                    height = x;
+                }
 
-            width *= density;
-            height *= density;
+                width *= density;
+                height *= density;
 
-            bitmap = decodeSampledBitmapFromFile(path, width, height);
-        } else {
-            bitmap = BitmapFactory.decodeFile(path);
-        }
+                bitmap = decodeSampledBitmapFromFile(path, width, height);
+            } else {
+                bitmap = BitmapFactory.decodeFile(path);
+            }
         /*
 
         if (bitmap == null) {
@@ -704,7 +725,10 @@ public final class ImageUtils {
         Log.i(TAG, "getPhoto " + path + " " + width + "x" + height + " -> " + finalWidth + "x" + finalHeight+" orientation: "+orientation);
         bitmap = Bitmap.createScaledBitmap(bitmap, finalWidth, finalHeight, true);
         */
-        bitmap = rotate(bitmap, orientation);
+            bitmap = rotate(bitmap, orientation);
+        } catch (OutOfMemoryError e) {
+            Log.e(TAG, "" + e.getMessage(), e);
+        }
 
         return bitmap;
     }
@@ -720,43 +744,23 @@ public final class ImageUtils {
     @Nullable
     public static Bitmap getPhotoFromFilePx(String path, int width, int height) {
         int orientation = getCameraPhotoOrientation(path);
-        Bitmap bitmap;
-        if (width > 0 || height > 0) {
-            if (orientation == 90 || orientation == 270) {
-                int x = width;
-                width = height;
-                height = x;
+        Bitmap bitmap = null;
+        try {
+            if (width > 0 || height > 0) {
+                if (orientation == 90 || orientation == 270) {
+                    int x = width;
+                    width = height;
+                    height = x;
+                }
+
+                bitmap = decodeSampledBitmapFromFile(path, width, height);
+            } else {
+                bitmap = BitmapFactory.decodeFile(path);
             }
-
-            bitmap = decodeSampledBitmapFromFile(path, width, height);
-        } else {
-            bitmap = BitmapFactory.decodeFile(path);
+            bitmap = rotate(bitmap, orientation);
+        } catch (OutOfMemoryError e) {
+            Log.e(TAG, "" + e.getMessage(), e);
         }
-        /*
-
-        if (bitmap == null) {
-            Log.e(TAG, "Image "+path+" not found.");
-            return null;
-        }
-
-        float originalImgRatio = (float) (1.0 * bitmap.getWidth() / bitmap.getHeight());
-        float desiredSizeRatio = (float) (1.0 * width / height);
-
-        int finalWidth;
-        int finalHeight;
-
-        if (originalImgRatio > desiredSizeRatio) {
-            finalHeight = height;
-            finalWidth = (int) (height * originalImgRatio);
-        } else {
-            finalWidth = width;
-            finalHeight = (int) (finalWidth / originalImgRatio);
-        }
-
-        Log.i(TAG, "getPhoto " + path + " " + width + "x" + height + " -> " + finalWidth + "x" + finalHeight+" orientation: "+orientation);
-        bitmap = Bitmap.createScaledBitmap(bitmap, finalWidth, finalHeight, true);
-        */
-        bitmap = rotate(bitmap, orientation);
 
         return bitmap;
     }
@@ -773,39 +777,44 @@ public final class ImageUtils {
      */
     @Nullable
     public static Bitmap decodeSampledBitmapFromFile(String path, int reqWidth, int reqHeight) {
-        // First decode with inJustDecodeBounds=true to check dimensions
-        final BitmapFactory.Options options = new BitmapFactory.Options();
-        options.inJustDecodeBounds = true;
-        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT) {
-            //noinspection deprecation
-            options.inPurgeable = true;
-            //noinspection deprecation
-            options.inInputShareable = true;
-        }
-        BitmapFactory.decodeFile(path, options);
-
-        // Calculate inSampleSize
-        options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
-
-        // Decode bitmap with inSampleSize set
-        options.inJustDecodeBounds = false;
-
-        int width = reqWidth / options.inSampleSize;
-        int height = reqHeight / options.inSampleSize;
-
-        int estimatedBytes = width * 4 * height;
-
-        long freeMem = Runtime.getRuntime().maxMemory() - Runtime.getRuntime().totalMemory();
-        if (estimatedBytes > freeMem) {
-            System.gc();
-            freeMem = Runtime.getRuntime().maxMemory() - Runtime.getRuntime().totalMemory();
-            if (estimatedBytes > freeMem) {
-                Log.w(TAG, "NOT ENOUGH MEMORY! Bitmap size: " + estimatedBytes + " Free Mem: " + freeMem);
-                return null;
+        try {
+            // First decode with inJustDecodeBounds=true to check dimensions
+            final BitmapFactory.Options options = new BitmapFactory.Options();
+            options.inJustDecodeBounds = true;
+            if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT) {
+                //noinspection deprecation
+                options.inPurgeable = true;
+                //noinspection deprecation
+                options.inInputShareable = true;
             }
-        }
+            BitmapFactory.decodeFile(path, options);
 
-        return BitmapFactory.decodeFile(path, options);
+            // Calculate inSampleSize
+            options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
+
+            // Decode bitmap with inSampleSize set
+            options.inJustDecodeBounds = false;
+
+            int width = reqWidth / options.inSampleSize;
+            int height = reqHeight / options.inSampleSize;
+
+            int estimatedBytes = width * 4 * height;
+
+            long freeMem = Runtime.getRuntime().maxMemory() - Runtime.getRuntime().totalMemory();
+            if (estimatedBytes > freeMem) {
+                System.gc();
+                freeMem = Runtime.getRuntime().maxMemory() - Runtime.getRuntime().totalMemory();
+                if (estimatedBytes > freeMem) {
+                    Log.w(TAG, "NOT ENOUGH MEMORY! Bitmap size: " + estimatedBytes + " Free Mem: " + freeMem);
+                    return null;
+                }
+            }
+
+            return BitmapFactory.decodeFile(path, options);
+        } catch (OutOfMemoryError e) {
+            Log.e(TAG, "" + e.getMessage(), e);
+            return null;
+        }
     }
 
 
@@ -824,29 +833,34 @@ public final class ImageUtils {
     @Nullable
     @Deprecated
     public static Bitmap getCachedSquareThumbnail(Context c, String path, int side) {
-        Bitmap bitmap;
-        String name = new File(path).getName();
-        File cacheFile = new File(cacheDir, name.substring(0, name.length() - 4) + side + ".png");
-        if (!cacheFile.exists()) {
-            try {
-                bitmap = getSquareThumbnail(c, path, side);
-                new ImageWriter(cacheFile, bitmap).execute();
-            } catch (Exception e) {
-                Log.e(TAG, "Error generating thumbnail", e);
-                return null;
+        try {
+            Bitmap bitmap;
+            String name = new File(path).getName();
+            File cacheFile = new File(cacheDir, name.substring(0, name.length() - 4) + side + ".png");
+            if (!cacheFile.exists()) {
+                try {
+                    bitmap = getSquareThumbnail(c, path, side);
+                    new ImageWriter(cacheFile, bitmap).execute();
+                } catch (Exception e) {
+                    Log.e(TAG, "Error generating thumbnail", e);
+                    return null;
+                }
+            } else {
+                Log.v(TAG, "Loading from cache " + path);
+                final BitmapFactory.Options options = new BitmapFactory.Options();
+                if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT) {
+                    //noinspection deprecation
+                    options.inPurgeable = true;
+                    //noinspection deprecation
+                    options.inInputShareable = true;
+                }
+                bitmap = BitmapFactory.decodeFile(cacheFile.getAbsolutePath(), options);
             }
-        } else {
-            Log.v(TAG, "Loading from cache " + path);
-            final BitmapFactory.Options options = new BitmapFactory.Options();
-            if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT) {
-                //noinspection deprecation
-                options.inPurgeable = true;
-                //noinspection deprecation
-                options.inInputShareable = true;
-            }
-            bitmap = BitmapFactory.decodeFile(cacheFile.getAbsolutePath(), options);
+            return bitmap;
+        } catch (OutOfMemoryError e) {
+            Log.e(TAG, "" + e.getMessage(), e);
+            return null;
         }
-        return bitmap;
     }
 
     /**
@@ -986,12 +1000,16 @@ public final class ImageUtils {
      */
     public static Bitmap rotate(Bitmap bitmap, int orientation) {
         if (orientation != 0) {
-            Matrix matrix = new Matrix();
-            matrix.postRotate(orientation);
-            // create a new bitmap from the original using the matrix to transform the result
-            Bitmap bitmap1 = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
-            bitmap.recycle();
-            return bitmap1;
+            try {
+                Matrix matrix = new Matrix();
+                matrix.postRotate(orientation);
+                // create a new bitmap from the original using the matrix to transform the result
+                Bitmap bitmap1 = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
+                bitmap.recycle();
+                return bitmap1;
+            } catch (OutOfMemoryError e) {
+                Log.e(TAG, "" + e.getMessage(), e);
+            }
         }
         return bitmap;
     }
@@ -1403,15 +1421,6 @@ public final class ImageUtils {
             return sizeBitmap(bitmap);
         }
 
-        public static int sizeBitmap(Bitmap bitmap) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-                return bitmap.getAllocationByteCount();
-            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR1) {
-                return bitmap.getByteCount();
-            } else {
-                return bitmap.getRowBytes() * bitmap.getHeight();
-            }
-        }
     }
 
 
