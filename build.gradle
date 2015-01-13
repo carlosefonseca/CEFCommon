@@ -43,8 +43,8 @@ dependencies {
     compile 'com.parse.bolts:bolts-android:1.1.4'
     compile 'com.facebook.rebound:rebound:0.3.6'
     //    compile 'commons-io:commons-io:2.4'
-    //    compile 'org.apache.commons:commons-lang3:3.3.2'
-    //    compile 'org.apache.commons:commons-collections4:4.0'
+        compile 'org.apache.commons:commons-lang3:3.3.2'
+        compile 'org.apache.commons:commons-collections4:4.0'
     //    compile 'com.loopj.android:android-async-http:1.4.4'
 }
 

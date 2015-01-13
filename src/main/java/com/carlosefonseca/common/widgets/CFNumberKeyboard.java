@@ -10,7 +10,7 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.*;
-import com.carlosefonseca.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import com.carlosefonseca.common.R;
 import com.carlosefonseca.common.utils.CodeUtils;
 import com.carlosefonseca.common.utils.Log;

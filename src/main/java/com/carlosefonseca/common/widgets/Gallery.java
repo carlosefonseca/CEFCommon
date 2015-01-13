@@ -14,7 +14,7 @@ import android.widget.ImageView;
 import android.widget.Scroller;
 import bolts.Continuation;
 import bolts.Task;
-import com.carlosefonseca.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.CollectionUtils;
 import com.carlosefonseca.common.R;
 import com.carlosefonseca.common.utils.*;
 import org.jetbrains.annotations.NotNull;

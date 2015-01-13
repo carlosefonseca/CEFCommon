@@ -1,6 +1,6 @@
 package com.carlosefonseca.common.utils;
 
-import com.carlosefonseca.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

@@ -3,7 +3,7 @@ package com.carlosefonseca.common.utils;
 import android.content.Context;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
-import com.carlosefonseca.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import com.carlosefonseca.common.CFApp;
 import org.jetbrains.annotations.Nullable;
 

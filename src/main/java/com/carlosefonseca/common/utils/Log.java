@@ -8,8 +8,8 @@ import org.jetbrains.annotations.Nullable;
 import java.util.regex.Pattern;
 
 import static android.util.Log.*;
-import static com.carlosefonseca.apache.commons.lang3.StringUtils.defaultString;
-import static com.carlosefonseca.apache.commons.lang3.StringUtils.isNotEmpty;
+import static org.apache.commons.lang3.StringUtils.defaultString;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 @SuppressWarnings("UnusedDeclaration")
 public final class Log {

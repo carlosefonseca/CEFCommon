@@ -9,7 +9,7 @@ import android.net.Uri;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
-import com.carlosefonseca.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import com.carlosefonseca.common.CFApp;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;

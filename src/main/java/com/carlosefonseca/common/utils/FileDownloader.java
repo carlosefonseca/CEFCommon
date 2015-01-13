@@ -3,7 +3,7 @@ package com.carlosefonseca.common.utils;
 import android.annotation.TargetApi;
 import android.os.AsyncTask;
 import android.os.Build;
-import com.carlosefonseca.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.CollectionUtils;
 import com.carlosefonseca.common.CFApp;
 import org.jetbrains.annotations.Nullable;
 

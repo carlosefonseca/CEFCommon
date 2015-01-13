@@ -1,6 +1,6 @@
 package com.carlosefonseca.common.utils;
 
-import com.carlosefonseca.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import de.greenrobot.event.EventBus;
 
 import java.lang.ref.WeakReference;
