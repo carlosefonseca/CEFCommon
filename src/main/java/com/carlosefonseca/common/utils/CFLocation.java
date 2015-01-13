@@ -5,6 +5,7 @@ import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.util.Pair;
+import junit.framework.Assert;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -165,6 +166,7 @@ public class CFLocation extends Location implements Comparable<CFLocation> {
     public static String reverseGeocodeLocality(Context context, double lat, double lon, @NotNull Locale locale)
             throws IOException {
         try {
+            Assert.assertNotNull("Context is null", context);
             //noinspection ConstantConditions
             if (locale == null) {
                 Log.w(TAG, "LOCALE IS NULL!");

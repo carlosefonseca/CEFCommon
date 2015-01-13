@@ -30,7 +30,13 @@ import org.jetbrains.annotations.Nullable;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.text.NumberFormat;
+import java.util.Locale;
 import java.util.regex.Pattern;
+
+import static java.lang.Runtime.getRuntime;
 
 public final class CodeUtils {
 
@@ -123,6 +129,32 @@ public final class CodeUtils {
                 callback.invoke(origin, true, false);
             }
         });
+    }
+
+    static DecimalFormat formatter;
+
+    static {
+        formatter = (DecimalFormat) NumberFormat.getInstance(Locale.US);
+        DecimalFormatSymbols decimalFormatSymbols = formatter.getDecimalFormatSymbols();
+        decimalFormatSymbols.setGroupingSeparator(' ');
+        formatter.setDecimalFormatSymbols(decimalFormatSymbols);
+    }
+
+    public static String getKB(long bytes) {
+        return formatter.format(bytes / 1024);
+    }
+
+    protected static long getFreeMem() {
+        Runtime r = getRuntime();
+        long freeMem = r.maxMemory() - r.totalMemory() + r.freeMemory();
+        long freeMemLess = Math.max(0, freeMem - (2 * 1024 * 1024));
+        Log.d(TAG,
+              "getFreeMem: Memory usage: %s ( %s / %s ) kB. Reporting only: %s kB",
+              getKB(freeMem),
+              getKB(r.totalMemory() - r.freeMemory()),
+              getKB(r.maxMemory()),
+              getKB(freeMemLess));
+        return freeMemLess;
     }
 
     public interface RunnableWithView<T extends View> {
