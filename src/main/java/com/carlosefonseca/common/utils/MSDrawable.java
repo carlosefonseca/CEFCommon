@@ -8,6 +8,7 @@ import android.graphics.drawable.shapes.Shape;
 import android.os.Build;
 import android.util.StateSet;
 import android.view.View;
+import android.widget.ImageView;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -56,6 +57,11 @@ public class MSDrawable {
         } else {
             view.setBackground(background);
         }
+        return this;
+    }
+
+    public MSDrawable asImage(ImageView imageView) {
+        imageView.setImageDrawable(build());
         return this;
     }
 

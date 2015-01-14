@@ -13,6 +13,7 @@ import com.nineoldandroids.animation.Animator;
 import com.nineoldandroids.animation.AnimatorListenerAdapter;
 import com.nineoldandroids.animation.AnimatorSet;
 import com.nineoldandroids.animation.ObjectAnimator;
+import com.nineoldandroids.view.ViewHelper;
 
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static com.carlosefonseca.common.utils.AnimationUtils.HEIGHT;
@@ -104,17 +105,17 @@ public abstract class ZoomViewController<T extends View> {
 
         // Hide the thumbnail and show the zoomed-in view. When the animation begins,
         // it will position the zoomed-in view in the place of the thumbnail.
-        thumbView.setAlpha(0f);
+        ViewHelper.setAlpha(thumbView, 0f);
         expandedView.setVisibility(View.VISIBLE);
 
         final View fadeView = getFadeView();
         fadeView.setVisibility(View.VISIBLE);
-        fadeView.setAlpha(0f);
+        ViewHelper.setAlpha(fadeView, 0f);
 
         // Set the pivot point for SCALE_X and SCALE_Y transformations to the top-left corner of
         // the zoomed-in view (the default is the center of the view).
-        expandedView.setPivotX(0f);
-        expandedView.setPivotY(0f);
+        ViewHelper.setPivotX(expandedView, 0f);
+        ViewHelper.setPivotY(expandedView, 0f);
 
         // Construct and run the parallel animation of the four translation and scale properties
         // (X, Y, SCALE_X, and SCALE_Y).

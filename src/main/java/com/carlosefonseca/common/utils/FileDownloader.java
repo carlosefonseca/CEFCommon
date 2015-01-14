@@ -237,15 +237,13 @@ public final class FileDownloader {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
             getThreadPoolExecutor();
             if (Build.VERSION.SDK_INT > Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1) {
-                for (Download url : toDownload)
-                    new Downloader().executeOnExecutor(sThreadPoolExecutor, url);
+                for (Download url : toDownload) new Downloader().executeOnExecutor(sThreadPoolExecutor, url);
             } else {
                 CodeUtils.runOnUIThread(new Runnable() {
                     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
                     @Override
                     public void run() {
-                        for (Download url : toDownload)
-                            new Downloader().executeOnExecutor(sThreadPoolExecutor, url);
+                        for (Download url : toDownload) new Downloader().executeOnExecutor(sThreadPoolExecutor, url);
                     }
                 });
             }
@@ -253,9 +251,7 @@ public final class FileDownloader {
             CodeUtils.runOnUIThread(new Runnable() {
                 @Override
                 public void run() {
-                    for (Download url : toDownload) {
-                        if (!cancelAll) new Downloader().execute(url);
-                    }
+                    for (Download url : toDownload) if (!cancelAll) new Downloader().execute(url);
                 }
             });
         }

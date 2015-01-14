@@ -81,13 +81,7 @@ public class GalleryPlus extends FrameLayout {
             final int h = (int) (getMeasuredWidth() * aspectRatio);
             galleryView.getLayoutParams().height = h;
             galleryView.setLayoutParams(galleryView.getLayoutParams());
-            setMeasuredDimension(widthMeasureSpec, h);
-            /*Rembrandt rembrandt = galleryView.getRembrandt();
-            if (rembrandt != null) {
-                rembrandt.maxSize(getMeasuredWidth(), (int) (getMeasuredWidth() * aspectRatio));
-            } else {
-                Log.w("Rembrandt is null");
-            }*/
+            setMeasuredDimension(getMeasuredWidth(), h);
         }
     }
 
@@ -95,13 +89,6 @@ public class GalleryPlus extends FrameLayout {
         return galleryView.getAdapter().getCount() == 0;
     }
 
-
-/*
-    protected void setSingleImage(boolean singleImage) {
-        arrowLeftView.setVisibility(singleImage ? GONE : VISIBLE);
-        arrowRightView.setVisibility(singleImage ? GONE : VISIBLE);
-    }
-*/
 
     public void setupWithImageList(Collection<File> imageList) {
         galleryView.setupWithImageList(imageList);
@@ -229,12 +216,13 @@ public class GalleryPlus extends FrameLayout {
                 zoomRembrandtController.zoomFromView(((GalleryPage) v).getImageView(), item);
             }
         });
-        if (activity instanceof CFActivity)
-        ((CFActivity) activity).getActivityStateListener().addListener(new ActivityStateListener.SimpleInterface(){
-            @Override
-            public boolean onBackPressed() {
-                return zoomRembrandtController.hide();
-            }
-        });
+        if (activity instanceof CFActivity) {
+            ((CFActivity) activity).getActivityStateListener().addListener(new ActivityStateListener.SimpleInterface() {
+                @Override
+                public boolean onBackPressed() {
+                    return zoomRembrandtController.hide();
+                }
+            });
+        }
     }
 }
