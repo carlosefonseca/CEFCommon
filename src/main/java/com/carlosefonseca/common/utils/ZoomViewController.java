@@ -60,6 +60,7 @@ public abstract class ZoomViewController<T extends View> {
      * @param expandedView
      */
     protected void zoomFromView(final View thumbView, final T expandedView) {
+        mExpandedView = expandedView;
 
         // If there's an animation in progress, cancel it immediately and proceed with this one.
         if (mCurrentAnimator != null) {
@@ -182,6 +183,10 @@ public abstract class ZoomViewController<T extends View> {
         });
     }
 
+    public boolean hide() {
+        return mExpandedView != null && mExpandedView.getVisibility() == View.VISIBLE && mExpandedView.performClick();
+    }
+
     // TODO: make configurable
     private View getFadeView() {
         if (mFadeView == null) {
@@ -214,15 +219,15 @@ public abstract class ZoomViewController<T extends View> {
         return mContext;
     }
 
-    T mView;
+    T mExpandedView;
 
     protected T getExpandedView() {
-        if (mView == null) {
+        if (mExpandedView == null) {
             getFadeView();
-            mView = createExpandedView();
-            mContainer.addView(mView, MATCH_PARENT, MATCH_PARENT);
+            mExpandedView = createExpandedView();
+            mContainer.addView(mExpandedView, MATCH_PARENT, MATCH_PARENT);
         }
-        return mView;
+        return mExpandedView;
     }
 
     protected abstract T createExpandedView();

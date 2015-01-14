@@ -32,7 +32,16 @@ public class CFActivity extends FragmentActivity {
     protected SystemBarTintManager tintManager;
     protected WeakReference<LoadingDialog> dialog;
     private static WeakReference<CFActivity> latestActivity;
-    private ActivityStateListener mActivityStateListener;
+    @Nullable private ActivityStateListener mActivityStateListener;
+
+    @Override
+    public void onBackPressed() {
+        if (mActivityStateListener != null) {
+            if (!mActivityStateListener.onBackPressed()) super.onBackPressed();
+        } else {
+            super.onBackPressed();
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

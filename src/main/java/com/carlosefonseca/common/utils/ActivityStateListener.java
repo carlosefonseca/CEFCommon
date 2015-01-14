@@ -78,6 +78,18 @@ public class ActivityStateListener {
         for (Interface mListener : mListeners) mListener.onDestroy();
     }
 
+    /**
+     * @return True if something handled the back.
+     */
+    public boolean onBackPressed() {
+        for (Interface listener : mListeners) {
+            if (listener.onBackPressed()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public interface Interface {
         public void onCreate(Bundle savedInstanceState);
 
@@ -94,6 +106,11 @@ public class ActivityStateListener {
         public void onSaveInstanceState(Bundle outState);
 
         public void onDestroy();
+
+        /**
+         * @return True if the back was handler, false if was ignored.
+         */
+        public boolean onBackPressed();
     }
 
     public static class SimpleInterface implements Interface {
@@ -120,5 +137,11 @@ public class ActivityStateListener {
 
         @Override
         public void onDestroy() { }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public boolean onBackPressed() { return false; }
     }
 }

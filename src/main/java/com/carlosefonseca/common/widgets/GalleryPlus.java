@@ -8,7 +8,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import com.carlosefonseca.common.CFActivity;
 import com.carlosefonseca.common.R;
+import com.carlosefonseca.common.utils.ActivityStateListener;
 import com.carlosefonseca.common.utils.ImageUtils;
 import com.carlosefonseca.common.utils.Log;
 import com.carlosefonseca.common.utils.Rembrandt;
@@ -229,6 +231,12 @@ public class GalleryPlus extends FrameLayout {
                 zoomRembrandtController.zoomFromView(((GalleryPage) v).getImageView(), item);
             }
         });
-
+        if (activity instanceof CFActivity)
+        ((CFActivity) activity).getActivityStateListener().addListener(new ActivityStateListener.SimpleInterface(){
+            @Override
+            public boolean onBackPressed() {
+                return zoomRembrandtController.hide();
+            }
+        });
     }
 }
