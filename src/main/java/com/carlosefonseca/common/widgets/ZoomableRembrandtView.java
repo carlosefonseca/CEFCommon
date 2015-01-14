@@ -3,18 +3,19 @@ package com.carlosefonseca.common.widgets;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.util.AttributeSet;
+import android.util.DisplayMetrics;
 import com.carlosefonseca.common.utils.CodeUtils;
-import com.carlosefonseca.common.utils.Log;
-import com.carlosefonseca.common.utils.Rembrandt;
+import com.carlosefonseca.common.utils.UIL;
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.assist.ImageSize;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
-import java.io.IOException;
 
 public class ZoomableRembrandtView extends ZoomableImageView {
 
     private static final String TAG = CodeUtils.getTag(ZoomableRembrandtView.class);
-    private Bitmap bitmap;
+    private Bitmap mBitmap;
     private Object mLastUrlOrFile;
 
     public ZoomableRembrandtView(Context context) {
@@ -32,7 +33,7 @@ public class ZoomableRembrandtView extends ZoomableImageView {
     @Nullable
     protected Bitmap getBitmap(@Nullable Object urlOrFile) {
         if (mLastUrlOrFile != null && CodeUtils.equals(urlOrFile, mLastUrlOrFile)) {
-            return bitmap;
+            return mBitmap;
         }
 
         if (urlOrFile == null) {
@@ -40,18 +41,25 @@ public class ZoomableRembrandtView extends ZoomableImageView {
         }
 
         mLastUrlOrFile = urlOrFile;
+        String uri;
         if (urlOrFile instanceof String) {
-            try {
-                bitmap = Rembrandt.bitmapFromUrl((String) urlOrFile, 0, 0);
-            } catch (IOException e) {
-                Log.e(TAG, "" + e.getMessage(), e);
-                return null;
-            }
+            uri = UIL.getUri((String) urlOrFile);
         } else if (urlOrFile instanceof File) {
-            bitmap = Rembrandt.bitmapFromFile((File) urlOrFile, 0, 0);
+            uri = UIL.getUri((File) urlOrFile);
+        } else {
+            throw new RuntimeException("" + urlOrFile.getClass().getName() + " isn't valid.");
         }
-        return bitmap;
+        DisplayMetrics d = getResources().getDisplayMetrics();
 
+        mBitmap = ImageLoader.getInstance().loadImageSync(uri, new ImageSize(d.widthPixels * 2, d.heightPixels * 2));
+        if (mBitmap != null) return mBitmap;
+
+        //noinspection SuspiciousNameCombination
+        mBitmap = ImageLoader.getInstance().loadImageSync(uri, new ImageSize(d.heightPixels, d.heightPixels));
+        if (mBitmap != null) return mBitmap;
+
+        mBitmap = ImageLoader.getInstance().loadImageSync(uri, new ImageSize(d.widthPixels, d.heightPixels));
+        return mBitmap;
     }
 
     public synchronized void setImageFile(File file) {

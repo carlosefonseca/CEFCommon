@@ -2,6 +2,7 @@ package com.carlosefonseca.common.widgets;
 
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
@@ -12,17 +13,21 @@ import android.view.ViewGroup;
 import android.view.animation.Interpolator;
 import android.widget.ImageView;
 import android.widget.Scroller;
-import bolts.Continuation;
-import bolts.Task;
-import org.apache.commons.collections4.CollectionUtils;
 import com.carlosefonseca.common.R;
 import com.carlosefonseca.common.utils.*;
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.assist.FailReason;
+import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener;
+import org.apache.commons.collections4.CollectionUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.lang.reflect.Field;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
 
 public class Gallery extends ViewPager {
 
@@ -35,7 +40,7 @@ public class Gallery extends ViewPager {
     private float density;
     private int duration = -1;
     private ImageView.ScaleType scaleType;
-    private Rembrandt rembrandt;
+//    private Rembrandt rembrandt;
 
     public Gallery(Context context) {
         super(context);
@@ -70,7 +75,7 @@ public class Gallery extends ViewPager {
     public GalleryAdapter getOrCreateAdapter() {
         GalleryAdapter adapter = (GalleryAdapter) getAdapter();
         if (adapter == null) {
-            adapter = new GalleryAdapter(getContext(), scaleType, rembrandt);
+            adapter = new GalleryAdapter(getContext(), scaleType, /*rembrandt*/null);
             setAdapter(adapter);
         }
         return adapter;
@@ -115,16 +120,16 @@ public class Gallery extends ViewPager {
     }
 
     public void setRembrandt(Rembrandt rembrandt) {
-        this.rembrandt = rembrandt;
+//        this.rembrandt = rembrandt;
     }
 
-    public Rembrandt getRembrandt() {
-        return rembrandt;
-    }
+//    public Rembrandt getRembrandt() {
+//        return rembrandt;
+//    }
 
     public static class GalleryAdapter extends PagerAdapter implements OnClickListener {
 
-        private final Rembrandt rembrandt;
+        //        private final Rembrandt rembrandt;
         @Nullable private List<File> imageList;
         @Nullable private ArrayList<String> urlList;
         private LinkedList<View> recycledViews = new LinkedList<View>();
@@ -148,9 +153,9 @@ public class Gallery extends ViewPager {
         }
 
         protected GalleryAdapter(Context context, @Nullable ImageView.ScaleType scaleType, @Nullable Rembrandt rembrandt) {
-            if (rembrandt == null) Log.w("REMBRANDT IS NULL!");
+//            if (rembrandt == null) Log.w("REMBRANDT IS NULL!");
             this.scaleType = scaleType;
-            this.rembrandt = rembrandt == null ? new Rembrandt(context) : rembrandt;
+//            this.rembrandt = rembrandt == null ? new Rembrandt(context) : rembrandt;
             layoutInflater = LayoutInflater.from(context);
         }
 
@@ -206,15 +211,19 @@ public class Gallery extends ViewPager {
                 imageView = view.imageView;
             }
 
+            String uri = null;
             if (urlList != null) {
                 String url = urlList.get(position);
                 view.set(url, position);
-                rembrandt.load(url);
+                uri = UIL.getUri(url);
+//                rembrandt.load(url);
             } else if (imageList != null) {
                 File file = imageList.get(position);
                 view.set(file, position);
-                rembrandt.load(file);
+                uri = UIL.getUri(file);
+//                rembrandt.load(file);
             }
+/*
             rembrandt.measureFirst().fadeIn(imageView).continueWith(new Continuation<Void, Void>() {
                 @Override
                 public Void then(Task<Void> task) throws Exception {
@@ -226,6 +235,20 @@ public class Gallery extends ViewPager {
                     return null;
                 }
             }, Task.UI_THREAD_EXECUTOR).continueWith(TaskUtils.LogErrorContinuation);
+*/
+
+            ImageLoader.getInstance()
+                       .displayImage(uri, imageView, UIL.mOptionsForPhotos, new SimpleImageLoadingListener() {
+                           @Override
+                           public void onLoadingFailed(String imageUri, View view, FailReason failReason) {
+                               imageView.setBackgroundColor(Color.GRAY);
+                           }
+
+                           @Override
+                           public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
+                               ResourceUtils.setBackground(imageView, null);
+                           }
+                       });
 
             view.setOnClickListener(this);
 

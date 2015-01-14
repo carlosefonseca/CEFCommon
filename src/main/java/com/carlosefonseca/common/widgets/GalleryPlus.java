@@ -12,8 +12,6 @@ import com.carlosefonseca.common.CFActivity;
 import com.carlosefonseca.common.R;
 import com.carlosefonseca.common.utils.ActivityStateListener;
 import com.carlosefonseca.common.utils.ImageUtils;
-import com.carlosefonseca.common.utils.Log;
-import com.carlosefonseca.common.utils.Rembrandt;
 import com.carlosefonseca.common.utils.ZoomZoomableRembrandtController;
 import org.jetbrains.annotations.Nullable;
 
@@ -84,12 +82,12 @@ public class GalleryPlus extends FrameLayout {
             galleryView.getLayoutParams().height = h;
             galleryView.setLayoutParams(galleryView.getLayoutParams());
             setMeasuredDimension(widthMeasureSpec, h);
-            Rembrandt rembrandt = galleryView.getRembrandt();
+            /*Rembrandt rembrandt = galleryView.getRembrandt();
             if (rembrandt != null) {
                 rembrandt.maxSize(getMeasuredWidth(), (int) (getMeasuredWidth() * aspectRatio));
             } else {
                 Log.w("Rembrandt is null");
-            }
+            }*/
         }
     }
 
