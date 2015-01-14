@@ -3,8 +3,8 @@ package com.carlosefonseca.common.utils;
 import android.annotation.TargetApi;
 import android.os.AsyncTask;
 import android.os.Build;
-import org.apache.commons.collections4.CollectionUtils;
 import com.carlosefonseca.common.CFApp;
+import org.apache.commons.collections4.CollectionUtils;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.*;
@@ -222,9 +222,14 @@ public final class FileDownloader {
                 });
             }
         } else {
-            for (String url : toDownload) {
-                if (!cancelAll) new Downloader().execute(new Download(url));
-            }
+            CodeUtils.runOnUIThread(new Runnable() {
+                @Override
+                public void run() {
+                    for (String url : toDownload) {
+                        if (!cancelAll) new Downloader().execute(new Download(url));
+                    }
+                }
+            });
         }
     }
 
@@ -245,9 +250,14 @@ public final class FileDownloader {
                 });
             }
         } else {
-            for (Download url : toDownload) {
-                if (!cancelAll) new Downloader().execute(url);
-            }
+            CodeUtils.runOnUIThread(new Runnable() {
+                @Override
+                public void run() {
+                    for (Download url : toDownload) {
+                        if (!cancelAll) new Downloader().execute(url);
+                    }
+                }
+            });
         }
     }
 
@@ -266,7 +276,12 @@ public final class FileDownloader {
                 });
             }
         } else {
-            if (!cancelAll) new Downloader().execute(download);
+            CodeUtils.runOnUIThread(new Runnable() {
+                @Override
+                public void run() {
+                    if (!cancelAll) new Downloader().execute(download);
+                }
+            });
         }
     }
     //endregion
