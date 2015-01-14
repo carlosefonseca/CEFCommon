@@ -46,6 +46,8 @@ dependencies {
         compile 'org.apache.commons:commons-lang3:3.3.2'
         compile 'org.apache.commons:commons-collections4:4.0'
     //    compile 'com.loopj.android:android-async-http:1.4.4'
+    compile 'com.nostra13.universalimageloader:universal-image-loader:1.9.3'
+
 }
 
 android {

@@ -447,7 +447,7 @@ public final class ImageUtils {
      * @param heightDp      Desired height.
      */
     @Nullable
-    public static Bitmap getCachedPhoto(final String filenameOrUrl, final int widthDp, final int heightDp) {
+    public static Bitmap getCachedPhoto(@Nullable final String filenameOrUrl, final int widthDp, final int heightDp) {
         if (filenameOrUrl == null) return null;
         return getCachedPhoto(getFileFromUrlOrPath(filenameOrUrl), widthDp, heightDp, null);
     }

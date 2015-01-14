@@ -8,13 +8,22 @@ import android.widget.ImageView;
 import bolts.Continuation;
 import bolts.Task;
 import org.apache.commons.lang3.StringUtils;
+import com.carlosefonseca.common.CFApp;
+import com.nostra13.universalimageloader.core.DisplayImageOptions;
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.assist.ImageScaleType;
+import com.nostra13.universalimageloader.core.display.FadeInBitmapDisplayer;
+import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener;
 import junit.framework.Assert;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.concurrent.Callable;
 
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
@@ -39,13 +48,23 @@ public class Rembrandt {
     private final Context mContext;
     private String mUrl;
     private File mFile;
-    private int placeholder;
+    private int mPlaceholder;
 
     private HashMap<ImageView, String> mMapping = new HashMap<>();
     private Transform mTransform;
     private OnBitmap mNotify;
     private boolean mHideIfNull;
-    @Nullable private Point maxSize;
+    @Nullable private Point mMaxSize;
+    private boolean mMeasureFirst;
+
+    DisplayImageOptions options = new DisplayImageOptions.Builder().resetViewBeforeLoading(true)
+                                                                   .cacheInMemory(true)
+                                                                   .cacheOnDisk(true)
+                                                                   .considerExifParams(true)
+                                                                   .imageScaleType(ImageScaleType.EXACTLY)
+                                                                   .bitmapConfig(Bitmap.Config.RGB_565)
+                                                                   .build();
+    private File mExternalFilesDir = CFApp.getContext().getExternalFilesDir(null);
 
     public Rembrandt(Context context) {
         mContext = context;
@@ -87,7 +106,7 @@ public class Rembrandt {
     }
 
     public Rembrandt placeholder(int drawable) {
-        this.placeholder = drawable;
+        this.mPlaceholder = drawable;
         return this;
     }
 
@@ -103,10 +122,28 @@ public class Rembrandt {
         return into(view, CROSS_FADE);
     }
 
-    public Task<Void> into(final ImageView view, short animation) {
+    static SimpleImageLoadingListener animateFirstDisplayListener = new SimpleImageLoadingListener() {
+
+        final List<String> displayedImages = Collections.synchronizedList(new LinkedList<String>());
+
+        @Override
+        public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
+            if (loadedImage != null) {
+                ImageView imageView = (ImageView) view;
+                boolean firstDisplay = !displayedImages.contains(imageUri);
+                if (firstDisplay) {
+                    FadeInBitmapDisplayer.animate(imageView, 500);
+                    displayedImages.add(imageUri);
+                }
+            }
+        }
+    };
+
+
+    public Task<Void> into(final ImageView view, final short animation) {
         final Task<Void> run;
         if (null == mUrl && null == mFile) {
-            if (placeholder != 0) {
+            if (mPlaceholder != 0) {
                 placePlaceholder(view);
             } else {
                 view.setImageBitmap(null);
@@ -116,11 +153,75 @@ public class Rembrandt {
             run = Task.forResult(null);
         } else {
             view.setVisibility(View.VISIBLE);
-            run = run(view, mUrl, mFile, maxSize, placeholder, animation, mMapping, mTransform, mNotify, mCache);
+
+            if (mUrl != null) {
+                if (!mUrl.startsWith("http")) {
+                    if (!mUrl.startsWith("/")) {
+                        mUrl = mExternalFilesDir + "/" + mUrl;
+                    }
+                    mUrl = "file://" + mUrl;
+                }
+            } else {
+                mUrl = "file://" + mFile.getAbsolutePath();
+            }
+
+            ImageLoader.getInstance().displayImage(mUrl, view, options, animateFirstDisplayListener);
+            return Task.forResult(null);
+
+/*
+            if (mMeasureFirst && mMaxSize == null) {
+                final String url = mUrl;
+                final File file = mFile;
+                final int placeholder = mPlaceholder;
+                final HashMap<ImageView, String> mapping = mMapping;
+                final Transform transform = mTransform;
+                final OnBitmap notify = mNotify;
+                final LruCache<String, Bitmap> cache = mCache;
+
+                final Task<Void>.TaskCompletionSource source = Task.create();
+                CodeUtils.runOnGlobalLayout(view, new CodeUtils.RunnableWithView<ImageView>() {
+                    @Override
+                    public void run(ImageView view) {
+                        Log.v(TAG + ".run",
+                              "{%s} View: %s URL: %s File: %s MaxSize: %s",
+                              Rembrandt.this.hashCode(),
+                              Integer.toHexString(System.identityHashCode(view)),
+                              url,
+                              file,
+                              null);
+                        Rembrandt.run(view, url, file, null, placeholder, animation, mapping, transform, notify, cache)
+                                 .continueWith(new Continuation<Void, Object>() {
+                                     @Nullable
+                                     @Override
+                                     public Object then(Task<Void> task) throws Exception {
+                                         if (task.isCompleted()) {
+                                             source.setResult(task.getResult());
+                                         } else if (task.isFaulted()) {
+                                             source.setError(task.getError());
+                                         } else if (task.isCancelled()) {
+                                             source.setCancelled();
+                                         }
+                                         return null;
+                                     }
+                                 });
+                    }
+                });
+                run = source.getTask();
+            } else {
+                Log.v(TAG + ".run",
+                      "{%s} View: %s URL: %s File: %s MaxSize: %s",
+                      hashCode(),
+                      Integer.toHexString(System.identityHashCode(view)),
+                      mUrl,
+                      mFile,
+                      mMaxSize);
+                run = run(view, mUrl, mFile, mMaxSize, mPlaceholder, animation, mMapping, mTransform, mNotify, mCache);
+            }
+*/
         }
         mUrl = null;
         mFile = null;
-        placeholder = 0;
+        mPlaceholder = 0;
         return run;
     }
 
@@ -164,7 +265,7 @@ public class Rembrandt {
             @Override
             public Bitmap call() throws Exception {
                 if (!path.equals(mapping.get(view))) {
-                    Log.v(TAG, "CANCELED Image loading of " + url);
+                    Log.v(TAG, "CANCELED Image loading of " + url + ". View is mapped to another path.");
                     return null;
                 }
                 int mWidth = maxSize != null
@@ -175,6 +276,8 @@ public class Rembrandt {
                               : view.getLayoutParams().height == WRAP_CONTENT
                                 ? 0
                                 : Math.max(view.getMeasuredHeight(), 0);
+
+                Log.v(TAG, "Size: %dx%d", mWidth, mHeight);
 
                 if (mWidth == 0 || mHeight == 0) {
                     mWidth = 0;
@@ -269,16 +372,16 @@ public class Rembrandt {
     private void placePlaceholder(final ImageView view) {
 /*
         if (mTransform != null) {
-            final Bitmap bitmap = mCache.get("placeholder");
+            final Bitmap bitmap = mCache.get("mPlaceholder");
             Task<Bitmap> placeholderTask;
             if (bitmap == null) {
                 placeholderTask = Task.callInBackground(new Callable<Bitmap>() {
                     @Override
                     public Bitmap call() throws Exception {
                         Bitmap bitmap = BitmapFactory.decodeResource(mContext.getResources(),
-                                                                     Rembrandt.this.placeholder);
+                                                                     Rembrandt.this.mPlaceholder);
                         final Bitmap bitmap1 = mTransform.bitmap(bitmap);
-                        mCache.put("placeholder", bitmap);
+                        mCache.put("mPlaceholder", bitmap);
                         return bitmap1;
                     }
                 });
@@ -294,7 +397,7 @@ public class Rembrandt {
             }, Task.UI_THREAD_EXECUTOR);
         }
 */
-        view.setImageResource(placeholder);
+        view.setImageResource(mPlaceholder);
     }
 
     public Rembrandt hideIfNull() {
@@ -313,7 +416,16 @@ public class Rembrandt {
     }
 
     public Rembrandt maxSize(int widthPixels, int heightPixels) {
-        this.maxSize = new Point(widthPixels, heightPixels);
+        if (widthPixels > 0 && heightPixels > 0) {
+            mMaxSize = new Point(widthPixels, heightPixels);
+        } else {
+            mMaxSize = null;
+        }
+        return this;
+    }
+
+    public Rembrandt measureFirst() {
+        mMeasureFirst = true;
         return this;
     }
 

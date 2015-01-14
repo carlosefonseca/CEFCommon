@@ -10,6 +10,8 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import com.carlosefonseca.common.R;
 import com.carlosefonseca.common.utils.ImageUtils;
+import com.carlosefonseca.common.utils.Log;
+import com.carlosefonseca.common.utils.Rembrandt;
 import com.carlosefonseca.common.utils.ZoomZoomableRembrandtController;
 import org.jetbrains.annotations.Nullable;
 
@@ -80,6 +82,12 @@ public class GalleryPlus extends FrameLayout {
             galleryView.getLayoutParams().height = h;
             galleryView.setLayoutParams(galleryView.getLayoutParams());
             setMeasuredDimension(widthMeasureSpec, h);
+            Rembrandt rembrandt = galleryView.getRembrandt();
+            if (rembrandt != null) {
+                rembrandt.maxSize(getMeasuredWidth(), (int) (getMeasuredWidth() * aspectRatio));
+            } else {
+                Log.w("Rembrandt is null");
+            }
         }
     }
 
@@ -158,7 +166,7 @@ public class GalleryPlus extends FrameLayout {
     public void setAspectRatio(@Nullable Double aspectRatio) {
         this.aspectRatio = aspectRatio;
         ViewGroup.LayoutParams layoutParams = getLayoutParams();
-        if (layoutParams != null) {
+        if (layoutParams != null && layoutParams.width > 0 && layoutParams.height > 0) {
             if (aspectRatio != null) {
                 layoutParams.height = (int) (aspectRatio * layoutParams.width);
                 galleryView.getLayoutParams().height = (int) (aspectRatio * layoutParams.width);
