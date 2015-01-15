@@ -42,14 +42,30 @@ public final class TaskUtils {
     }
 
 
+    /**
+     * Logs task errors.
+     * Handles {@link bolts.AggregateException} in a way that only one exception object is actually logged,
+     * the rest is dumped to the logs so that it can be viewed on crash reporter as one exception.
+     */
     public static void logAggregateException(Exception error) {
         if (error != null) {
             if (error instanceof AggregateException) {
-                Log.w(TAG, new RuntimeException(error.getMessage()));
-                for (Exception exception : ((AggregateException) error).getErrors()) {
-                    Log.w(TAG, "--------");
-                    Log.w(TAG, exception);
+
+                Throwable[] causes = ((AggregateException) error).getCauses();
+
+                if (causes.length == 1) {
+                    Log.w(TAG, causes[0]);
+                    return;
                 }
+
+                Log.w(TAG, "START OF AGGREGATE EXCEPTION DUMP -------------------");
+                for (int i = 0; i < causes.length; i++) {
+                    Throwable throwable = causes[i];
+                    Log.w(TAG, Log.getStackTraceString(throwable));
+                    if (i + 1 < causes.length) Log.w(TAG, "--------");
+                }
+                Log.w(TAG, "END OF AGGREGATE EXCEPTION DUMP ---------------------");
+                Log.w(TAG, "There were multiple errors. Check logs.", error);
             } else {
                 Log.w(TAG, error);
             }
@@ -61,7 +77,7 @@ public final class TaskUtils {
         if (error != null) {
             if (error instanceof AggregateException) {
                 StringBuilder s = new StringBuilder(error.getMessage());
-                for (Exception exception : ((AggregateException) error).getErrors()) {
+                for (Throwable exception : ((AggregateException) error).getCauses()) {
                     s.append("--------");
                     s.append(exception);
                 }
