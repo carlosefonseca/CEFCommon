@@ -38,9 +38,9 @@ public final class UrlUtils {
     public static final Pattern phoneMatcher= Pattern.compile("([+(]?(?:\\d[()]?[- .]?[()]?){8,}\\d)");
     // Previously failed with numbers 1990-2000 (years)
     // public static final Pattern phoneMatcher= Pattern.compile("([\\d(+](?:[\\d()./+-]+ ?){6,}[\\d)])");
-    public static final Pattern httpMatcher= Pattern.compile("\\b(https?://[^\\s]+)");
-    public static final Pattern wwwMatcher= Pattern.compile("\\b(www\\.[^\\s]+)");
-    public static final Pattern emailMatcher = Pattern.compile("([A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,4})");
+    public static final Pattern httpMatcher = Pattern.compile("\\b(https?://[^\\s]+)", Pattern.CASE_INSENSITIVE);
+    public static final Pattern wwwMatcher = Pattern.compile("\\b(www\\.[^\\s]+)", Pattern.CASE_INSENSITIVE);
+    public static final Pattern emailMatcher = Pattern.compile("([A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,4})", Pattern.CASE_INSENSITIVE);
 
 
     public static String urlForEmail(String email) {return "mailto:" + email.trim();}
