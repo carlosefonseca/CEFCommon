@@ -16,6 +16,7 @@ import com.nostra13.universalimageloader.core.display.FadeInBitmapDisplayer;
 import com.nostra13.universalimageloader.core.imageaware.ImageViewAware;
 import com.nostra13.universalimageloader.core.listener.ImageLoadingListener;
 import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
@@ -31,6 +32,7 @@ public final class UIL {
 
     private static File sExternalFilesDir;
     private static HashSet<String> sAssets;
+    private static ImageLoader sIL;
 
     private UIL() {}
 
@@ -53,18 +55,20 @@ public final class UIL {
                                                              .tasksProcessingOrder(QueueProcessingType.LIFO)
                                                              .writeDebugLogs()
                                                              .build();
-        ImageLoader.getInstance().init(config);
+        sIL = ImageLoader.getInstance();
+        sIL.init(config);
 
         sAssets = ResourceUtils.getAssets(context);
     }
 
     public static DisplayImageOptions mOptionsForPhotos = new DisplayImageOptions.Builder().resetViewBeforeLoading(true)
-                                                                                    .cacheInMemory(true)
-                                                                                    .cacheOnDisk(true)
-                                                                                    .considerExifParams(true)
-                                                                                    .imageScaleType(ImageScaleType.EXACTLY)
-                                                                                    .bitmapConfig(Bitmap.Config.RGB_565)
-                                                                                    .build();
+                                                                                           .cacheInMemory(true)
+                                                                                           .cacheOnDisk(true)
+                                                                                           .considerExifParams(true)
+                                                                                           .imageScaleType(
+                                                                                                   ImageScaleType.EXACTLY)
+                                                                                           .bitmapConfig(Bitmap.Config.RGB_565)
+                                                                                           .build();
 
     static DisplayImageOptions mOptionsForIcons = new DisplayImageOptions.Builder().resetViewBeforeLoading(true)
                                                                                    .cacheInMemory(true)
@@ -74,22 +78,23 @@ public final class UIL {
                                                                                    .bitmapConfig(Bitmap.Config.ARGB_8888)
                                                                                    .build();
 
-    public final static SimpleImageLoadingListener ANIMATE_FIRST_DISPLAY_LISTENER = new SimpleImageLoadingListener() {
+    public static SimpleImageLoadingListener getAnimateFirstDisplayListener() {
+        return new SimpleImageLoadingListener() {
+            final List<String> displayedImages = Collections.synchronizedList(new LinkedList<String>());
 
-        final List<String> displayedImages = Collections.synchronizedList(new LinkedList<String>());
-
-        @Override
-        public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
-            if (loadedImage != null) {
-                ImageView imageView = (ImageView) view;
-                boolean firstDisplay = !displayedImages.contains(imageUri);
-                if (firstDisplay) {
-                    FadeInBitmapDisplayer.animate(imageView, 500);
-                    displayedImages.add(imageUri);
+            @Override
+            public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
+                if (loadedImage != null) {
+                    ImageView imageView = (ImageView) view;
+                    boolean firstDisplay = !displayedImages.contains(imageUri);
+                    if (firstDisplay) {
+                        FadeInBitmapDisplayer.animate(imageView, 500);
+                        displayedImages.add(imageUri);
+                    }
                 }
             }
-        }
-    };
+        };
+    }
 
     @Nullable
     public static String getUri(@Nullable String str) {
@@ -147,22 +152,36 @@ public final class UIL {
 
         ImageSize targetImageSize = widthPx > 0 && heightPx > 0 ? new ImageSize(widthPx, heightPx) : null;
 
-        return ImageLoader.getInstance().loadImageSync(uri, targetImageSize);
+        return sIL.loadImageSync(uri, targetImageSize);
     }
 
     public static void display(@Nullable String str, ImageView imageView) {
-        ImageLoader.getInstance().displayImage(UIL.getUri(str), new ImageViewAware(imageView), null, null);
+        if (StringUtils.isNotBlank(str)) {
+            sIL.displayImage(UIL.getUri(str), new ImageViewAware(imageView), null, null);
+        }
     }
 
     public static void displayPhoto(@Nullable String str, ImageView imageView) {
-        ImageLoader.getInstance().displayImage(UIL.getUri(str), new ImageViewAware(imageView), mOptionsForPhotos, null);
+        if (StringUtils.isNotBlank(str)) {
+            sIL.displayImage(UIL.getUri(str), new ImageViewAware(imageView), mOptionsForPhotos, null);
+        }
     }
 
     public static void displayIcon(@Nullable String str, ImageView imageView) {
-        ImageLoader.getInstance().displayImage(UIL.getUri(str), new ImageViewAware(imageView), mOptionsForIcons, null);
+        if (StringUtils.isNotBlank(str)) {
+            sIL.displayImage(UIL.getUri(str), new ImageViewAware(imageView), mOptionsForIcons, null);
+        }
     }
 
     public static void display(@Nullable String str, ImageView imageView, ImageLoadingListener listener) {
-        ImageLoader.getInstance().displayImage(UIL.getUri(str), new ImageViewAware(imageView), null, listener);
+        if (StringUtils.isNotBlank(str)) {
+            sIL.displayImage(UIL.getUri(str), new ImageViewAware(imageView), null, listener);
+        }
+    }
+
+    public static void displayPhoto(@Nullable String str, ImageView imageView, ImageLoadingListener listener) {
+        if (StringUtils.isNotBlank(str)) {
+            sIL.displayImage(UIL.getUri(str), new ImageViewAware(imageView), mOptionsForPhotos, listener);
+        }
     }
 }
