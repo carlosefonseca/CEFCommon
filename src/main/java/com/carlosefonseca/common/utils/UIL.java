@@ -13,6 +13,8 @@ import com.nostra13.universalimageloader.core.assist.ImageScaleType;
 import com.nostra13.universalimageloader.core.assist.ImageSize;
 import com.nostra13.universalimageloader.core.assist.QueueProcessingType;
 import com.nostra13.universalimageloader.core.display.FadeInBitmapDisplayer;
+import com.nostra13.universalimageloader.core.imageaware.ImageViewAware;
+import com.nostra13.universalimageloader.core.listener.ImageLoadingListener;
 import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener;
 import org.jetbrains.annotations.Nullable;
 
@@ -147,6 +149,10 @@ public final class UIL {
     }
 
     public static void display(String str, ImageView imageView) {
-        ImageLoader.getInstance().displayImage(getUri(str), imageView);
+        ImageLoader.getInstance().displayImage(UIL.getUri(str), new ImageViewAware(imageView), null, null);
+    }
+
+    public static void display(String str, ImageView imageView, ImageLoadingListener listener) {
+        ImageLoader.getInstance().displayImage(UIL.getUri(str), new ImageViewAware(imageView), null, listener);
     }
 }
