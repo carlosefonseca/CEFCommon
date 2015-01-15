@@ -74,7 +74,7 @@ public final class UIL {
                                                                                    .bitmapConfig(Bitmap.Config.ARGB_8888)
                                                                                    .build();
 
-    static SimpleImageLoadingListener sAnimateFirstDisplayListener = new SimpleImageLoadingListener() {
+    public final static SimpleImageLoadingListener ANIMATE_FIRST_DISPLAY_LISTENER = new SimpleImageLoadingListener() {
 
         final List<String> displayedImages = Collections.synchronizedList(new LinkedList<String>());
 
@@ -91,7 +91,9 @@ public final class UIL {
         }
     };
 
-    public static String getUri(String str) {
+    @Nullable
+    public static String getUri(@Nullable String str) {
+        if (str == null) return null;
         final String uri;
         if (str.startsWith("http")) { // Full URL
             String lastSegmentOfURL = NetworkingUtils.getLastSegmentOfURL(str);
@@ -148,11 +150,19 @@ public final class UIL {
         return ImageLoader.getInstance().loadImageSync(uri, targetImageSize);
     }
 
-    public static void display(String str, ImageView imageView) {
+    public static void display(@Nullable String str, ImageView imageView) {
         ImageLoader.getInstance().displayImage(UIL.getUri(str), new ImageViewAware(imageView), null, null);
     }
 
-    public static void display(String str, ImageView imageView, ImageLoadingListener listener) {
+    public static void displayPhoto(@Nullable String str, ImageView imageView) {
+        ImageLoader.getInstance().displayImage(UIL.getUri(str), new ImageViewAware(imageView), mOptionsForPhotos, null);
+    }
+
+    public static void displayIcon(@Nullable String str, ImageView imageView) {
+        ImageLoader.getInstance().displayImage(UIL.getUri(str), new ImageViewAware(imageView), mOptionsForIcons, null);
+    }
+
+    public static void display(@Nullable String str, ImageView imageView, ImageLoadingListener listener) {
         ImageLoader.getInstance().displayImage(UIL.getUri(str), new ImageViewAware(imageView), null, listener);
     }
 }

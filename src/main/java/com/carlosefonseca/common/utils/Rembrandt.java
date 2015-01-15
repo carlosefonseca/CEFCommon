@@ -154,18 +154,16 @@ public class Rembrandt {
         } else {
             view.setVisibility(View.VISIBLE);
 
+            String uri = null;
             if (mUrl != null) {
-                if (!mUrl.startsWith("http")) {
-                    if (!mUrl.startsWith("/")) {
-                        mUrl = mExternalFilesDir + "/" + mUrl;
-                    }
-                    mUrl = "file://" + mUrl;
-                }
+                uri = UIL.getUri(mUrl);
+            } else if (mFile != null) {
+                uri = UIL.getUri(mFile);
             } else {
-                mUrl = "file://" + mFile.getAbsolutePath();
+                Log.wtf(TAG, new RuntimeException("wtf"));
             }
 
-            ImageLoader.getInstance().displayImage(mUrl, view, options, animateFirstDisplayListener);
+            ImageLoader.getInstance().displayImage(uri, view, options, animateFirstDisplayListener);
             return Task.forResult(null);
 
 /*
