@@ -182,7 +182,7 @@ public class CFLocationManager implements GooglePlayServicesClient.ConnectionCal
 
     public void addListener(OnLocationChangedListener listener) {
         listeners.add(listener);
-        Log.d(TAG, "Listeners++: " + listeners.size());
+        Log.d(TAG, "Listeners++: Total: " + listeners.size() + " New: " + listener.getClass().getName());
     }
 
     /**
