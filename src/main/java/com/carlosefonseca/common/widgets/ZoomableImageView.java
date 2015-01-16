@@ -632,4 +632,13 @@ public class ZoomableImageView extends View {
     public void setOnClickListener(OnClickListener l) {
         this.onClickListener = l;
     }
+
+    @Override
+    public boolean performClick() {
+        if (onClickListener != null) {
+            onClickListener.onClick(this);
+            return true;
+        }
+        return false;
+    }
 }
