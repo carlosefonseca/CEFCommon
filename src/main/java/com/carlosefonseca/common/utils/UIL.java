@@ -184,4 +184,12 @@ public final class UIL {
             sIL.displayImage(UIL.getUri(str), new ImageViewAware(imageView), mOptionsForPhotos, listener);
         }
     }
+
+    @Nullable
+    public static Bitmap getIcon(@Nullable String str, int w, int h) {
+        if (StringUtils.isNotBlank(str)) {
+            return sIL.loadImageSync(getUri(str), new ImageSize(w, h), mOptionsForIcons);
+        }
+        return null;
+    }
 }
