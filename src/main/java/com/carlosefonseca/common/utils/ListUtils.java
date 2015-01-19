@@ -2,6 +2,7 @@ package com.carlosefonseca.common.utils;
 
 import android.os.Build;
 import android.util.SparseArray;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -14,22 +15,28 @@ public final class ListUtils {
 
     private ListUtils() {}
 
-    @Nullable
+    @Contract("null -> null")
     public static <T> T first(@Nullable List<T> list) {
-        return list != null && !list.isEmpty() ? list.get(0) : null;
+        //noinspection ConstantConditions
+        return list == null || list.isEmpty() ? null : list.get(0);
     }
 
-    @Nullable
+    @Contract("null -> null")
     public static <T> T last(@Nullable List<T> list) {
-        return list != null && !list.isEmpty() ? list.get(list.size() - 1) : null;
+        //noinspection ConstantConditions
+        return list == null || list.isEmpty() ? null : list.get(list.size() - 1);
     }
 
+    @Contract("null,_ -> null")
     public static <T> List<T> firsts(List<T> list, int length) {
-        return list.subList(0, Math.min(list.size(), length));
+        //noinspection ConstantConditions
+        return list == null ? null : list.subList(0, Math.min(list.size(), length));
     }
 
+    @Contract("null,_ -> null")
     public static <T> List<T> lasts(List<T> list, int length) {
-        return list.subList(Math.max(list.size() - length, 0), list.size());
+        //noinspection ConstantConditions
+        return list == null ? null : list.subList(Math.max(list.size() - length, 0), list.size());
     }
 
     /**

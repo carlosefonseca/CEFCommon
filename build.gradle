@@ -30,13 +30,13 @@ repositories {
 
 dependencies {
     //noinspection GradleDependency
-    compile 'com.android.support:support-v4:19.1.0'
+    compile 'com.android.support:support-v4:21.0.3'
     //noinspection GradleDynamicVersion,GradleDependency
     compile 'com.google.android.gms:play-services-maps:6.5.87'
     compile 'com.google.android.gms:play-services-location:6.5.87'
     //noinspection GradleDependency
     compile 'com.google.code.gson:gson:1.7.2'
-    compile 'com.intellij:annotations:12.0'
+    compile('org.jetbrains:annotations:13.0') { transitive = true }
     compile 'com.nineoldandroids:library:2.4.0'
     compile 'de.greenrobot:eventbus:2.0.2'
     compile 'com.readystatesoftware.systembartint:systembartint:1.0.4'

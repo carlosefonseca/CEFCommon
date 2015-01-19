@@ -14,6 +14,7 @@ import bolts.Task;
 import org.apache.commons.lang3.StringUtils;
 import com.carlosefonseca.common.CFApp;
 import com.carlosefonseca.common.widgets.LoadingDialog;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONObject;
@@ -34,29 +35,27 @@ public final class UrlUtils {
 
     private UrlUtils() {}
 
-
-    public static final Pattern phoneMatcher= Pattern.compile("([+(]?(?:\\d[()]?[- .]?[()]?){8,}\\d)");
-    // Previously failed with numbers 1990-2000 (years)
-    // public static final Pattern phoneMatcher= Pattern.compile("([\\d(+](?:[\\d()./+-]+ ?){6,}[\\d)])");
+    public static final Pattern phoneMatcher = Pattern.compile("([+(]?(?:\\d[()]?[- .]?[()]?){8,}\\d)");
     public static final Pattern httpMatcher = Pattern.compile("\\b(https?://[^\\s]+)", Pattern.CASE_INSENSITIVE);
     public static final Pattern wwwMatcher = Pattern.compile("\\b(www\\.[^\\s]+)", Pattern.CASE_INSENSITIVE);
     public static final Pattern emailMatcher = Pattern.compile("([A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,4})", Pattern.CASE_INSENSITIVE);
-
 
     public static String urlForEmail(String email) {return "mailto:" + email.trim();}
 
     public static String urlForTel(String number) {return "tel:" + number.trim().replaceAll("\\s*", "");}
 
-    @Nullable
+    @Contract("null -> null")
     public static String simplifyUrlForDisplay(@Nullable String url) {
+        //noinspection ConstantConditions
         return url == null ? null : url.trim().replaceFirst("https?://(www.)?", "").replace("?fref=ts", "");
     }
 
     /**
      * Takes any string but only returns those that start with HTTP. Returns null otherwise.
      */
-    @Nullable public static String filterHttp(@Nullable String url) {
-        return url != null && url.startsWith("http") ? url : null;
+    @Nullable
+    public static String filterHttp(@Nullable String url) {
+        return url == null || !url.startsWith("http") ? null : url;
     }
 
     public static final class Facebook {
@@ -81,16 +80,14 @@ public final class UrlUtils {
          * + optional query string
          * }</pre>
          */
-        public static final Pattern PATTERN = Pattern.compile(
-                "^(?:https?://)?(?:www\\.)?facebook\\.com/(?:([^/?]*)|pages(?:.*)/(\\d+))/?(?:\\?.*)?$");
+        public static final Pattern PATTERN =
+                Pattern.compile("^(?:https?://)?(?:www\\.)?facebook\\.com/(?:([^/?]*)|pages(?:.*)/(\\d+))/?(?:\\?.*)?$");
 
 
+        @Nullable
         public static String getFacebookNameFromURL(String url) {
             Matcher matcher = PATTERN.matcher(url);
-            if (matcher.find()) {
-                return defaultString(matcher.group(1), matcher.group(2));
-            }
-            return null;
+            return matcher.find() ? defaultString(matcher.group(1), matcher.group(2)) : null;
         }
 
         public static void openFacebookPage(final Context context, final String text)
@@ -193,7 +190,8 @@ public final class UrlUtils {
             context.startActivity(intent);
         }
 
-        public static boolean tryOpenProfileFromURL(Context context, @NotNull String url) {
+        @Contract("_,null -> false")
+        public static boolean tryOpenProfileFromURL(Context context, @Nullable String url) {
             if (url == null) return false;
             final Matcher matcher = TWITTER_USER_NAME_REGEX.matcher(url);
             if (matcher.matches()) {
@@ -204,8 +202,11 @@ public final class UrlUtils {
             return false;
         }
 
-        public static String getUserUrl(String username) {
-            if (username == null) return null;
+        @Contract("null -> null")
+        public static String getUserUrl(@Nullable String username) {
+            if (username == null) { //noinspection ConstantConditions
+                return null;
+            }
             return "https://twitter.com/" + (username.startsWith("@") ? username.substring(1) : username);
         }
     }
@@ -229,7 +230,9 @@ public final class UrlUtils {
             context.startActivity(intent);
         }
 
-        public static boolean tryOpenProfileFromURL(Context context, @NotNull String url) {
+        @Contract("_, null -> false")
+        public static boolean tryOpenProfileFromURL(Context context, @Nullable String url) {
+            //noinspection ConstantConditions
             if (url == null) return false;
             final Matcher matcher = IG_USER_NAME_REGEX.matcher(url);
             if (matcher.matches()) {
@@ -240,8 +243,11 @@ public final class UrlUtils {
             return false;
         }
 
+        @Contract("null -> null")
         public static String getUserUrl(String username) {
-            if (username == null) return null;
+            if (username == null) { //noinspection ConstantConditions
+                return null;
+            }
             return "http://instagram.com/" + (username.startsWith("@") ? username.substring(1) : username);
         }
     }
@@ -260,10 +266,10 @@ public final class UrlUtils {
 
 //      "http://maps.google.com/maps?q=" + StringUtils.normalizeSpace(getName()).replaceAll(StringUtils.SPACE, "%20");
 
-        @Nullable
+        @Contract("null -> null")
         public static String urlForAddress(@Nullable String address) {
-            if (address == null) return null;
-            return "geo:0,0?q=" + StringUtils.normalizeSpace(address);
+            //noinspection ConstantConditions
+            return address == null ? null : "geo:0,0?q=" + StringUtils.normalizeSpace(address);
         }
 
         public static String urlForCoordinates(String name, double lat, double lng) {
@@ -331,6 +337,7 @@ public final class UrlUtils {
 
     /**
      * Checks for apps that handle the URL in the following order: Facebook, Twitter, Instagram, Maps, anything else.
+     *
      * @return True if the URL was handled and something opened; False if the URL could not be handled.
      */
     public static boolean tryAll(Context context, @Nullable String url) {
