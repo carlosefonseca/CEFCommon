@@ -5,8 +5,11 @@ import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.Nullable;
 
 public final class ViewUtils {
     private ViewUtils() {}
@@ -39,6 +42,19 @@ public final class ViewUtils {
                         view.getPaddingTop() + top,
                         view.getPaddingRight() + right,
                         view.getPaddingBottom() + bottom);
+    }
+
+    /**
+     * Removes the view from its parent. If the view doesn't have a parent, it will do nothing.
+     *
+     * @param view The view to remove.
+     * @return The removed view.
+     */
+    @Contract("null -> null")
+    public static <T extends View> T remove(@Nullable T view) {
+        if (view != null && view.getParent() != null) ((ViewGroup) view.getParent()).removeView(view);
+        //noinspection ConstantConditions
+        return view;
     }
 
     public static class ButtonHighlighterOnTouchListener implements View.OnTouchListener {
