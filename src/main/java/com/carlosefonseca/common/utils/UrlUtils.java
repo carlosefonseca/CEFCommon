@@ -1,5 +1,6 @@
 package com.carlosefonseca.common.utils;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -11,9 +12,10 @@ import android.text.method.LinkMovementMethod;
 import android.widget.TextView;
 import bolts.Continuation;
 import bolts.Task;
-import org.apache.commons.lang3.StringUtils;
 import com.carlosefonseca.common.CFApp;
 import com.carlosefonseca.common.widgets.LoadingDialog;
+import junit.framework.Assert;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -22,11 +24,13 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static com.carlosefonseca.common.utils.ListUtils.list;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 
 public final class UrlUtils {
@@ -35,10 +39,79 @@ public final class UrlUtils {
 
     private UrlUtils() {}
 
-    public static final Pattern phoneMatcher = Pattern.compile("([+(]?(?:\\d[()]?[- .]?[()]?){8,}\\d)");
-    public static final Pattern httpMatcher = Pattern.compile("\\b(https?://[^\\s]+)", Pattern.CASE_INSENSITIVE);
-    public static final Pattern wwwMatcher = Pattern.compile("\\b(www\\.[^\\s]+)", Pattern.CASE_INSENSITIVE);
-    public static final Pattern emailMatcher = Pattern.compile("([A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,4})", Pattern.CASE_INSENSITIVE);
+    public static final Pattern PHONE_MATCHER = Pattern.compile("(?<!\\S)([+(]{0,2}(?:\\d[()]?[- .]?[()]?){8,}\\d)");
+    public static final Pattern HTTP_MATCHER = Pattern.compile("\\b(https?://[^\\s]+)", Pattern.CASE_INSENSITIVE);
+    public static final Pattern WWW_MATCHER = Pattern.compile("(?<!https?://)(www\\.[^\\s]+)", Pattern.CASE_INSENSITIVE);
+    public static final Pattern EMAIL_MATCHER = Pattern.compile("([A-Z0-9._%+-=]+@[A-Z0-9.-]+\\.[A-Z]{2,4})", Pattern.CASE_INSENSITIVE);
+
+    static {
+        if (CFApp.isTestDevice()) {
+            phoneMatcherTest();
+            httpMatcher();
+            wwwMatcher();
+            emailMatcher();
+        }
+    }
+
+    public static void phoneMatcherTest() {// @formatter:off
+        genericMatchTester(PHONE_MATCHER,
+                           list("0123456789", "+35196123456789", "555.123.4567", "(+351) 963 323 805", "+1-(800)-555-2468"),
+                           list("https://www.facebook.com/pages/Quintal-de-Al%C3%A9m-do-Ribeiro/108234839208541?fref=ts", "1999-2000"));
+    } // @formatter:on
+
+
+    public static void httpMatcher() {// @formatter:off
+        genericMatchTester(HTTP_MATCHER,
+                           Arrays.asList("https://www.facebook.com/pages/Quintal-de-Al%C3%A9m-do-Ribeiro/", "http://example.com"),
+                           Arrays.asList("www.facebook.com/pages/Quintal-de-Al%C3%A9m-do-Ribeiro/", "example.com"));
+    }// @formatter:on
+
+    public static void wwwMatcher() {// @formatter:off
+        genericMatchTester(WWW_MATCHER,
+                           Arrays.asList("www.facebook.com/pages/Quintal-de-Al%C3%A9m-do-Ribeiro/"),
+                           Arrays.asList("http://www.facebook.com/pages/Quintal-de-Al%C3%A9m-do-Ribeiro/", "https://example.com"));
+    }// @formatter:on
+
+    public static void emailMatcher() {// @formatter:off
+        genericMatchTester(EMAIL_MATCHER,
+                           Arrays.asList("carlos@card4b.pt", "ze+manel@google.com", "bar.ba@test.co.uk","_somename@example.com"),
+                           Arrays.asList("1", "1@1.1", "aa@aa.a"));
+    }// @formatter:on
+
+    @SuppressLint("Assert")
+    @SuppressWarnings({"UseOfSystemOutOrSystemErr", "ConstantConditions"})
+    public static void genericMatchTester(Pattern pattern, List<String> corrects, List<String> wrongs) {
+        final boolean JUNIT = true;
+
+        for (String single : corrects) {
+            Matcher matcher = pattern.matcher(single);
+            if (!matcher.find()) {
+                if (JUNIT) {
+                    Assert.fail("Should've matched: " + single);
+                } else {
+                    System.out.println("Should've matched: " + single);
+                    assert false;
+                }
+            }
+            if (JUNIT) Assert.assertEquals(matcher.group(), single);
+            else assert matcher.group().equals(single);
+        }
+
+        // FAILS
+        for (String single : wrongs) {
+            Matcher matcher = pattern.matcher(single);
+            if (matcher.find()) {
+                if (JUNIT) {
+                    Assert.fail("Shouldn't have matched: " + single);
+                } else {
+                    System.out.println("Shouldn't have matched: " + single);
+                    assert false;
+                }
+            }
+        }
+    }
+
+
 
     public static String urlForEmail(String email) {return "mailto:" + email.trim();}
 
@@ -69,19 +142,15 @@ public final class UrlUtils {
          * Supports the following URL's:
          * <pre>{@code
          * https://www.facebook.com/xtourmaker
-         *  http://www.facebook.com/xtourmaker
-         *         www.facebook.com/xtourmaker
-         *             facebook.com/xtourmaker
+         * https://www.facebook.com/pages/255500287862344
          * https://www.facebook.com/pages/Beware/255500287862344
-         *  http://www.facebook.com/pages/Beware/255500287862344
-         *         www.facebook.com/pages/Beware/255500287862344
-         *             facebook.com/pages/Beware/255500287862344
+         * (https://www. is mostly optional)
          * + optional ending slash
          * + optional query string
          * }</pre>
          */
         public static final Pattern PATTERN =
-                Pattern.compile("^(?:https?://)?(?:www\\.)?facebook\\.com/(?:([^/?]*)|pages(?:.*)/(\\d+))/?(?:\\?.*)?$");
+                Pattern.compile("(?:https?://)?(?:www\\.)?facebook\\.com/(?:([^/?]*)|pages(?:.*)/(\\d+))/?(?:\\?.*)?");
 
 
         @Nullable
@@ -422,10 +491,10 @@ public final class UrlUtils {
     }
 
     public static String linkifyText(String text) {
-        text = emailMatcher.matcher(text).replaceAll("<a href='mailto:$1'>$1</a>");
-        text = httpMatcher.matcher(text).replaceAll("<a href='$1'>$1</a>");
-        text = wwwMatcher.matcher(text).replaceAll("<a href='http://$1'>$1</a>");
-        text = phoneMatcher.matcher(text).replaceAll("<a href='tel://$1'>$1</a>");
+        text = EMAIL_MATCHER.matcher(text).replaceAll("<a href='mailto:$1'>$1</a>");
+        text = HTTP_MATCHER.matcher(text).replaceAll("<a href='$1'>$1</a>");
+        text = WWW_MATCHER.matcher(text).replaceAll("<a href='http://$1'>$1</a>");
+        text = PHONE_MATCHER.matcher(text).replaceAll("<a href='tel://$1'>$1</a>");
         text = text.replaceAll("\\n", "<br/>");
         return text;
     }
