@@ -65,8 +65,7 @@ public final class UIL {
                                                                                            .cacheInMemory(true)
                                                                                            .cacheOnDisk(true)
                                                                                            .considerExifParams(true)
-                                                                                           .imageScaleType(
-                                                                                                   ImageScaleType.EXACTLY)
+                                                                                           .imageScaleType(ImageScaleType.EXACTLY)
                                                                                            .bitmapConfig(Bitmap.Config.RGB_565)
                                                                                            .build();
 

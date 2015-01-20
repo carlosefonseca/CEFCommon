@@ -1410,7 +1410,7 @@ public final class ImageUtils {
             // OutOfMemory exception. Stored in kilobytes as LruCache takes an
             // int in its constructor.
             // Use 1/4th of the available memory for this memory cache.
-            super((int) ((Runtime.getRuntime().maxMemory() - Runtime.getRuntime().totalMemory()) / 4));
+            super(Math.max(0, (int) ((Runtime.getRuntime().maxMemory() - Runtime.getRuntime().totalMemory()) / 4)));
             Log.i(TAG, "Cache Size: " + maxSize() / 1024f / 1024f + " MB");
         }
 
