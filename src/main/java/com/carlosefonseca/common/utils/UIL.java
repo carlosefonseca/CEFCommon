@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.view.View;
 import android.widget.ImageView;
+import com.carlosefonseca.common.CFApp;
 import com.nostra13.universalimageloader.cache.disc.impl.UnlimitedDiscCache;
 import com.nostra13.universalimageloader.cache.disc.naming.FileNameGenerator;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
@@ -20,7 +21,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
-import java.lang.String;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -49,13 +49,15 @@ public final class UIL {
         sExternalFilesDir = context.getExternalFilesDir(null);
         UnlimitedDiscCache diskCache = new UnlimitedDiscCache(sExternalFilesDir, null, fileNameGenerator);
 
-        ImageLoaderConfiguration config =
-                new ImageLoaderConfiguration.Builder(context).threadPriority(Thread.NORM_PRIORITY - 2)
-                                                             .memoryCacheSize((int) (CodeUtils.getFreeMem()/6))
-                                                             .diskCache(diskCache)
-                                                             .tasksProcessingOrder(QueueProcessingType.LIFO)
-                                                             .writeDebugLogs()
-                                                             .build();
+        ImageLoaderConfiguration.Builder builder = new ImageLoaderConfiguration.Builder(context);
+        if (CFApp.isTestDevice()) builder.writeDebugLogs();
+
+        ImageLoaderConfiguration config = builder.threadPriority(Thread.NORM_PRIORITY - 2)
+                                                 .memoryCacheSize((int) (CodeUtils.getFreeMem() / 6))
+                                                 .diskCache(diskCache)
+                                                 .tasksProcessingOrder(QueueProcessingType.LIFO)
+                                                 .build();
+
         sIL = ImageLoader.getInstance();
         sIL.init(config);
 
