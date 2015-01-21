@@ -53,6 +53,7 @@ public class CFActivity extends FragmentActivity {
     protected void onDestroy() {
         super.onDestroy();
         if (mActivityStateListener != null) mActivityStateListener.onDestroy();
+        mActivityStateListener = null;
     }
 
     @Override
