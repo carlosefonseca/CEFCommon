@@ -3,8 +3,8 @@ package com.carlosefonseca.common.utils;
 import android.content.Context;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
-import org.apache.commons.lang3.StringUtils;
 import com.carlosefonseca.common.CFApp;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.*;
@@ -217,5 +217,48 @@ public final class FileUtils {
             Log.e(TAG, "Error opening the file in assets: " + file, e);
         }
         return null;
+    }
+
+    public static void writeObject(Serializable serializable, File file) {
+        ObjectOutputStream outputStream = null;
+        try {
+            outputStream = new ObjectOutputStream(new FileOutputStream(file));
+            outputStream.writeObject(serializable);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } finally {
+            if (outputStream != null) {
+                try {
+                    outputStream.close();
+                } catch (IOException e) {
+                    Log.w(TAG, e);
+                }
+            }
+        }
+    }
+
+    public static <T> T readObject(File file) {
+        ObjectInputStream stream = null;
+        FileInputStream input = null;
+        try {
+            input = new FileInputStream(file);
+            stream = new ObjectInputStream(input);
+            //noinspection unchecked
+            return (T) stream.readObject();
+
+        } catch (IOException | ClassNotFoundException e) {
+            throw new RuntimeException(e);
+
+        } finally {
+            try {
+                if (stream != null) {
+                    stream.close();
+                } else if (input != null) {
+                    input.close();
+                }
+            } catch (IOException e) {
+                Log.w(TAG, e);
+            }
+        }
     }
 }

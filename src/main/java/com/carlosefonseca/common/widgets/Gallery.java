@@ -33,14 +33,12 @@ public class Gallery extends ViewPager {
 
     private static final java.lang.String TAG = CodeUtils.getTag(Gallery.class);
 
-    private int res;
     private int bottomMargin;
     private int rightMargin;
     private int width;
     private float density;
     private int duration = -1;
     private ImageView.ScaleType scaleType;
-//    private Rembrandt rembrandt;
 
     public Gallery(Context context) {
         super(context);
@@ -73,9 +71,9 @@ public class Gallery extends ViewPager {
 
     @NotNull
     public GalleryAdapter getOrCreateAdapter() {
-        GalleryAdapter adapter = (GalleryAdapter) getAdapter();
+        GalleryAdapter adapter = getAdapter();
         if (adapter == null) {
-            adapter = new GalleryAdapter(getContext(), scaleType, /*rembrandt*/null);
+            adapter = new GalleryAdapter(getContext(), scaleType /*rembrandt*/);
             setAdapter(adapter);
         }
         return adapter;
@@ -99,15 +97,12 @@ public class Gallery extends ViewPager {
     }
 
     public void setImageOverlay(int res, int bottomMargin, int rightMargin) {
-        this.res = res;
         this.bottomMargin = bottomMargin;
         this.rightMargin = rightMargin;
     }
 
     /**
      * Sets a click listener on the images.
-     *
-     * @param listener
      */
     @Override
     public void setOnClickListener(@Nullable OnClickListener listener) {
@@ -119,17 +114,8 @@ public class Gallery extends ViewPager {
         getLayoutParams().height = (int) (width / 2 + 24 * density);
     }
 
-    public void setRembrandt(Rembrandt rembrandt) {
-//        this.rembrandt = rembrandt;
-    }
-
-//    public Rembrandt getRembrandt() {
-//        return rembrandt;
-//    }
-
     public static class GalleryAdapter extends PagerAdapter implements OnClickListener {
 
-        //        private final Rembrandt rembrandt;
         @Nullable private List<File> imageList;
         @Nullable private ArrayList<String> urlList;
         private LinkedList<View> recycledViews = new LinkedList<View>();
@@ -149,13 +135,7 @@ public class Gallery extends ViewPager {
         }
 
         protected GalleryAdapter(Context context, @Nullable ImageView.ScaleType scaleType) {
-            this(context, scaleType, null);
-        }
-
-        protected GalleryAdapter(Context context, @Nullable ImageView.ScaleType scaleType, @Nullable Rembrandt rembrandt) {
-//            if (rembrandt == null) Log.w("REMBRANDT IS NULL!");
             this.scaleType = scaleType;
-//            this.rembrandt = rembrandt == null ? new Rembrandt(context) : rembrandt;
             layoutInflater = LayoutInflater.from(context);
         }
 
@@ -216,26 +196,11 @@ public class Gallery extends ViewPager {
                 String url = urlList.get(position);
                 view.set(url, position);
                 uri = UIL.getUri(url);
-//                rembrandt.load(url);
             } else if (imageList != null) {
                 File file = imageList.get(position);
                 view.set(file, position);
                 uri = UIL.getUri(file);
-//                rembrandt.load(file);
             }
-/*
-            rembrandt.measureFirst().fadeIn(imageView).continueWith(new Continuation<Void, Void>() {
-                @Override
-                public Void then(Task<Void> task) throws Exception {
-                    if (task.getError() != null) {
-                        imageView.setBackgroundColor(Color.GRAY);
-                    } else {
-                        imageView.setBackgroundColor(Color.TRANSPARENT);
-                    }
-                    return null;
-                }
-            }, Task.UI_THREAD_EXECUTOR).continueWith(TaskUtils.LogErrorContinuation);
-*/
 
             ImageLoader.getInstance()
                        .displayImage(uri, imageView, UIL.mOptionsForPhotos, new SimpleImageLoadingListener() {
@@ -280,6 +245,12 @@ public class Gallery extends ViewPager {
         @Nullable
         public List<String> getUrlList() {
             return urlList;
+        }
+
+        public void clear() {
+            imageList = null;
+            urlList = null;
+            notifyDataSetChanged();
         }
     }
 

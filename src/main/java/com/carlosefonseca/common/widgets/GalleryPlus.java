@@ -121,8 +121,6 @@ public class GalleryPlus extends FrameLayout {
 
     /**
      * Sets a click listener on the images of the Gallery.
-     *
-     * @param listener
      * @see com.carlosefonseca.common.widgets.Gallery#setOnClickListener(android.view.View.OnClickListener)
      */
     @Override

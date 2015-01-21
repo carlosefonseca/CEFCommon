@@ -51,6 +51,7 @@ public final class UIL {
 
         ImageLoaderConfiguration config =
                 new ImageLoaderConfiguration.Builder(context).threadPriority(Thread.NORM_PRIORITY - 2)
+                                                             .memoryCacheSize((int) (CodeUtils.getFreeMem()/6))
                                                              .diskCache(diskCache)
                                                              .tasksProcessingOrder(QueueProcessingType.LIFO)
                                                              .writeDebugLogs()

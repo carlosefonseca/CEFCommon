@@ -1,5 +1,6 @@
 package com.carlosefonseca.common.widgets;
 
+import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.res.Resources;
@@ -15,16 +16,16 @@ import android.widget.TextView;
 import bolts.Continuation;
 import bolts.Task;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 /**
  * from http://stackoverflow.com/a/17782522/1069444
  */
 @SuppressWarnings("UnusedDeclaration")
 public class AutoResizeTextView extends TextView {
+
+    private static HashMap<Integer, Integer> sCache;
+
     private boolean mNeedsResize = true;
 
     public static void makeSameSizeOnNextResize(List<AutoResizeTextView> autoResizeTextViews) {
@@ -77,6 +78,14 @@ public class AutoResizeTextView extends TextView {
                 return null;
             }
         });
+    }
+
+    public static HashMap<Integer, Integer> getCache() {
+        return sCache;
+    }
+
+    public static void setCache(HashMap<Integer, Integer> cache) {
+        sCache = cache;
     }
 
     private interface SizeTester {
@@ -314,9 +323,23 @@ public class AutoResizeTextView extends TextView {
         adjustTextSize(String.valueOf(getText()));
     }
 
+    @SuppressLint("UseSparseArrays")
+    public static void enableGlobalSizeCache(boolean enable) {
+        sCache = enable ? new HashMap<Integer, Integer>() : null;
+    }
+
     private int efficientTextSizeSearch(int start, int end, SizeTester sizeTester, RectF availableSpace) {
-        if (!mEnableSizeCache) {
-            return binarySearch(start, end, sizeTester, availableSpace);
+        if (sCache != null || !mEnableSizeCache) {
+            if (sCache == null) {
+                return binarySearch(start, end, sizeTester, availableSpace);
+            }
+
+            int key = getText().toString().hashCode();
+            Integer integer = sCache.get(key);
+            if (integer != null) return integer;
+            int i = binarySearch(start, end, sizeTester, availableSpace);
+            sCache.put(key, i);
+            return i;
         }
         String text = String.valueOf(getText());
         int key = text == null ? 0 : text.length();

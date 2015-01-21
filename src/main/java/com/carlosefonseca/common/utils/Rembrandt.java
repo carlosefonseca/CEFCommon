@@ -34,6 +34,7 @@ import static com.carlosefonseca.common.utils.NetworkingUtils.getLastSegmentOfUR
  * Square's Picasso. It doesn't have half the features of Picasso but does what I need, which is downloading, caching and
  * setting on ImageViews.
  */
+@Deprecated
 public class Rembrandt {
     private static final String TAG = CodeUtils.getTag(Rembrandt.class);
     public static final int XFADE_MILLIS = 500;
