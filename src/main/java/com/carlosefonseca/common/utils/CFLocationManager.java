@@ -15,6 +15,7 @@ import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.LocationSource;
+import org.apache.commons.collections4.CollectionUtils;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashSet;
@@ -185,6 +186,11 @@ public class CFLocationManager implements GooglePlayServicesClient.ConnectionCal
         Log.d(TAG, "Listeners++: Total: " + listeners.size() + " New: " + listener.getClass().getName());
     }
 
+    public void addListenerAndLocate(OnLocationChangedListener listener) {
+        addListener(listener);
+        if (!isLocating) startLocationUpdates();
+    }
+
     /**
      * Adds a listener that will only receive one location.
      */
@@ -200,7 +206,7 @@ public class CFLocationManager implements GooglePlayServicesClient.ConnectionCal
             listeners.remove(listener);
             Log.d(TAG, "Listeners--: " + listeners.size());
         }
-        if (listeners == null || listeners.isEmpty()) stop();
+        if (CollectionUtils.isEmpty(listeners)) stop();
     }
 
     /**
