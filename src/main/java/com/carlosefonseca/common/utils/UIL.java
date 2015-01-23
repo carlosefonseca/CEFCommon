@@ -18,6 +18,7 @@ import com.nostra13.universalimageloader.core.imageaware.ImageViewAware;
 import com.nostra13.universalimageloader.core.listener.ImageLoadingListener;
 import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener;
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
@@ -127,7 +128,9 @@ public final class UIL {
     }
 
     @Nullable
-    public static String getUri(File file) {
+    @Contract("null -> null")
+    public static String getUri(@Nullable File file) {
+        if (file == null) return null;
         final String uri;
         if (file.exists()) {
             uri = "file://" + file.getAbsolutePath();
@@ -144,10 +147,12 @@ public final class UIL {
     }
 
     @Nullable
-    public static Bitmap loadSync(String str) {return loadSync(str, 0, 0);}
+    @Contract("null -> null")
+    public static Bitmap loadSync(@Nullable String str) {return loadSync(str, 0, 0);}
 
     @Nullable
-    public static Bitmap loadSync(String str, int widthPx, int heightPx) {
+    @Contract("null,_,_ -> null")
+    public static Bitmap loadSync(@Nullable String str, int widthPx, int heightPx) {
         if (str == null) return null;
 
         String uri = getUri(str);
@@ -188,10 +193,9 @@ public final class UIL {
     }
 
     @Nullable
+    @Contract("null,_,_ -> null")
     public static Bitmap getIcon(@Nullable String str, int w, int h) {
-        if (StringUtils.isNotBlank(str)) {
-            return sIL.loadImageSync(getUri(str), new ImageSize(w, h), mOptionsForIcons);
-        }
-        return null;
+        if (StringUtils.isBlank(str)) return null;
+        return sIL.loadImageSync(getUri(str), new ImageSize(w, h), mOptionsForIcons);
     }
 }
