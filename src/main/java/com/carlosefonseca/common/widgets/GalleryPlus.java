@@ -10,9 +10,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import com.carlosefonseca.common.CFActivity;
 import com.carlosefonseca.common.R;
-import com.carlosefonseca.common.utils.ActivityStateListener;
-import com.carlosefonseca.common.utils.ImageUtils;
-import com.carlosefonseca.common.utils.ZoomZoomableRembrandtController;
+import com.carlosefonseca.common.utils.*;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
@@ -74,6 +72,7 @@ public class GalleryPlus extends FrameLayout {
         }
     }
 
+/*
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
@@ -84,6 +83,7 @@ public class GalleryPlus extends FrameLayout {
             setMeasuredDimension(getMeasuredWidth(), h);
         }
     }
+*/
 
     public boolean isEmpty() {
         return galleryView.getAdapter().getCount() == 0;
@@ -148,20 +148,30 @@ public class GalleryPlus extends FrameLayout {
     /**
      * Ex: 3/5 <-> height / width
      */
-    public void setAspectRatio(@Nullable Double aspectRatio) {
+    public void setAspectRatio(@Nullable final Double aspectRatio) {
         this.aspectRatio = aspectRatio;
-        ViewGroup.LayoutParams layoutParams = getLayoutParams();
-        if (layoutParams != null && layoutParams.width > 0 && layoutParams.height > 0) {
-            if (aspectRatio != null) {
-                layoutParams.height = (int) (aspectRatio * layoutParams.width);
-                galleryView.getLayoutParams().height = (int) (aspectRatio * layoutParams.width);
+
+        if (aspectRatio == null) {
+            ViewUtils.setLayoutHeight(this, ViewGroup.LayoutParams.WRAP_CONTENT);
+            ViewUtils.setLayoutHeight(galleryView, ViewGroup.LayoutParams.WRAP_CONTENT);
+        } else {
+            final int measuredWidth = getMeasuredWidth();
+            if (measuredWidth != 0) {
+                final int newHeight = (int) (aspectRatio * measuredWidth);
+                ViewUtils.setLayoutWidthHeight(this, measuredWidth, newHeight);
+                ViewUtils.setLayoutWidthHeight(galleryView, measuredWidth, newHeight);
             } else {
-                layoutParams.height = ViewGroup.LayoutParams.WRAP_CONTENT;
-                galleryView.getLayoutParams().height = ViewGroup.LayoutParams.WRAP_CONTENT;
+                CodeUtils.runOnGlobalLayout(this, new CodeUtils.RunnableWithView<GalleryPlus>() {
+                    @Override
+                    public void run(GalleryPlus view) {
+                        int measuredWidth1 = view.getMeasuredWidth();
+                        int newHeight1 = (int) (aspectRatio * measuredWidth1);
+                        ViewUtils.setLayoutWidthHeight(view, measuredWidth1, newHeight1);
+                        ViewUtils.setLayoutWidthHeight(galleryView, measuredWidth1, newHeight1);
+                    }
+                });
             }
         }
-        requestLayout();
-        invalidate();
     }
 
     public void setAspectRatioFromImage(File image) {
