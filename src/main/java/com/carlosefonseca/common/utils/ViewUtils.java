@@ -185,4 +185,20 @@ public final class ViewUtils {
 
     }
 
+    public static void setLayoutHeight(View view, int height) {
+        view.getLayoutParams().height = height;
+        view.setLayoutParams(view.getLayoutParams());
+    }
+
+    public static void setLayoutWidth(View view, int width) {
+        view.getLayoutParams().width = width;
+        view.setLayoutParams(view.getLayoutParams());
+    }
+
+    public static void setLayoutWidthHeight(View view, int width, int height) {
+        view.getLayoutParams().width = width;
+        view.getLayoutParams().height = height;
+        view.setLayoutParams(view.getLayoutParams());
+    }
+
 }
