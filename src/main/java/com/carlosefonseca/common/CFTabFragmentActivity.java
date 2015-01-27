@@ -35,6 +35,11 @@ public class CFTabFragmentActivity extends CFActivity implements TabHost.OnTabCh
             this.args = args;
         }
 
+        public TabInfo(String tag, Fragment fragment) {
+            this.tag = tag;
+            this.fragment = fragment;
+        }
+
         public String getTag() {
             return tag;
         }
