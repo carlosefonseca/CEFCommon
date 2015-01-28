@@ -334,6 +334,10 @@ public final class ResourceUtils {
             Color.colorToHSV(color, hsv);
         }
 
+        /**
+         * Adds value to each of the RGB channels. Keeps values inside the 0xFF limit.
+         * @param value Value to add to all RGB channels. [0..255].
+         */
         public HSVColor addRGB(int value) {
             int color = color();
             int argb = Color.argb(Color.alpha(color),

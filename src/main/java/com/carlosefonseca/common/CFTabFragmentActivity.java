@@ -132,7 +132,8 @@ public class CFTabFragmentActivity extends CFActivity implements TabHost.OnTabCh
     public void onTabChanged(String tag) {
         TabInfo newTab = this.mapTabInfo.get(tag);
         Assert.assertNotNull(newTab);
-        if (mLastTab != newTab) {
+        if (mLastTab != newTab ||
+            (mLastTab != null && mLastTab.fragment != null && mLastTab.fragment.getView() == null)) {
             FragmentTransaction ft = this.getSupportFragmentManager().beginTransaction();
             if (mLastTab != null) {
                 if (mLastTab.fragment != null) {

@@ -520,7 +520,7 @@ public class CFArrayAdapter<T> extends BaseAdapter implements Filterable {
         return mFilter;
     }
 
-    public List<T> getItems() {
+    public ArrayList<T> getItems() {
         return new ArrayList<>(mObjects);
     }
 
