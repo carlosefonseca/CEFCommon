@@ -144,4 +144,8 @@ public class ActivityStateListener {
         @Override
         public boolean onBackPressed() { return false; }
     }
+
+    public static interface ActivityStateListenerProvider {
+        ActivityStateListener getActivityStateListener();
+    }
 }

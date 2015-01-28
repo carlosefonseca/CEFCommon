@@ -21,7 +21,7 @@ import static com.carlosefonseca.common.utils.CodeUtils.isMainThread;
 /**
  * Base Activity with a lot of good stuff.
  */
-public class CFActivity extends FragmentActivity {
+public class CFActivity extends FragmentActivity implements ActivityStateListener.ActivityStateListenerProvider {
 
     private static final String sTAG = getTag(CFActivity.class);
     public static final int REQUEST_EXIT = -1234;
@@ -121,6 +121,7 @@ public class CFActivity extends FragmentActivity {
         return dialog == null ? null : dialog.get();
     }
 
+    @Override
     public ActivityStateListener getActivityStateListener() {
         if (mActivityStateListener == null) {
             mActivityStateListener = new ActivityStateListener(this);
