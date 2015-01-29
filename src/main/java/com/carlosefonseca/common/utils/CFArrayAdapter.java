@@ -259,15 +259,17 @@ public class CFArrayAdapter<T> extends BaseAdapter implements Filterable {
     /**
      * Removes the specified object from the array.
      *
+     * NOTE: This is different from the original remove method since it removes from both the full array and from the
+     * filtered array.
+     *
      * @param object The object to remove.
      */
     public void remove(T object) {
         synchronized (mLock) {
             if (mOriginalValues != null) {
                 mOriginalValues.remove(object);
-            } else {
-                mObjects.remove(object);
             }
+            mObjects.remove(object);
         }
         if (mNotifyOnChange) notifyDataSetChanged();
     }
