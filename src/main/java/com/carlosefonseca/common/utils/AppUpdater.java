@@ -124,7 +124,7 @@ public final class AppUpdater {
         ProgressDialog mProgressDialog = new ProgressDialog(activity);
         mProgressDialog.setTitle("Downloading update…");
         if (StringUtils.isNotBlank(latestVersion.release_notes)) {
-            mProgressDialog.setMessage("Release notes:\n\n" + latestVersion.release_notes);
+            mProgressDialog.setMessage("Release notes:\n\n" + stripWeirdThings(latestVersion.release_notes));
         } else {
             mProgressDialog.setMessage("Please wait…");
         }
@@ -169,6 +169,10 @@ public final class AppUpdater {
         });
 
         downloadURL.execute(latestVersion.url);
+    }
+
+    private static String stripWeirdThings(String release_notes) {
+        return release_notes.replaceAll("<[^|]+\\|([^>]+)>", "$1");
     }
 
     public static void tryOnceCheckForUpdatesAndAsk(final Context context) {
