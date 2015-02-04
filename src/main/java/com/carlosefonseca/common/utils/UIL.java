@@ -19,6 +19,7 @@ import com.nostra13.universalimageloader.core.listener.ImageLoadingListener;
 import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
@@ -154,12 +155,20 @@ public final class UIL {
     @Contract("null,_,_ -> null")
     public static Bitmap loadSync(@Nullable String str, int widthPx, int heightPx) {
         if (str == null) return null;
-
         String uri = getUri(str);
-
         ImageSize targetImageSize = widthPx > 0 && heightPx > 0 ? new ImageSize(widthPx, heightPx) : null;
-
         return sIL.loadImageSync(uri, targetImageSize);
+    }
+
+    public static void load(@Nullable String str, @NotNull ImageLoadingListener loadingListener) {
+        load(str, 0, 0, loadingListener);
+    }
+
+    public static void load(@Nullable String str, int widthPx, int heightPx, @NotNull ImageLoadingListener loadingListener) {
+        if (str == null) return;
+        String uri = getUri(str);
+        ImageSize targetImageSize = widthPx > 0 && heightPx > 0 ? new ImageSize(widthPx, heightPx) : null;
+        sIL.loadImage(uri, targetImageSize, loadingListener);
     }
 
     public static void display(@Nullable String str, ImageView imageView) {
@@ -180,15 +189,18 @@ public final class UIL {
         }
     }
 
-    public static void display(@Nullable String str, ImageView imageView, ImageLoadingListener listener) {
+    public static void display(@Nullable String str, @Nullable ImageView imageView, ImageLoadingListener listener) {
         if (StringUtils.isNotBlank(str)) {
-            sIL.displayImage(UIL.getUri(str), new ImageViewAware(imageView), null, listener);
+            sIL.displayImage(UIL.getUri(str), imageView != null ? new ImageViewAware(imageView) : null, null, listener);
         }
     }
 
-    public static void displayPhoto(@Nullable String str, ImageView imageView, ImageLoadingListener listener) {
+    public static void displayPhoto(@Nullable String str, @Nullable ImageView imageView, ImageLoadingListener listener) {
         if (StringUtils.isNotBlank(str)) {
-            sIL.displayImage(UIL.getUri(str), new ImageViewAware(imageView), mOptionsForPhotos, listener);
+            sIL.displayImage(UIL.getUri(str),
+                             imageView != null ? new ImageViewAware(imageView) : null,
+                             mOptionsForPhotos,
+                             listener);
         }
     }
 
