@@ -1,6 +1,7 @@
 package com.carlosefonseca.common.utils;
 
 import android.os.Environment;
+import android.support.annotation.Nullable;
 import bolts.Task;
 
 import java.io.*;
@@ -29,6 +30,27 @@ public final class DownloadURLTask  {
             @Override
             public String call() throws Exception {
                 return download(url, false);
+            }
+        });
+    }
+
+    public static Task<String> downloadStringRetries(final String url) {
+        return Task.callInBackground(new Callable<String>() {
+            @Nullable
+            @Override
+            public String call() throws IOException {
+                int limit = 5;
+                do {
+                    try {
+                        limit--;
+                        Log.v(TAG, "Downloading "+url);
+                        return download(url, false);
+                    } catch (IOException e) {
+                        if (limit == 0) throw e;
+                        Log.w(TAG, "Download Failed. Retrying.", e);
+                    }
+                } while (limit > 0);
+                return null;
             }
         });
     }
