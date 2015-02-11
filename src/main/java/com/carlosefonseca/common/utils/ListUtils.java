@@ -113,6 +113,20 @@ public final class ListUtils {
         return list;
     }
 
+    /**
+     * Iterates through the sparse array and adds the contents to the list.
+     *
+     * @param list  The list that will receive the items.
+     * @param array The sparse array that contains the elements.
+     */
+    public static <T> ArrayList<Integer> sparseArrayKeysToList(SparseArray<? extends T> array) {
+        ArrayList<Integer> keys = new ArrayList<>(array.size());
+        for (int i = 0; i < array.size(); i++) {
+            keys.add(array.keyAt(i));
+        }
+        return keys;
+    }
+
     public static void removeNullElements(ArrayList<?> arrayList) {
         for (int i = arrayList.size() - 1; i >= 0; i--) {
             if (arrayList.get(i) == null) {
