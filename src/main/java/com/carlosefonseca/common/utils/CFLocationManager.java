@@ -4,6 +4,7 @@ import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
 import android.widget.Toast;
+import bolts.Continuation;
 import bolts.Task;
 import com.carlosefonseca.common.CFApp;
 import com.google.android.gms.common.ConnectionResult;
@@ -186,9 +187,23 @@ public class CFLocationManager implements GooglePlayServicesClient.ConnectionCal
         Log.d(TAG, "Listeners++: Total: " + listeners.size() + " New: " + listener.getClass().getName());
     }
 
-    public void addListenerAndLocate(OnLocationChangedListener listener) {
+    public void addListenerAndLocate(final OnLocationChangedListener listener) {
         addListener(listener);
-        if (!isLocating) startLocationUpdates();
+        if (!isLocating) {
+            startLocationUpdates();
+        } else {
+            if (this.location != null) {
+                listener.onLocationChanged(this.location);
+            } else {
+                getLastLocationTask().onSuccess(new Continuation<Location, Void>() {
+                    @Override
+                    public Void then(Task<Location> task) throws Exception {
+                        listener.onLocationChanged(task.getResult());
+                        return null;
+                    }
+                });
+            }
+        }
     }
 
     /**
