@@ -165,6 +165,7 @@ public class GalleryPlus extends FrameLayout {
                     @Override
                     public void run(GalleryPlus view) {
                         int measuredWidth1 = view.getMeasuredWidth();
+                        if (measuredWidth1 == 0) measuredWidth1 = ((View) view.getParent()).getMeasuredWidth();
                         int newHeight1 = (int) (aspectRatio * measuredWidth1);
                         ViewUtils.setLayoutWidthHeight(view, measuredWidth1, newHeight1);
                         ViewUtils.setLayoutWidthHeight(galleryView, measuredWidth1, newHeight1);
