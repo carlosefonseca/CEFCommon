@@ -18,6 +18,9 @@ public final class TaskUtils {
         }
     };
 
+    /**
+     * @return True if there are errors, false otherwise.
+     */
     public static boolean logTaskError(Task<?> voidTask) {
         final Exception error = voidTask.getError();
         logAggregateException(error);
