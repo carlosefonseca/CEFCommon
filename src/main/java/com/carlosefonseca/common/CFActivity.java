@@ -159,6 +159,7 @@ public class CFActivity extends FragmentActivity implements ActivityStateListene
     @Override
     protected void onResume() {
         super.onResume();
+        if (mActivityStateListener != null) mActivityStateListener.onResume();
         setLatestActivity();
     }
 
@@ -187,6 +188,7 @@ public class CFActivity extends FragmentActivity implements ActivityStateListene
             registered = false;
         }
 //        clearLatestActivityIfSame();
+        if (mActivityStateListener != null) mActivityStateListener.onPause();
     }
 
     void onEventMainThread(RunnableOnActivity runnable) {
