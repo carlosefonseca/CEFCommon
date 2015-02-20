@@ -118,7 +118,7 @@ public final class TaskUtils {
     }
 
     /**
-     * TaskUtils.<Object>getPassThruLogErrorContinuation()
+     * {@code TaskUtils.<Object>getPassThruLogErrorContinuation() }
      */
     public static <T> Continuation<T, T> getPassThruLogErrorContinuation() {
         return new Continuation<T, T>() {

@@ -327,7 +327,7 @@ public class MapHelper {
     public enum AnchorPlacement {
         CENTER_BOTTOM, CENTER;
 
-        float u() {
+        public float u() {
             switch (this) {
                 case CENTER_BOTTOM:
                 case CENTER:
@@ -336,7 +336,7 @@ public class MapHelper {
             }
         }
 
-        float v() {
+        public float v() {
             switch (this) {
 
                 case CENTER_BOTTOM:
