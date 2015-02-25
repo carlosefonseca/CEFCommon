@@ -9,6 +9,7 @@ import android.media.ExifInterface;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Environment;
+import android.support.annotation.Nullable;
 import android.support.v4.util.LruCache;
 import android.text.Layout;
 import android.text.StaticLayout;
@@ -20,7 +21,6 @@ import android.view.animation.Animation;
 import android.widget.ImageView;
 import bolts.Task;
 import com.carlosefonseca.common.CFApp;
-import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -131,6 +131,42 @@ public final class ImageUtils {
             return bitmap.getRowBytes() * bitmap.getHeight();
         }
     }
+
+//    @Deprecated
+//    @Nullable
+//    public static Bitmap getCachedPhoto(String path) {
+//        return UIL.loadSync(path);
+//    }
+//
+//    @Nullable
+//    @Deprecated
+//    public static Bitmap getCachedPhoto(String image, int i, int i1) {
+//        return UIL.loadSyncDP(image, i, i1);
+//    }
+//
+//    @Deprecated
+//    @Nullable
+//    public static Bitmap getCachedPhoto(File file, int i, int i1) {
+//        return UIL.loadSync(file, i, i1);
+//    }
+//
+//    @Deprecated
+//    @Nullable
+//    public static Bitmap getCachedPhoto(File path) {
+//        return UIL.loadSync(path);
+//    }
+//
+//    @Nullable
+//    @Deprecated
+//    public static Bitmap getResizedIcon(String file, int w, int h) {
+//        return UIL.getIconDP(file, w, h);
+//    }
+//
+//    @Nullable
+//    @Deprecated
+//    public static Bitmap getResizedIcon(File file, int w, int h) {
+//        return UIL.getIconDP(UIL.getUri(file), w, h);
+//    }
 
     public static class BitmapCanvas {
         public final Bitmap bitmap;
