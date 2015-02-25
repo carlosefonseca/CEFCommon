@@ -2,6 +2,7 @@ package com.carlosefonseca.common.utils;
 
 import android.content.Context;
 import android.content.res.ColorStateList;
+import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
@@ -160,15 +161,15 @@ public final class ResourceUtils {
      * Creates a {@link android.graphics.drawable.StateListDrawable} from a resource id which is recolored with a color for the
      * default state and another color for both PRESSED and SELECTED states.
      *
-     * @param context    A context.
+     * @param resources
      * @param resId      The (bitmap) resource id.
      * @param color      The default color.
      * @param otherColor The color for the other states.
      */
-    public static StateListDrawable createDualStateDrawableFromResource(Context context, int resId, int color, int otherColor) {
+    public static StateListDrawable createDualStateDrawableFromResource(Resources resources, int resId, int color, int otherColor) {
         return ResourceUtils.createDualStateDrawable(
-                new BitmapDrawable(context.getResources(), ImageUtils.createRecoloredBitmap(context, resId, color)),
-                new BitmapDrawable(context.getResources(), ImageUtils.createRecoloredBitmap(context, resId, otherColor)), BOTH);
+                new BitmapDrawable(resources, ImageUtils.createRecoloredBitmap(resources, resId, color)),
+                new BitmapDrawable(resources, ImageUtils.createRecoloredBitmap(resources, resId, otherColor)), BOTH);
     }
 
     /**

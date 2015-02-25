@@ -17,6 +17,7 @@ import com.nostra13.universalimageloader.core.assist.ImageSize;
 import com.nostra13.universalimageloader.core.assist.QueueProcessingType;
 import com.nostra13.universalimageloader.core.display.FadeInBitmapDisplayer;
 import com.nostra13.universalimageloader.core.download.BaseImageDownloaderImpl;
+import com.nostra13.universalimageloader.core.download.ImageDownloader;
 import com.nostra13.universalimageloader.core.imageaware.ImageViewAware;
 import com.nostra13.universalimageloader.core.listener.ImageLoadingListener;
 import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener;
@@ -28,6 +29,7 @@ import org.jetbrains.annotations.Nullable;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
+import java.util.regex.Pattern;
 import java.util.zip.ZipFile;
 
 public final class UIL {
@@ -117,14 +119,18 @@ public final class UIL {
         };
     }
 
+    static Pattern pattern = Pattern.compile("(assets|file|obb)://.*", Pattern.CASE_INSENSITIVE);
+
     @Nullable
     public static String getUri(@Nullable String str) {
         if (str == null) return null;
+        if (pattern.matcher(str).matches()) return str;
+
         final String uri;
         if (str.startsWith("http")) { // Full URL
             String lastSegmentOfURL = NetworkingUtils.getLastSegmentOfURL(str);
             if (sAssets.contains(lastSegmentOfURL)) {
-                uri = "assets://" + lastSegmentOfURL;
+                uri = ImageDownloader.Scheme.ASSETS.wrap(lastSegmentOfURL);
             } else if (sApkExpansionZipFile != null && sApkExpansionZipFile.contains(lastSegmentOfURL)) {
                 uri = BaseImageDownloaderImpl.obbScheme + lastSegmentOfURL;
             } else {
@@ -134,16 +140,16 @@ public final class UIL {
         } else {
             if (!str.startsWith("/")) { // only filename
                 if (sAssets.contains(str)) {
-                    uri = "assets://" + str;
+                    uri = ImageDownloader.Scheme.ASSETS.wrap(str);
                 } else if (sApkExpansionZipFile != null && sApkExpansionZipFile.contains(str)) {
                     uri = BaseImageDownloaderImpl.obbScheme + str;
                 } else { // set full path to ext/files
-                    uri = "file://" + sExternalFilesDir + "/" + str;
+                    uri = ImageDownloader.Scheme.FILE.wrap(sExternalFilesDir + "/" + str);
                 }
             }
             // we have a full path
             else {
-                uri = "file://" + str;
+                uri = ImageDownloader.Scheme.FILE.wrap(str);
             }
         }
         return uri;
@@ -155,11 +161,11 @@ public final class UIL {
         if (file == null) return null;
         final String uri;
         if (file.exists()) {
-            uri = "file://" + file.getAbsolutePath();
+            uri = ImageDownloader.Scheme.FILE.wrap(file.getAbsolutePath());
         } else {
             String name = file.getName();
             if (sAssets.contains(name)) {
-                uri = "assets://" + name;
+                uri = ImageDownloader.Scheme.ASSETS.wrap(name);
             } else if (sApkExpansionZipFile != null && sApkExpansionZipFile.contains(name)) {
                 uri = BaseImageDownloaderImpl.obbScheme + name;
             } else {

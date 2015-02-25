@@ -35,13 +35,10 @@ import java.util.regex.Pattern;
 import static android.os.Build.VERSION.SDK_INT;
 import static android.os.Build.VERSION_CODES.ICE_CREAM_SANDWICH;
 import static com.carlosefonseca.common.utils.CodeUtils.getTag;
-import static com.carlosefonseca.common.utils.NetworkingUtils.getFileFromUrlOrPath;
-import static com.carlosefonseca.common.utils.NetworkingUtils.getLastSegmentOfURL;
 
 /**
  * Util methods for manipulating images.
  */
-@SuppressWarnings("UnusedDeclaration")
 public final class ImageUtils {
 
     private static final String TAG = getTag(ImageUtils.class);
@@ -68,29 +65,6 @@ public final class ImageUtils {
 
     private ImageUtils() {}
 
-    /**
-     * Given a {@code BitmapFactory.Options} of an image and the desired size for that image, calculates the adequate
-     * InSampleSize value.
-     */
-    static int calculateInSampleSize(BitmapFactory.Options options, int reqWidth, int reqHeight) {
-        // Raw height and width of image
-        final int height = options.outHeight;
-        final int width = options.outWidth;
-        int inSampleSize = 1;
-
-        if (height > reqHeight && width > reqWidth) {
-            inSampleSize = (int) Math.min(Math.floor((float) height / (float) reqHeight),
-                                          Math.floor((float) width / (float) reqWidth));
-        }
-        return inSampleSize;
-    }
-
-/*
-    public static void setDensity(Activity activity) {
-        Log.i(TAG, "Width dp: " + ((1.0 * displayMetrics.widthDP) / density) + " density: " + density);
-    }
-*/
-
     public static float getDensity() {
         return density;
     }
@@ -106,172 +80,10 @@ public final class ImageUtils {
     public static DisplayMetrics getDisplayMetrics() {
         if (displayMetrics == null) {
             displayMetrics = CFApp.getContext().getResources().getDisplayMetrics();
-//            throw new IllegalStateException("setDensity not yet invoked. Display Metrics aren't yet available.");
         }
         return displayMetrics;
     }
 
-
-    /**
-     * @param c Context
-     * @param path Path
-     * @param reqWidth  Pixels
-     * @param reqHeight Pixels
-     * @throws IOException
-     */
-    public static Bitmap decodeSampledBitmapFromFileOnAssets(Context c, String path, int reqWidth, int reqHeight)
-            throws IOException {
-        InputStream stream = c.getAssets().open(path);
-
-        // First decode with inJustDecodeBounds=true to check dimensions
-        BitmapFactory.Options options = null;
-
-        if (reqWidth > 0 || reqHeight > 0) {
-            options = new BitmapFactory.Options();
-            options.inJustDecodeBounds = true;
-            if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT) {
-                //noinspection deprecation
-                options.inPurgeable = true;
-                //noinspection deprecation
-                options.inInputShareable = true;
-            }
-            BitmapFactory.decodeStream(stream, null, options);
-
-            // Calculate inSampleSize
-            options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
-
-            // Decode bitmap with inSampleSize set
-            options.inJustDecodeBounds = false;
-            stream.reset();
-            //	    stream.close();
-            //	    stream = SharedObjects.getContext().getAssets().open(path);
-        }
-
-        Bitmap bitmap = BitmapFactory.decodeStream(stream, null, options);
-        stream.close();
-        return bitmap;
-    }
-
-    @Nullable
-    private static Bitmap getPhotoFromAssets(String path) {
-        try {
-            InputStream stream = CFApp.getContext().getAssets().open(path);
-            Bitmap bitmap = BitmapFactory.decodeStream(stream);
-            stream.close();
-            return bitmap;
-        } catch (IOException e) {
-            Log.e(TAG, "" + e.getMessage(), e);
-            return null;
-        }
-    }
-
-
-    @Nullable
-    public static Bitmap decodeSampledBitmapFromFile(File path, int reqWidth, int reqHeight) {
-        if (path == null) return null;
-        return decodeSampledBitmapFromFile(path.getAbsolutePath(), reqWidth, reqHeight);
-    }
-
-    @Nullable
-    public static Bitmap getCachedPhoto(@Nullable File file, int widthDp, int heightDp, @Nullable String sizeName) {
-        return getCachedPhotoPx(file, ((int) (widthDp * density)), (int) (heightDp * density), sizeName);
-    }
-
-    /**
-     * Tries to get an image from the cache folder. If not found, tries to get the original image, scale it and save it to the
-     * cache asynchronously.
-     *
-     * @param file     The path to the image file.
-     * @param widthPx  Minimum width in DP's.
-     * @param heightPx Minimum height in DP's.
-     * @param sizeName An optional name to use for size of the the cached image.
-     * @return Scaled and rotated image.
-     * @see #getPhotoFromFile
-     */
-    @Nullable
-    public static Bitmap getCachedPhotoPx(@Nullable File file, int widthPx, int heightPx, @Nullable String sizeName) {
-        Bitmap bitmap = null;
-        if (file == null) return null;
-        String name = file.getName();
-        String cacheName;
-        File cacheFile = null;
-
-        if (widthPx > 0 && heightPx > 0) {
-            if (sizeName == null) {
-                cacheName = name.substring(0, name.length() - 4) + "-" + widthPx + "x" + heightPx + ".png";
-            } else {
-                cacheName = name.substring(0, name.length() - 4) + sizeName + ".png";
-            }
-            cacheFile = new File(cacheDir, cacheName);
-            if (cacheFile.exists()) {
-                try {
-                    bitmap = BitmapFactory.decodeFile(cacheFile.getAbsolutePath());
-                } catch (OutOfMemoryError e) {
-                    Log.e(TAG, "" + e.getMessage(), e);
-                    bitmap = null;
-                }
-            }
-        }
-
-        if (bitmap == null) {
-            bitmap = getPhotoFromFileOrAssetsPx(file, widthPx, heightPx);
-            if (bitmap == null) return null;
-            if (cacheFile != null) new ImageWriter(cacheFile, bitmap).execute();
-        }
-        return bitmap;
-    }
-
-    @Deprecated
-    @Nullable
-    private static Bitmap getPhotoFromFileOrAssets(@Nullable File file, int widthDp, int heightDp) {
-        return getPhotoFromFileOrAssetsPx(file, dp2px(widthDp), dp2px(heightDp));
-    }
-
-    /**
-     * Same as {@link #tryPhotoFromFileOrAssetsPx(java.io.File, int, int)} but logs a warning if the image was not
-     * found.
-     *
-     * @param file   The path to the image file.
-     * @param width  Desired width in pixels.
-     * @param height Desired height in pixels.
-     * @return Scaled and rotated image or null if no image was found.
-     */
-    @Nullable
-    private static Bitmap getPhotoFromFileOrAssetsPx(@Nullable File file, int width, int height) {
-        final Bitmap bitmap = tryPhotoFromFileOrAssetsPx(file, width, height);
-        if (bitmap == null) Log.w(TAG, "IMAGE DOES NOT EXIST " + file);
-        return bitmap;
-    }
-
-    @Deprecated
-    @Nullable
-    static Bitmap tryPhotoFromFileOrAssets(@Nullable File file, int widthDp, int heightDp) {
-        return tryPhotoFromFileOrAssetsPx(file, dp2px(widthDp), dp2px(heightDp));
-    }
-
-    /**
-     * Obtains an image, scaled down to be at least the requested size and rotated according to the EXIF on the
-     * file.
-     * <p/>
-     * If the file doesn't exist, looks for the same filename on the app's assets.
-     *
-     * @param file     The path to the image file.
-     * @param widthPx  Desired width in pixels.
-     * @param heightPx Desired height in pixels.
-     * @return Scaled and rotated image or null if no image was found.
-     */
-
-    @Nullable
-    static Bitmap tryPhotoFromFileOrAssetsPx(@Nullable File file, int widthPx, int heightPx) {
-        if (file == null) return null;
-        Bitmap bitmap = null;
-        if (file.exists()) {
-            bitmap = getPhotoFromFilePx(file.getAbsolutePath(), widthPx, heightPx);
-        } else if (getImagesOnAssets().contains(file.getName())) {
-            bitmap = getPhotoFromAssets(file.getName(), widthPx, heightPx);
-        }
-        return bitmap;
-    }
 
     /**
      * Gets the aspect ratio (h/w) of an image be it on the full path or on the assets folder.
@@ -285,7 +97,6 @@ public final class ImageUtils {
 
     @Nullable
     static BitmapFactory.Options getImageBounds(File file) {
-        Bitmap bitmap = null;
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inJustDecodeBounds = true;
         if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT) {
@@ -310,13 +121,6 @@ public final class ImageUtils {
         return options;
     }
 
-
-//            return 1.0 * options.outHeight / options.outWidth;
-
-    @Nullable
-    public static Bitmap getPhotoFromFileOrAssets(File file) {
-        return getPhotoFromFileOrAssetsPx(file, -1, -1);
-    }
 
     public static int sizeBitmap(Bitmap bitmap) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
@@ -345,245 +149,6 @@ public final class ImageUtils {
         return bitmapCanvas;
     }
 
-    public static interface RunnableWithBitmap {
-        public void run(Bitmap bmp);
-    }
-
-    public static void getCachedPhotoAsync(@Nullable final File file,
-                                           final int widthDp,
-                                           final int heightDp,
-                                           final RunnableWithBitmap runnable) {
-        new AsyncTask<Void, Void, Bitmap>() {
-            @Nullable
-            @Override
-            protected Bitmap doInBackground(Void... params) {
-                return getCachedPhoto(file, widthDp, heightDp, null);
-            }
-
-            @Override
-            protected void onPostExecute(Bitmap bmp) {
-                runnable.run(bmp);
-            }
-        }.execute();
-    }
-
-    @Nullable
-    public static AsyncTask<Void, Void, Bitmap> getCachedPhotoAsync(final String filenameOrUrl,
-                                                                    final int widthDp,
-                                                                    final int heightDp,
-                                                                    final RunnableWithBitmap runnable) {
-        if (filenameOrUrl.startsWith("http://")) {
-            return new AsyncTask<Void, Void, Bitmap>() {
-                @Nullable
-                @Override
-                protected Bitmap doInBackground(Void... params) {
-                    File fullPath = ResourceUtils.getFullPath(getLastSegmentOfURL(filenameOrUrl));
-                    if (fullPath == null) throw new RuntimeException("FullPath is null :\\");
-                    Bitmap cachedPhoto = getCachedPhoto(fullPath, widthDp, heightDp, null);
-                    if (cachedPhoto != null) return cachedPhoto;
-                    try {
-                        Bitmap bitmap = NetworkingUtils.loadBitmap(filenameOrUrl);
-                        new ImageWriter(fullPath, bitmap);
-                        return bitmap;
-                    } catch (IOException e) {
-                        Log.e(TAG, "" + e.getMessage(), e);
-                    }
-                    return null;
-                }
-
-                @Override
-                protected void onPostExecute(Bitmap bmp) {
-                    runnable.run(bmp);
-                }
-            }.execute();
-        } else {
-            File file = filenameOrUrl.startsWith("/") ? new File(filenameOrUrl) : ResourceUtils.getFullPath(filenameOrUrl);
-            getCachedPhotoAsync(file, widthDp, heightDp, runnable);
-        }
-        return null;
-    }
-
-    @Nullable
-    public static Bitmap getPhotoFromFileOrAssets(String filenameOrUrl) {
-        if (filenameOrUrl == null) return null;
-        return getPhotoFromFileOrAssetsPx(getFileFromUrlOrPath(filenameOrUrl), -1, -1);
-    }
-
-
-    /**
-     * Convenience method to convert filenames or URLs to an existing file on disk that will then be loaded with {@link
-     * #getCachedPhoto(java.io.File, int, int, String)}.
-     * <p/>
-     * Accepted {@code filenameOrUrl} options:
-     * <ul>
-     * <li>http://example.com/image.png</li>
-     * <li>/sdcard/somefolder/image.png</li>
-     * <li>image.png</li>
-     * </ul>
-     * <p/>
-     * This method doesn't resize
-     *
-     * @param filenameOrUrl File "reference".
-     */
-    @Nullable
-    public static Bitmap getCachedPhoto(String filenameOrUrl) {
-        return getCachedPhoto(filenameOrUrl, -1, -1);
-    }
-
-
-    /**
-     * Convenience method to convert filenames or URLs to an existing file on disk that will then be loaded with {@link
-     * #getCachedPhoto(java.io.File, int, int, String)}.
-     * <p/>
-     * Accepted {@code filenameOrUrl} options:
-     * <ul>
-     * <li>http://example.com/image.png</li>
-     * <li>/sdcard/somefolder/image.png</li>
-     * <li>image.png</li>
-     * </ul>
-     *
-     * @param filenameOrUrl File "reference".
-     * @param widthDp       Desired width.
-     * @param heightDp      Desired height.
-     */
-    @Nullable
-    public static Bitmap getCachedPhoto(@Nullable final String filenameOrUrl, final int widthDp, final int heightDp) {
-        if (filenameOrUrl == null) return null;
-        return getCachedPhoto(getFileFromUrlOrPath(filenameOrUrl), widthDp, heightDp, null);
-    }
-
-    /**
-     * Convenience method to convert filenames or URLs to an existing file on disk that will then be loaded with {@link
-     * #getResizedIcon(java.io.File, int, int)}.
-     * <p/>
-     * Accepted {@code filenameOrUrl} options:
-     * <ul>
-     * <li>http://example.com/image.png</li>
-     * <li>/sdcard/somefolder/image.png</li>
-     * <li>image.png</li>
-     * </ul>
-     *
-     * @param filenameOrUrl File "reference".
-     * @param widthDp       Desired width.
-     * @param heightDp      Desired height.
-     */
-
-    @Nullable
-    public static Bitmap getResizedIcon(final String filenameOrUrl, final int widthDp, final int heightDp) {
-        if (filenameOrUrl == null) return null;
-        return getResizedIcon(getFileFromUrlOrPath(filenameOrUrl), widthDp, heightDp);
-    }
-
-    /**
-     *
-     * @param name File name
-     * @param width Pixels
-     * @param height Pixels
-     * @return Bitmap or null
-     */
-    @Nullable
-    public static Bitmap getPhotoFromAssets(String name, int width, int height) {
-        try {
-            return decodeSampledBitmapFromFileOnAssets(CFApp.getContext(), name, width, height);
-        } catch (IOException e) {
-            Log.e(TAG, "" + e.getMessage(), e);
-        }
-        return null;
-    }
-
-    /**
-     * Tries to get an image from the cache folder. If not found, tries to get the original image, scale it and save it to the
-     * cache asynchronously.
-     *
-     * @param file     The path to the image file.
-     * @param widthDp  Minimum width in DP's.
-     * @param heightDp Minimum height in DP's.
-     * @return Scaled image.
-     * @see #getPhotoFromFile
-     */
-    @Nullable
-    public static Bitmap getResizedIcon(@Nullable File file, final int widthDp, final int heightDp) {
-        try {
-            Bitmap bitmap = null;
-            if (file == null) return null;
-            String name = file.getName();
-            String cacheName;
-
-            cacheName = name.substring(0, name.length() - 4) + "-" + widthDp + "x" + heightDp + ".png";
-
-            File cacheFile = new File(cacheDir, cacheName);
-            if (cacheFile.exists()) {
-                bitmap = BitmapFactory.decodeFile(cacheFile.getAbsolutePath());
-            }
-
-            if (bitmap == null) {   // cache doesn't exist
-
-                Bitmap bitmap1 = null;
-                if (file.exists()) {
-                    // Load full size from sd
-                    bitmap1 = BitmapFactory.decodeFile(file.getAbsolutePath());
-                } else if (getImagesOnAssets().contains(name)) {
-                    // Load full size from assets
-                    bitmap1 = getPhotoFromAssets(name);
-                }
-
-                if (bitmap1 != null) {
-
-                    if (widthDp != -1 || heightDp != -1) {
-                        // desired size
-                        int widthPx;
-                        int heightPx;
-                        if (bitmap1.getWidth() >= bitmap1.getHeight()) {
-                            widthPx = (int) (widthDp * density);
-                            heightPx = /*heightDp != -1 ? (int) (heightDp * density) :*/ widthPx * bitmap1.getHeight() /
-                                                                                         bitmap1.getWidth();
-                        } else {
-                            heightPx = (int) (heightDp * density);
-                            widthPx = /*widthDp != -1 ? (int) (widthDp * density) : */heightPx * bitmap1.getWidth() /
-                                                                                      bitmap1.getHeight();
-                        }
-
-                        if (widthPx == bitmap1.getWidth() && heightPx == bitmap1.getHeight()) {
-                            return bitmap1;
-                        }
-
-                        if (widthPx == 0 && heightPx == 0) {
-                            throw new IllegalArgumentException(String.format(
-                                    "width(%d) and height(%d) must be > 0. Provided values: widthDp:%d heightDp:%d",
-                                    widthPx,
-                                    heightPx,
-                                    widthDp,
-                                    heightDp));
-                        }
-
-                        // bitmap size != desired size
-                        bitmap = scaleAndCrop(bitmap1, widthPx, heightPx);
-                        bitmap1.recycle();
-
-                        new ImageWriter(cacheFile, bitmap).execute();
-                    } else {
-                        bitmap = bitmap1;
-                    }
-                } else {
-                    Log.w(TAG, "IMAGE DOES NOT EXIST " + file);
-                }
-            }
-            return bitmap;
-        } catch (OutOfMemoryError e) {
-            Log.e(TAG, "" + e.getMessage(), e);
-            return null;
-        }
-    }
-
-    public static Bitmap scaleAndCrop(Bitmap bitmap1, int widthPx, int heightPx) {
-        Bitmap bitmap = Bitmap.createBitmap(widthPx, heightPx, Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(bitmap);
-        Paint paint = new Paint(/*Paint.FILTER_BITMAP_FLAG*/);
-        paint.setAntiAlias(true);
-
-        canvas.drawBitmap(bitmap1, null, new Rect(0, 0, widthPx, heightPx), paint);
-        return bitmap;
-    }
 
     /**
      * Configuration.SCREENLAYOUT_SIZE_LARGE, Configuration.SCREENLAYOUT_SIZE_NORMAL...
@@ -650,175 +215,6 @@ public final class ImageUtils {
 
 
     /**
-     * Obtains an image, scaled down to be at least the requested size and rotated according to the EXIF on the file.<br/>
-     * It's aware of the device density.
-     *
-     * @param path The path to the image file.
-     * @return Scaled and rotated image or null if no image was found.
-     */
-    @SuppressWarnings("SuspiciousNameCombination")
-    @Nullable
-    public static Bitmap getPhotoFromFile(String path) {
-        try {
-            int orientation = getCameraPhotoOrientation(path);
-            Bitmap bitmap = BitmapFactory.decodeFile(path, null);
-            return rotate(bitmap, orientation);
-        } catch (Exception e) {
-            Log.e(TAG, "" + e.getMessage(), e);
-            return null;
-        }
-    }
-
-    /**
-     * Obtains an image, scaled down to be at least the requested size and rotated according to the EXIF on the file.<br/>
-     * It's aware of the device density.
-     *
-     * @param path   The path to the image file.
-     * @param width  Desired width in DP's.
-     * @param height Desired height in DP's.
-     * @return Scaled and rotated image or null if no image was found.
-     */
-    @SuppressWarnings("SuspiciousNameCombination")
-    @Nullable
-    public static Bitmap getPhotoFromFile(String path, int width, int height) {
-        int orientation = getCameraPhotoOrientation(path);
-        Bitmap bitmap = null;
-        try {
-            if (width > 0 || height > 0) {
-                if (displayMetrics == null) {
-                    Log.w(TAG, "Device density not accurate. Please call setDensity() from an activity before this.");
-                }
-                if (orientation == 90 || orientation == 270) {
-                    int x = width;
-                    width = height;
-                    height = x;
-                }
-
-                width *= density;
-                height *= density;
-
-                bitmap = decodeSampledBitmapFromFile(path, width, height);
-            } else {
-                bitmap = BitmapFactory.decodeFile(path);
-            }
-        /*
-
-        if (bitmap == null) {
-            Log.e(TAG, "Image "+path+" not found.");
-            return null;
-        }
-
-        float originalImgRatio = (float) (1.0 * bitmap.getWidth() / bitmap.getHeight());
-        float desiredSizeRatio = (float) (1.0 * width / height);
-
-        int finalWidth;
-        int finalHeight;
-
-        if (originalImgRatio > desiredSizeRatio) {
-            finalHeight = height;
-            finalWidth = (int) (height * originalImgRatio);
-        } else {
-            finalWidth = width;
-            finalHeight = (int) (finalWidth / originalImgRatio);
-        }
-
-        Log.i(TAG, "getPhoto " + path + " " + width + "x" + height + " -> " + finalWidth + "x" + finalHeight+" orientation: "+orientation);
-        bitmap = Bitmap.createScaledBitmap(bitmap, finalWidth, finalHeight, true);
-        */
-            bitmap = rotate(bitmap, orientation);
-        } catch (OutOfMemoryError e) {
-            Log.e(TAG, "" + e.getMessage(), e);
-        }
-
-        return bitmap;
-    }
-    /**
-     * Obtains an image, scaled down to be at least the requested size and rotated according to the EXIF on the file.<br/>
-     *
-     * @param path   The path to the image file.
-     * @param width  Desired width in pixels.
-     * @param height Desired height in pixels.
-     * @return Scaled and rotated image or null if no image was found.
-     */
-    @SuppressWarnings("SuspiciousNameCombination")
-    @Nullable
-    public static Bitmap getPhotoFromFilePx(String path, int width, int height) {
-        int orientation = getCameraPhotoOrientation(path);
-        Bitmap bitmap = null;
-        try {
-            if (width > 0 || height > 0) {
-                if (orientation == 90 || orientation == 270) {
-                    int x = width;
-                    width = height;
-                    height = x;
-                }
-
-                bitmap = decodeSampledBitmapFromFile(path, width, height);
-            } else {
-                bitmap = BitmapFactory.decodeFile(path);
-            }
-            bitmap = rotate(bitmap, orientation);
-        } catch (OutOfMemoryError e) {
-            Log.e(TAG, "" + e.getMessage(), e);
-        }
-
-        return bitmap;
-    }
-
-
-    /**
-     * Obtains a scaled down image from the file system.
-     * The scaling uses the size parameters to calculate the inSampleSize and, therefore, it will have at least that size.
-     *
-     * @param path      The path to the image file.
-     * @param reqWidth  Minimum width px.
-     * @param reqHeight Minimum height px.
-     * @return Scaled image.
-     */
-    @Nullable
-    public static Bitmap decodeSampledBitmapFromFile(String path, int reqWidth, int reqHeight) {
-        try {
-            // First decode with inJustDecodeBounds=true to check dimensions
-            final BitmapFactory.Options options = new BitmapFactory.Options();
-            options.inJustDecodeBounds = true;
-            if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT) {
-                //noinspection deprecation
-                options.inPurgeable = true;
-                //noinspection deprecation
-                options.inInputShareable = true;
-            }
-            BitmapFactory.decodeFile(path, options);
-
-            // Calculate inSampleSize
-            options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
-
-            // Decode bitmap with inSampleSize set
-            options.inJustDecodeBounds = false;
-
-            int width = reqWidth / options.inSampleSize;
-            int height = reqHeight / options.inSampleSize;
-
-            int estimatedBytes = width * 4 * height;
-
-            long freeMem = Runtime.getRuntime().maxMemory() - Runtime.getRuntime().totalMemory();
-            if (estimatedBytes > freeMem) {
-                System.gc();
-                freeMem = Runtime.getRuntime().maxMemory() - Runtime.getRuntime().totalMemory();
-                if (estimatedBytes > freeMem) {
-                    Log.w(TAG, "NOT ENOUGH MEMORY! Bitmap size: " + estimatedBytes + " Free Mem: " + freeMem);
-                    return null;
-                }
-            }
-
-            return BitmapFactory.decodeFile(path, options);
-        } catch (OutOfMemoryError e) {
-            Log.e(TAG, "" + e.getMessage(), e);
-            return null;
-        }
-    }
-
-
-    /**
      * Creates a squared thumbnail image from a source image and saves it to disk.
      * Subsequent requests to the same image with the same size will return the cached image.
      * The thumbnail will be a center-cropped version of the original, scaled to the specified size and rotated according to the
@@ -874,10 +270,9 @@ public final class ImageUtils {
      * @see #getCachedSquareThumbnail(android.content.Context, String, int) Disk-cached version.
      */
     private static Bitmap getSquareThumbnail(Context c, String path, int side) {
-        Bitmap bitmap = decodeSampledBitmapFromFile(path, side, side);
+        Bitmap bitmap = UIL.loadSync(path, side, side);
         bitmap = cropSquare(bitmap);
         bitmap = Bitmap.createScaledBitmap(bitmap, side, side, true);
-        bitmap = rotate(bitmap, path);
         return bitmap;
     }
 
@@ -977,42 +372,8 @@ public final class ImageUtils {
         return rotate;
     }
 
-    /**
-     * Creates a rotated copy of an image according to the EXIF information.
-     *
-     * @param bitmap The source image.
-     * @param path   The path on disk.
-     * @return A rotated bitmap.
-     */
-    public static Bitmap rotate(Bitmap bitmap, String path) {
-        int orientation = getCameraPhotoOrientation(path);
-        bitmap = rotate(bitmap, orientation);
 
-        return bitmap;
-    }
 
-    /**
-     * Rotates an image by a given number of degrees.
-     *
-     * @param bitmap      The source bitmap.
-     * @param orientation The amount of degrees to rotate.
-     * @return Rotated bitmap.
-     */
-    public static Bitmap rotate(Bitmap bitmap, int orientation) {
-        if (orientation != 0) {
-            try {
-                Matrix matrix = new Matrix();
-                matrix.postRotate(orientation);
-                // create a new bitmap from the original using the matrix to transform the result
-                Bitmap bitmap1 = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
-                bitmap.recycle();
-                return bitmap1;
-            } catch (OutOfMemoryError e) {
-                Log.e(TAG, "" + e.getMessage(), e);
-            }
-        }
-        return bitmap;
-    }
 
     /**
      * Creates a new bitmap from the original resource and paints the visible parts with the given color.
@@ -1393,7 +754,7 @@ public final class ImageUtils {
         @Nullable
         @Override
         protected Bitmap create(String key) {
-            return getCachedPhoto(key, width, height);
+            return UIL.loadSync(key, dp2px(width), dp2px(height));
         }
     }
 

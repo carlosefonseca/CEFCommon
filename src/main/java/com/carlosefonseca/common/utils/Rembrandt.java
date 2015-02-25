@@ -7,7 +7,6 @@ import android.view.View;
 import android.widget.ImageView;
 import bolts.Continuation;
 import bolts.Task;
-import org.apache.commons.lang3.StringUtils;
 import com.carlosefonseca.common.CFApp;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
@@ -15,6 +14,7 @@ import com.nostra13.universalimageloader.core.assist.ImageScaleType;
 import com.nostra13.universalimageloader.core.display.FadeInBitmapDisplayer;
 import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener;
 import junit.framework.Assert;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -27,7 +27,6 @@ import java.util.List;
 import java.util.concurrent.Callable;
 
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
-import static com.carlosefonseca.common.utils.NetworkingUtils.getLastSegmentOfURL;
 
 /**
  * This class is basically a re-packaging of multiple Bitmap methods in ImageUtils, in an interface similar to
@@ -295,7 +294,7 @@ public class Rembrandt {
                         bitmap = bitmapFromFile(url, mWidth, mHeight);
                     }
                 } else {
-                    bitmap = ImageUtils.getCachedPhotoPx(file, mWidth, mHeight, null);
+                    bitmap = UIL.loadSync(UIL.getUri(file), mWidth, mHeight);
                 }
                 if (bitmap != null) {
                     if (transform != null) bitmap = transform.bitmap(bitmap);
@@ -330,24 +329,17 @@ public class Rembrandt {
 
     @Nullable
     public static Bitmap bitmapFromFile(String url, int widthPx, int heightPx) {
-        final File file1 = url.startsWith("/") ? new File(url) : ResourceUtils.getFullPath(url);
-        return bitmapFromFile(file1, widthPx, heightPx);
+        return UIL.loadSync(url, widthPx, heightPx);
     }
 
     @Nullable
     public static Bitmap bitmapFromFile(@Nullable File file, int widthPx, int heightPx) {
-        return ImageUtils.getCachedPhotoPx(file, widthPx, heightPx, null);
+        return UIL.loadSync(UIL.getUri(file), widthPx, heightPx);
     }
 
     @Nullable
     public static Bitmap bitmapFromUrl(@NotNull String url, int widthPx, int heightPx) throws IOException {
-        final File fullPath = ResourceUtils.getFullPath(getLastSegmentOfURL(url));
-        Bitmap cachedPhoto = ImageUtils.tryPhotoFromFileOrAssetsPx(fullPath, widthPx, heightPx);
-        if (cachedPhoto != null) return cachedPhoto;
-        Log.i(TAG, "Downloading image " + url);
-        Bitmap bitmap = NetworkingUtils.loadBitmap(url);
-        if (bitmap != null && fullPath != null) ImageUtils.writeImageInBackground(fullPath, bitmap);
-        return bitmap;
+        return UIL.loadSync(url, widthPx, heightPx);
     }
 
     private static void setImageBitmapOnView(@NotNull Bitmap result, final ImageView view, short animated) {

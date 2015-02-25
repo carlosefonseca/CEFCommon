@@ -5,7 +5,7 @@ import android.graphics.Bitmap;
 import android.support.v4.view.PagerAdapter;
 import android.view.View;
 import android.view.ViewGroup;
-import com.carlosefonseca.common.utils.ImageUtils;
+import com.carlosefonseca.common.utils.UIL;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -29,7 +29,7 @@ public class ZoomableArrayAdapter extends PagerAdapter {
     @Override
     public Object instantiateItem(ViewGroup container, int position) {
         TouchImageView imageView = new TouchImageView(context);
-        Bitmap photo = ImageUtils.getCachedPhoto(objects.get(position), -1, -1, null);
+        Bitmap photo = UIL.loadSync(UIL.getUri(objects.get(position)));
         imageView.setImageBitmap(photo);
         container.addView(imageView, MATCH_PARENT, MATCH_PARENT);
         if (onClickListener != null) imageView.setOnClickListener(onClickListener);
