@@ -32,6 +32,8 @@ import java.util.*;
 import java.util.regex.Pattern;
 import java.util.zip.ZipFile;
 
+import static com.carlosefonseca.common.utils.ImageUtils.dp2px;
+
 public final class UIL {
 
     private static final String TAG = CodeUtils.getTag(UIL.class);
@@ -149,7 +151,18 @@ public final class UIL {
             }
             // we have a full path
             else {
-                uri = ImageDownloader.Scheme.FILE.wrap(str);
+                if (new File(str).exists()) {
+                    uri = ImageDownloader.Scheme.FILE.wrap(str);
+                } else {
+                    if (sAssets.contains(str)) {
+                        uri = ImageDownloader.Scheme.ASSETS.wrap(str);
+                    } else if (sApkExpansionZipFile != null && sApkExpansionZipFile.contains(str)) {
+                        uri = BaseImageDownloaderImpl.obbScheme + str;
+                    } else {
+                        // File doesn't exist but oh well...
+                        uri = ImageDownloader.Scheme.FILE.wrap(str);
+                    }
+                }
             }
         }
         return uri;
@@ -185,11 +198,33 @@ public final class UIL {
     public static Bitmap loadSync(@Nullable String str) {return loadSync(str, 0, 0);}
 
     @Nullable
+    @Contract("null -> null")
+    public static Bitmap loadSync(@Nullable File file) {return loadSync(file, 0, 0);}
+
+    @Nullable
     @Contract("null,_,_ -> null")
     public static Bitmap loadSync(@Nullable String str, int widthPx, int heightPx) {
         if (str == null) return null;
         String uri = getUri(str);
         ImageSize targetImageSize = widthPx > 0 && heightPx > 0 ? new ImageSize(widthPx, heightPx) : null;
+        return sIL.loadImageSync(uri, targetImageSize);
+    }
+
+    @Nullable
+    @Contract("null,_,_ -> null")
+    public static Bitmap loadSync(@Nullable File file, int widthPx, int heightPx) {
+        if (file == null) return null;
+        String uri = getUri(file);
+        ImageSize targetImageSize = widthPx > 0 && heightPx > 0 ? new ImageSize(widthPx, heightPx) : null;
+        return sIL.loadImageSync(uri, targetImageSize);
+    }
+
+    @Nullable
+    @Contract("null,_,_ -> null")
+    public static Bitmap loadSyncDP(@Nullable String str, int widthDp, int heightDp) {
+        if (str == null) return null;
+        String uri = getUri(str);
+        ImageSize targetImageSize = widthDp > 0 && heightDp > 0 ? new ImageSize(dp2px(widthDp), dp2px(heightDp)) : null;
         return sIL.loadImageSync(uri, targetImageSize);
     }
 
@@ -242,5 +277,12 @@ public final class UIL {
     public static Bitmap getIcon(@Nullable String str, int w, int h) {
         if (StringUtils.isBlank(str)) return null;
         return sIL.loadImageSync(getUri(str), new ImageSize(w, h), mOptionsForIcons);
+    }
+
+    @Nullable
+    @Contract("null,_,_ -> null")
+    public static Bitmap getIconDP(@Nullable String str, int w, int h) {
+        if (StringUtils.isBlank(str)) return null;
+        return sIL.loadImageSync(getUri(str), new ImageSize(dp2px(w), dp2px(h)), mOptionsForIcons);
     }
 }
