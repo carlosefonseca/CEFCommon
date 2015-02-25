@@ -4,6 +4,8 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.view.View;
 import android.widget.ImageView;
+import com.android.vending.expansion.zipfile.APKExpansionSupport;
+import com.android.vending.expansion.zipfile.ZipResourceFile;
 import com.carlosefonseca.common.CFApp;
 import com.nostra13.universalimageloader.cache.disc.impl.UnlimitedDiscCache;
 import com.nostra13.universalimageloader.cache.disc.naming.FileNameGenerator;
@@ -14,6 +16,7 @@ import com.nostra13.universalimageloader.core.assist.ImageScaleType;
 import com.nostra13.universalimageloader.core.assist.ImageSize;
 import com.nostra13.universalimageloader.core.assist.QueueProcessingType;
 import com.nostra13.universalimageloader.core.display.FadeInBitmapDisplayer;
+import com.nostra13.universalimageloader.core.download.BaseImageDownloaderImpl;
 import com.nostra13.universalimageloader.core.imageaware.ImageViewAware;
 import com.nostra13.universalimageloader.core.listener.ImageLoadingListener;
 import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener;
@@ -23,10 +26,9 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
+import java.io.IOException;
+import java.util.*;
+import java.util.zip.ZipFile;
 
 public final class UIL {
 
@@ -34,7 +36,9 @@ public final class UIL {
 
     private static File sExternalFilesDir;
     private static HashSet<String> sAssets;
+    private static HashMap<File, ZipFile> sObb;
     private static ImageLoader sIL;
+    @Nullable private static ZipResourceFile sApkExpansionZipFile;
 
     private UIL() {}
 
@@ -54,10 +58,23 @@ public final class UIL {
         ImageLoaderConfiguration.Builder builder = new ImageLoaderConfiguration.Builder(context);
         if (CFApp.isTestDevice()) builder.writeDebugLogs();
 
+        try {
+            sApkExpansionZipFile = APKExpansionSupport.getAPKExpansionZipFile(context);
+        } catch (IOException e) {
+            Log.e(TAG, "" + e.getMessage(), e);
+            sApkExpansionZipFile = null;
+        }
+
+        BaseImageDownloaderImpl sImageDownloader = null;
+        if (sApkExpansionZipFile != null && sApkExpansionZipFile.getAllEntries().length > 0) {
+            sImageDownloader = new BaseImageDownloaderImpl(context, sApkExpansionZipFile);
+        }
+
         ImageLoaderConfiguration config = builder.threadPriority(Thread.NORM_PRIORITY - 2)
                                                  .memoryCacheSize((int) (CodeUtils.getFreeMem() / 6))
                                                  .diskCache(diskCache)
                                                  .tasksProcessingOrder(QueueProcessingType.LIFO)
+                                                 .imageDownloader(sImageDownloader)
                                                  .build();
 
         sIL = ImageLoader.getInstance();
@@ -108,6 +125,8 @@ public final class UIL {
             String lastSegmentOfURL = NetworkingUtils.getLastSegmentOfURL(str);
             if (sAssets.contains(lastSegmentOfURL)) {
                 uri = "assets://" + lastSegmentOfURL;
+            } else if (sApkExpansionZipFile != null && sApkExpansionZipFile.contains(lastSegmentOfURL)) {
+                uri = BaseImageDownloaderImpl.obbScheme + lastSegmentOfURL;
             } else {
                 uri = str;
             }
@@ -116,6 +135,8 @@ public final class UIL {
             if (!str.startsWith("/")) { // only filename
                 if (sAssets.contains(str)) {
                     uri = "assets://" + str;
+                } else if (sApkExpansionZipFile != null && sApkExpansionZipFile.contains(str)) {
+                    uri = BaseImageDownloaderImpl.obbScheme + str;
                 } else { // set full path to ext/files
                     uri = "file://" + sExternalFilesDir + "/" + str;
                 }
@@ -139,12 +160,18 @@ public final class UIL {
             String name = file.getName();
             if (sAssets.contains(name)) {
                 uri = "assets://" + name;
+            } else if (sApkExpansionZipFile != null && sApkExpansionZipFile.contains(name)) {
+                uri = BaseImageDownloaderImpl.obbScheme + name;
             } else {
                 Log.w(TAG, "File " + file.getAbsolutePath() + " doesn't exist on ext or assets!");
                 uri = null;
             }
         }
         return uri;
+    }
+
+    public static boolean existsOnPackage(String file) {
+        return sAssets.contains(file) || (sApkExpansionZipFile != null && sApkExpansionZipFile.contains(file));
     }
 
     @Nullable
