@@ -5,7 +5,7 @@ import android.graphics.*;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
-import org.jetbrains.annotations.NotNull;
+import android.support.annotation.NonNull;
 
 /**
  * Provides a view that allows simple finger drawing. Also provides ways to extract a bitmap with the drawing and a
@@ -93,7 +93,7 @@ public class DrawingView extends View {
 
 
     @Override
-    public boolean onTouchEvent(@NotNull MotionEvent event) {
+    public boolean onTouchEvent(@NonNull MotionEvent event) {
         float x = event.getX();
         float y = event.getY();
 

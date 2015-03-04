@@ -3,13 +3,13 @@ package com.carlosefonseca.common.utils;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
+import android.support.annotation.Nullable;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.Nullable;
 
 public final class ViewUtils {
     private ViewUtils() {}

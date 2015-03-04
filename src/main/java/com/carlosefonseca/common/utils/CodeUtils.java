@@ -26,7 +26,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.carlosefonseca.common.CFApp;
-import org.jetbrains.annotations.Nullable;
+import android.support.annotation.Nullable;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;

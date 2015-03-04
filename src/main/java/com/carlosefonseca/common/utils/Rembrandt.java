@@ -15,8 +15,8 @@ import com.nostra13.universalimageloader.core.display.FadeInBitmapDisplayer;
 import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener;
 import junit.framework.Assert;
 import org.apache.commons.lang3.StringUtils;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import java.io.File;
 import java.io.IOException;
@@ -338,11 +338,11 @@ public class Rembrandt {
     }
 
     @Nullable
-    public static Bitmap bitmapFromUrl(@NotNull String url, int widthPx, int heightPx) throws IOException {
+    public static Bitmap bitmapFromUrl(@NonNull String url, int widthPx, int heightPx) throws IOException {
         return UIL.loadSync(url, widthPx, heightPx);
     }
 
-    private static void setImageBitmapOnView(@NotNull Bitmap result, final ImageView view, short animated) {
+    private static void setImageBitmapOnView(@NonNull Bitmap result, final ImageView view, short animated) {
         switch (animated) {
 
             case FADE_IN:

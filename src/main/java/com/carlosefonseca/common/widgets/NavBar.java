@@ -23,8 +23,8 @@ import com.carlosefonseca.common.utils.CodeUtils;
 import com.carlosefonseca.common.utils.Log;
 import com.carlosefonseca.common.utils.ResourceUtils;
 import com.carlosefonseca.common.utils.ViewUtils;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import static com.carlosefonseca.common.utils.ResourceUtils.createDualStateDrawable;
 
@@ -346,7 +346,7 @@ public class NavBar extends LinearLayout {
      * Please remember that if you use images with background, the custom background might not be visible.
      */
     @Override
-    public void addView(@NotNull View child, int index, ViewGroup.LayoutParams params) {
+    public void addView(@NonNull View child, int index, ViewGroup.LayoutParams params) {
         if (getChildCount() == 0 && child.getId() == R.id.nav_bar_root) {
             super.addView(child, index, params);
         } else {

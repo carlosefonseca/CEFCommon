@@ -15,7 +15,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
-import org.jetbrains.annotations.Nullable;
+import android.support.annotation.Nullable;
 import com.carlosefonseca.common.R;
 
 @SuppressWarnings("UnusedDeclaration")

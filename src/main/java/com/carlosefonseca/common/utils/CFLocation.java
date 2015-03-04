@@ -6,8 +6,8 @@ import android.location.Geocoder;
 import android.location.Location;
 import android.util.Pair;
 import junit.framework.Assert;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import java.io.IOException;
 import java.security.InvalidParameterException;
@@ -30,7 +30,7 @@ public class CFLocation extends Location implements Comparable<CFLocation> {
      *
      * @param coordinateString The coordinate as a string in the format -9.123,38.123,0 (long,lat,…)
      */
-    public CFLocation(@NotNull String coordinateString) {
+    public CFLocation(@NonNull String coordinateString) {
         this(coordinateString, null, NO_INDEX);
     }
 
@@ -41,7 +41,7 @@ public class CFLocation extends Location implements Comparable<CFLocation> {
      * @param locationToDistance The location to calculated a distance from.
      * @param index              An index.
      */
-    public CFLocation(@NotNull String coordinateString, @Nullable CFLocation locationToDistance, int index) {
+    public CFLocation(@NonNull String coordinateString, @Nullable CFLocation locationToDistance, int index) {
         super("");
         String[] split1 = coordinateString.split(LINE_COORDINATE_PART_SPLITTER);
         double latitude = Double.parseDouble(split1[1]);
@@ -65,7 +65,7 @@ public class CFLocation extends Location implements Comparable<CFLocation> {
         index = NO_INDEX;
     }
 
-    public CFLocation(@NotNull Double lat, @NotNull Double lng) {
+    public CFLocation(@NonNull Double lat, @NonNull Double lng) {
         this(lat, lng, NO_DISTANCE);
     }
 
@@ -73,7 +73,7 @@ public class CFLocation extends Location implements Comparable<CFLocation> {
         this(lat, lng, loc, NO_INDEX);
     }
 
-    public CFLocation(@NotNull Double lat, @NotNull Double lng, float distance) {
+    public CFLocation(@NonNull Double lat, @NonNull Double lng, float distance) {
         super("");
         setLatitude(lat);
         setLongitude(lng);
@@ -81,7 +81,7 @@ public class CFLocation extends Location implements Comparable<CFLocation> {
         index = NO_INDEX;
     }
 
-    public CFLocation(@NotNull Location location, float distance, int index) {
+    public CFLocation(@NonNull Location location, float distance, int index) {
         super(location);
         this.distance = distance;
         this.index = index;
@@ -108,7 +108,7 @@ public class CFLocation extends Location implements Comparable<CFLocation> {
     }
 
     @Override
-    public int compareTo(@NotNull CFLocation other) {
+    public int compareTo(@NonNull CFLocation other) {
         return (int) (this.distance - other.distance);
     }
 
@@ -163,7 +163,7 @@ public class CFLocation extends Location implements Comparable<CFLocation> {
     }
 
     @Nullable
-    public static String reverseGeocodeLocality(Context context, double lat, double lon, @NotNull Locale locale)
+    public static String reverseGeocodeLocality(Context context, double lat, double lon, @NonNull Locale locale)
             throws IOException {
         try {
             Assert.assertNotNull("Context is null", context);

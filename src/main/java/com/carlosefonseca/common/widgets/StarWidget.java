@@ -4,7 +4,7 @@ import android.content.Context;
 import android.graphics.*;
 import android.util.AttributeSet;
 import android.widget.ImageView;
-import org.jetbrains.annotations.NotNull;
+import android.support.annotation.NonNull;
 import com.carlosefonseca.common.utils.CodeUtils;
 
 public class StarWidget extends ImageView {
@@ -43,7 +43,7 @@ public class StarWidget extends ImageView {
     }
 
     @Override
-    protected void onDraw(@NotNull Canvas canvas) {
+    protected void onDraw(@NonNull Canvas canvas) {
         canvas.drawPath(createStar(22, centerPoint, centerPoint.x, centerPoint.x * 0.8), p);
         super.onDraw(canvas);
     }

@@ -7,7 +7,7 @@ import android.support.v4.app.FragmentTransaction;
 import android.view.View;
 import android.widget.TabHost;
 import junit.framework.Assert;
-import org.jetbrains.annotations.Nullable;
+import android.support.annotation.Nullable;
 
 import java.util.HashMap;
 

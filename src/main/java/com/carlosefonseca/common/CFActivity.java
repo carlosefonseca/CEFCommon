@@ -10,7 +10,7 @@ import com.carlosefonseca.common.utils.Log;
 import com.carlosefonseca.common.widgets.LoadingDialog;
 import com.readystatesoftware.systembartint.SystemBarTintManager;
 import de.greenrobot.event.EventBus;
-import org.jetbrains.annotations.Nullable;
+import android.support.annotation.Nullable;
 
 import java.lang.ref.WeakReference;
 

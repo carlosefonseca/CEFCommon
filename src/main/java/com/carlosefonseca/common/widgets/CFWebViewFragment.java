@@ -8,7 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebView;
 import com.carlosefonseca.common.utils.CodeUtils;
-import org.jetbrains.annotations.Nullable;
+import android.support.annotation.Nullable;
 
 /**
  * A fragment that displays a WebView.

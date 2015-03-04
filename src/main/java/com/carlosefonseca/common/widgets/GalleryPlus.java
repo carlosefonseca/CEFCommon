@@ -11,7 +11,7 @@ import android.widget.ImageView;
 import com.carlosefonseca.common.CFActivity;
 import com.carlosefonseca.common.R;
 import com.carlosefonseca.common.utils.*;
-import org.jetbrains.annotations.Nullable;
+import android.support.annotation.Nullable;
 
 import java.io.File;
 import java.util.Collection;

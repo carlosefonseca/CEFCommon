@@ -7,7 +7,7 @@ import android.graphics.drawable.ColorDrawable;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
-import org.jetbrains.annotations.NotNull;
+import android.support.annotation.NonNull;
 
 public class ButtonListAlertDialogBuilder extends AlertDialog.Builder {
     private final LinearLayout linearLayout;
@@ -50,7 +50,7 @@ public class ButtonListAlertDialogBuilder extends AlertDialog.Builder {
         return linearLayout;
     }
 
-    @NotNull
+    @NonNull
     @Override
     public AlertDialog create() {
         alertDialog = super.create();

@@ -14,8 +14,8 @@ import android.util.TypedValue;
 import android.view.View;
 import android.widget.TextView;
 import com.carlosefonseca.common.CFApp;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import java.io.File;
 import java.io.IOException;
@@ -59,7 +59,7 @@ public final class ResourceUtils {
      * @param view    The text view.
      * @param sizeRes The resource id for the dimension.
      */
-    public static void setTextSize(@NotNull TextView view, int sizeRes) {
+    public static void setTextSize(@NonNull TextView view, int sizeRes) {
         assert view.getResources() != null;
         view.setTextSize(TypedValue.COMPLEX_UNIT_PX, view.getResources().getDimension(sizeRes));
     }
@@ -71,7 +71,7 @@ public final class ResourceUtils {
      * @param view       The view.
      * @param background The drawable for the background.
      */
-    public static void setBackground(@NotNull View view, @Nullable Drawable background) {
+    public static void setBackground(@NonNull View view, @Nullable Drawable background) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
             //noinspection deprecation
             view.setBackgroundDrawable(background);

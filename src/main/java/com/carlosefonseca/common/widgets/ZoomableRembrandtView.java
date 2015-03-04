@@ -8,7 +8,7 @@ import com.carlosefonseca.common.utils.CodeUtils;
 import com.carlosefonseca.common.utils.UIL;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.assist.ImageSize;
-import org.jetbrains.annotations.Nullable;
+import android.support.annotation.Nullable;
 
 import java.io.File;
 

@@ -8,8 +8,8 @@ import bolts.Task;
 import com.carlosefonseca.common.utils.CodeUtils;
 import com.carlosefonseca.common.utils.ImageUtils;
 import com.carlosefonseca.common.utils.Rembrandt;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import java.io.File;
 
@@ -148,7 +148,7 @@ public class RembrandtView extends ImageView {
         this.aspectRatio = aspectRatio;
     }
 
-    public void setAspectRatioFromImage(@NotNull File image) {
+    public void setAspectRatioFromImage(@NonNull File image) {
         final double aspectRatio1 = ImageUtils.getAspectRatio(image);
         if (aspectRatio1 != 0) aspectRatio = aspectRatio1;
     }

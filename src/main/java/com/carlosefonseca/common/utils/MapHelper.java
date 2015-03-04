@@ -14,8 +14,8 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.Projection;
 import com.google.android.gms.maps.model.*;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import static com.carlosefonseca.common.utils.CodeUtils.getTag;
 import static com.carlosefonseca.common.utils.ImageUtils.dp2px;
@@ -182,7 +182,7 @@ public class MapHelper {
         }
     };
 
-    private void panZoomTo(@NotNull LatLng location) {
+    private void panZoomTo(@NonNull LatLng location) {
         if (gMap != null) {
             if (gMap.getCameraPosition().zoom < userZoom) {
                 gMap.animateCamera(CameraUpdateFactory.newLatLngZoom(location, userZoom));
@@ -193,7 +193,7 @@ public class MapHelper {
     }
 
 
-    protected void updateMyLocation(@NotNull Location location) {
+    protected void updateMyLocation(@NonNull Location location) {
         userLocation = LL(location);
         if (gMap == null) return;
         if (myLocationMarker != null) {
@@ -233,11 +233,11 @@ public class MapHelper {
         return results[0];
     }
 
-    public static LatLng LL(@NotNull Location location) {
+    public static LatLng LL(@NonNull Location location) {
         return new LatLng(location.getLatitude(), location.getLongitude());
     }
 
-    private void panTo(@NotNull LatLng location) {
+    private void panTo(@NonNull LatLng location) {
         if (gMap == null) return;
         gMap.animateCamera(CameraUpdateFactory.newLatLng(location));
     }
@@ -261,7 +261,7 @@ public class MapHelper {
         gMap.animateCamera(CameraUpdateFactory.newLatLngBounds(build, dp2px(50)));
     }
 
-    void updateMyLocationMarkerAnimated(@NotNull final LatLng target) {
+    void updateMyLocationMarkerAnimated(@NonNull final LatLng target) {
         if (gMap == null) return;
         final long duration = 250;
         handler = new Handler();

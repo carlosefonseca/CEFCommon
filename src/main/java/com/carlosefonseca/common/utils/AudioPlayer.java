@@ -6,8 +6,8 @@ import android.net.Uri;
 import android.widget.Toast;
 import com.carlosefonseca.common.CFApp;
 import de.greenrobot.event.EventBus;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import java.io.File;
 import java.util.LinkedList;
@@ -94,7 +94,7 @@ public class AudioPlayer {
     /**
      * THE PLAY METHOD
      */
-    private static void play(@NotNull MediaPlayer mediaPlayer, @Nullable File file) {
+    private static void play(@NonNull MediaPlayer mediaPlayer, @Nullable File file) {
         stop();
 
         currentFile = file;
@@ -158,7 +158,7 @@ public class AudioPlayer {
     /**
      * Adds the file to the queue or simply plays the file is nothing is playing
      */
-    public static void queueFile(@NotNull File audioFile) {
+    public static void queueFile(@NonNull File audioFile) {
         if (!isPlaying()) {
             playFile(audioFile);
         } else {

@@ -14,7 +14,7 @@ import com.carlosefonseca.common.CFApp;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
-import org.jetbrains.annotations.Nullable;
+import android.support.annotation.Nullable;
 
 import java.io.File;
 import java.util.Map;

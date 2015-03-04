@@ -5,7 +5,7 @@ import android.content.res.AssetManager;
 import android.content.res.Resources;
 import com.carlosefonseca.common.CFApp;
 import org.apache.commons.lang3.StringUtils;
-import org.jetbrains.annotations.Nullable;
+import android.support.annotation.Nullable;
 
 import java.io.*;
 import java.util.*;

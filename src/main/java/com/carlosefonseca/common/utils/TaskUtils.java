@@ -5,7 +5,7 @@ import android.os.Looper;
 import bolts.AggregateException;
 import bolts.Continuation;
 import bolts.Task;
-import org.jetbrains.annotations.Nullable;
+import android.support.annotation.Nullable;
 
 public final class TaskUtils {
     private static final String TAG = CodeUtils.getTag(TaskUtils.class);

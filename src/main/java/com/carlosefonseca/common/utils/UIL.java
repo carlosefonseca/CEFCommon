@@ -23,8 +23,8 @@ import com.nostra13.universalimageloader.core.listener.ImageLoadingListener;
 import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import java.io.File;
 import java.io.IOException;
@@ -228,11 +228,11 @@ public final class UIL {
         return sIL.loadImageSync(uri, targetImageSize);
     }
 
-    public static void load(@Nullable String str, @NotNull ImageLoadingListener loadingListener) {
+    public static void load(@Nullable String str, @NonNull ImageLoadingListener loadingListener) {
         load(str, 0, 0, loadingListener);
     }
 
-    public static void load(@Nullable String str, int widthPx, int heightPx, @NotNull ImageLoadingListener loadingListener) {
+    public static void load(@Nullable String str, int widthPx, int heightPx, @NonNull ImageLoadingListener loadingListener) {
         if (str == null) return;
         String uri = getUri(str);
         ImageSize targetImageSize = widthPx > 0 && heightPx > 0 ? new ImageSize(widthPx, heightPx) : null;

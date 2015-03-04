@@ -3,7 +3,7 @@ package com.carlosefonseca.common.utils;
 import android.content.Context;
 import android.content.SharedPreferences;
 import com.carlosefonseca.common.CFApp;
-import org.jetbrains.annotations.Nullable;
+import android.support.annotation.Nullable;
 
 import java.util.Date;
 

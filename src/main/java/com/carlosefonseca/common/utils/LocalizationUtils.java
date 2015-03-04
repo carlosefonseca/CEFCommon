@@ -3,8 +3,8 @@ package com.carlosefonseca.common.utils;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import com.carlosefonseca.common.CFApp;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import java.util.*;
 
@@ -56,7 +56,7 @@ public final class LocalizationUtils {
      * @param languageCode Possible formats: "pt" or "pt_pt" or "pt-pt". Case insensitive.
      * @return A Locale.
      */
-    public static Locale getLocale(@NotNull String languageCode) {
+    public static Locale getLocale(@NonNull String languageCode) {
         if (languageCode.length() == 5 && (languageCode.charAt(2) == '-' || languageCode.charAt(2) == '_')) {
             return new Locale(languageCode.substring(0, 2), languageCode.substring(3));
         } else {
@@ -143,7 +143,7 @@ public final class LocalizationUtils {
         }
 
         @Override
-        public int compareTo(@NotNull Lang another) {
+        public int compareTo(@NonNull Lang another) {
             return toString().compareToIgnoreCase(another.toString());
         }
 

@@ -3,7 +3,7 @@ package com.carlosefonseca.common.utils;
 import android.app.ProgressDialog;
 import android.os.AsyncTask;
 import android.os.Environment;
-import org.jetbrains.annotations.Nullable;
+import android.support.annotation.Nullable;
 
 import java.io.*;
 import java.net.HttpURLConnection;

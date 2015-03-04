@@ -11,8 +11,8 @@ import android.view.MotionEvent;
 import android.view.View;
 import com.carlosefonseca.common.utils.CodeUtils;
 import com.carlosefonseca.common.utils.Log;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 public class ZoomableImageView extends View {
     private static final String TAG = CodeUtils.getTag(ZoomableImageView.class);
@@ -270,7 +270,7 @@ public class ZoomableImageView extends View {
 
 
     @Override
-    public boolean onTouchEvent(@NotNull MotionEvent event) {
+    public boolean onTouchEvent(@NonNull MotionEvent event) {
         if (gestureDetector.onTouchEvent(event)) {
             return true;
         }

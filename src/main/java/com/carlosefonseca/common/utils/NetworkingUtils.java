@@ -14,9 +14,9 @@ import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.os.Handler;
 import android.os.NetworkOnMainThreadException;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import de.greenrobot.event.EventBus;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.IOException;
@@ -300,7 +300,7 @@ public final class NetworkingUtils {
     };
 
     @SuppressWarnings("UnusedDeclaration")
-    public static String getLastSegmentOfURL(@NotNull String url) {
+    public static String getLastSegmentOfURL(@NonNull String url) {
         if (url.endsWith("/")) url = url.substring(0, url.length() - 1);
         return url.substring(url.lastIndexOf("/") + 1);
     }
@@ -359,7 +359,7 @@ public final class NetworkingUtils {
      * @param filenameOrUrl File object pointing to
      */
     @Nullable
-    public static File getFileFromUrlOrPath(@NotNull String filenameOrUrl) {
+    public static File getFileFromUrlOrPath(@NonNull String filenameOrUrl) {
         File file;
         if (filenameOrUrl.startsWith("http://")) {
             file = ResourceUtils.getFullPath(getLastSegmentOfURL(filenameOrUrl));

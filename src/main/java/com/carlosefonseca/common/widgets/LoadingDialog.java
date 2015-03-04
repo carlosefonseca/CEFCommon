@@ -14,8 +14,8 @@ import bolts.Continuation;
 import bolts.Task;
 import com.carlosefonseca.common.R;
 import com.carlosefonseca.common.utils.Log;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import java.util.concurrent.Callable;
 
@@ -421,7 +421,7 @@ public class LoadingDialog extends Dialog {
         });
     }
 
-    public void runOnUi(@NotNull Runnable runnable) {
+    public void runOnUi(@NonNull Runnable runnable) {
         if (isMainThread()) {
             runnable.run();
         } else if (activity != null) {

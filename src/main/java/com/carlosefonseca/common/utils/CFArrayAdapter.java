@@ -8,7 +8,7 @@ import android.widget.BaseAdapter;
 import android.widget.Filter;
 import android.widget.Filterable;
 import android.widget.TextView;
-import org.jetbrains.annotations.Nullable;
+import android.support.annotation.Nullable;
 import com.carlosefonseca.common.R;
 
 import java.util.*;

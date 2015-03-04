@@ -6,7 +6,7 @@ import android.widget.ImageView;
 import bolts.Continuation;
 import bolts.Task;
 import com.carlosefonseca.common.widgets.RembrandtView;
-import org.jetbrains.annotations.Nullable;
+import android.support.annotation.Nullable;
 
 import java.io.File;
 

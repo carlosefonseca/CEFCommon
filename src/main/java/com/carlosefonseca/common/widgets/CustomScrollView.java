@@ -6,7 +6,7 @@ import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ScrollView;
-import org.jetbrains.annotations.NotNull;
+import android.support.annotation.NonNull;
 
 /**
  * Scroll view that ignores gestures that are more on the X direction than on the Y direction.
@@ -28,7 +28,7 @@ public class CustomScrollView extends ScrollView {
     }
 
     @Override
-    public boolean onInterceptTouchEvent(@NotNull MotionEvent ev) {
+    public boolean onInterceptTouchEvent(@NonNull MotionEvent ev) {
         return super.onInterceptTouchEvent(ev) && mGestureDetector.onTouchEvent(ev);
     }
 

@@ -9,7 +9,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import com.carlosefonseca.common.R;
-import org.jetbrains.annotations.Nullable;
+import android.support.annotation.Nullable;
 
 /**
  * Creates a View.OnClickListener that starts a new activity.

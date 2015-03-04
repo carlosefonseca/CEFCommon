@@ -17,7 +17,7 @@ import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.LocationSource;
 import org.apache.commons.collections4.CollectionUtils;
-import org.jetbrains.annotations.Nullable;
+import android.support.annotation.Nullable;
 
 import java.util.HashSet;
 import java.util.Iterator;
@@ -276,7 +276,7 @@ public class CFLocationManager implements GooglePlayServicesClient.ConnectionCal
     @Nullable
     public Location getLastLocation() {
         if (getGAC().isConnected()) {
-            @Nullable Location googleLoc = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+            Location googleLoc = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
             return location == null || (googleLoc != null && googleLoc.getTime() > location.getTime())
                    ? googleLoc
                    : location;
@@ -294,7 +294,7 @@ public class CFLocationManager implements GooglePlayServicesClient.ConnectionCal
     public Task<Location> getLastLocationTask() {
         Location location1 = null;
         if (getGAC().isConnected()) {
-            @Nullable Location googleLoc = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+            Location googleLoc = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
             location1 = location == null || (googleLoc != null && googleLoc.getTime() > location.getTime())
                         ? googleLoc
                         : location;

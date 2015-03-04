@@ -5,7 +5,7 @@ import android.os.AsyncTask;
 import android.os.Build;
 import com.carlosefonseca.common.CFApp;
 import org.apache.commons.collections4.CollectionUtils;
-import org.jetbrains.annotations.Nullable;
+import android.support.annotation.Nullable;
 
 import java.io.*;
 import java.net.SocketException;

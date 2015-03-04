@@ -7,7 +7,7 @@ import android.util.AttributeSet;
 import android.widget.ImageView;
 import com.carlosefonseca.common.utils.ImageUtils;
 import com.carlosefonseca.common.R;
-import org.jetbrains.annotations.NotNull;
+import android.support.annotation.NonNull;
 
 /**
  * Draws a Pie-like progress widget.
@@ -119,7 +119,7 @@ public class PieView extends ImageView {
 
 
     @Override
-    protected void onDraw(@NotNull Canvas canvas) {
+    protected void onDraw(@NonNull Canvas canvas) {
         super.onDraw(canvas);
 
         canvas.rotate(-90, pivot, pivot);

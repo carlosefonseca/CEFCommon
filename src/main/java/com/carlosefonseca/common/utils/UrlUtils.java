@@ -17,8 +17,8 @@ import com.carlosefonseca.common.widgets.LoadingDialog;
 import junit.framework.Assert;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import org.json.JSONObject;
 
 import java.io.IOException;
@@ -224,7 +224,7 @@ public final class UrlUtils {
         }
 
         /* EXAMPLE USAGE */
-        public static boolean tryOpenUrl(Context context, @NotNull String url) {
+        public static boolean tryOpenUrl(Context context, @NonNull String url) {
             if (url == null) return false;
             String facebookName = Facebook.getFacebookNameFromURL(url);
             if (facebookName != null) {
@@ -328,14 +328,14 @@ public final class UrlUtils {
 
         private Coordinates() {}
 
-        public static String urlForCoordinates(@Nullable String name, @NotNull String coordinates) {
+        public static String urlForCoordinates(@Nullable String name, @NonNull String coordinates) {
             name = StringUtils.stripToNull(name);
             return "geo:0,0?q=" + coordinates + (name != null ? " (" + name + ")" : "");
         }
 
 //      "http://maps.google.com/maps?q=" + StringUtils.normalizeSpace(getName()).replaceAll(StringUtils.SPACE, "%20");
 
-        @Contract("null -> null")
+        //@Contract("null -> null")
         public static String urlForAddress(@Nullable String address) {
             //noinspection ConstantConditions
             return address == null ? null : "geo:0,0?q=" + StringUtils.normalizeSpace(address);
@@ -369,7 +369,7 @@ public final class UrlUtils {
          *
          * @return True if the url was opened; False if the url doesn't start with "geo:".
          */
-        public static boolean tryOpenUrl(Context context, @NotNull String url) {
+        public static boolean tryOpenUrl(Context context, @NonNull String url) {
             if (url == null) return false;
             return url.startsWith("geo:") && tryStartIntentForUrl(context, getIntent(context, url));
         }

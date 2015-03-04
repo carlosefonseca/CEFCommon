@@ -1,8 +1,8 @@
 package com.carlosefonseca.common.utils;
 
 import org.apache.commons.lang3.StringUtils;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -48,7 +48,7 @@ public final class UnitUtils {
         mDefaultSystem = System.METRIC;
     }
 
-    @NotNull
+    @NonNull
     public static System setNextSystem() {
         System system = UnitUtils.getSystem();
         double ordinal = 0;
@@ -88,7 +88,7 @@ public final class UnitUtils {
     public static System getSystem() {
         if (mSystem != null) return mSystem;
 
-        @Nullable final String system = PreferencesManager.getParameter(null, SYSTEM, (String) null);
+        final String system = PreferencesManager.getParameter(null, SYSTEM, (String) null);
         if (system == null) {
             Log.i(TAG, "No user defined System. Will use default: " + mDefaultSystem);
             mSystem = mDefaultSystem;

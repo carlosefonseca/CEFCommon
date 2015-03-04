@@ -3,7 +3,7 @@ package com.carlosefonseca.common.utils;
 import android.os.Build;
 import android.util.SparseArray;
 import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.Nullable;
+import android.support.annotation.Nullable;
 
 import java.util.*;
 

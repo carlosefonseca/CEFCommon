@@ -16,7 +16,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import com.carlosefonseca.common.R;
-import org.jetbrains.annotations.Nullable;
+import android.support.annotation.Nullable;
 
 public class NumberPicker extends LinearLayout {
 

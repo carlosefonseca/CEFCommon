@@ -9,8 +9,8 @@ import android.os.Build;
 import android.util.StateSet;
 import android.view.View;
 import android.widget.ImageView;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import static android.R.attr.*;
 
@@ -439,7 +439,7 @@ public class MSDrawable {
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    public static StateListDrawable createFromDrawables(@NotNull Drawable normal,
+    public static StateListDrawable createFromDrawables(@NonNull Drawable normal,
                                                         @Nullable Drawable pressed,
                                                         @Nullable Drawable selected,
                                                         @Nullable Drawable disabled) {
