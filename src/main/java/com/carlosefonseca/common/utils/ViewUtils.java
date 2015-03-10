@@ -8,6 +8,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import org.jetbrains.annotations.Contract;
 
@@ -50,11 +51,17 @@ public final class ViewUtils {
      * @param view The view to remove.
      * @return The removed view.
      */
-    @Contract("null -> null")
+//    @Contract("null -> null")
     public static <T extends View> T remove(@Nullable T view) {
         if (view != null && view.getParent() != null) ((ViewGroup) view.getParent()).removeView(view);
         //noinspection ConstantConditions
         return view;
+    }
+
+    public static ScrollView wrapInScrollView(View view) {
+        ScrollView scrollView = new ScrollView(view.getContext());
+        scrollView.addView(view, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        return scrollView;
     }
 
     public static class ButtonHighlighterOnTouchListener implements View.OnTouchListener {
