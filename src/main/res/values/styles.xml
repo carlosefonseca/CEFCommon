@@ -31,14 +31,14 @@
 
     <style name="NumberPickerButton">
         <item name="android:layout_width">50dip</item>
-        <item name="android:layout_height">40dip</item>
+        <item name="android:layout_height">50dip</item>
         <item name="android:background">#FDDD</item>
         <item name="android:textSize">30sp</item>
     </style>
 
     <style name="NumberPickerEditText">
         <item name="android:layout_width">30dip</item>
-        <item name="android:layout_height">40dip</item>
+        <item name="android:layout_height">50dip</item>
         <item name="android:background">@color/White</item>
         <item name="android:textSize">20sp</item>
     </style>
