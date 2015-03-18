@@ -70,7 +70,16 @@ public final class TaskUtils {
                 Log.w(TAG, "END OF AGGREGATE EXCEPTION DUMP ---------------------");
                 Log.w(TAG, "There were multiple errors. Check logs.", error);
             } else {
-                Log.w(TAG, error);
+                if (error.getCause() != null && error.getCause().getCause() != null) {
+                    Throwable cause = error;
+                    while (cause != null) {
+                        cause = cause.getCause();
+                        Log.i(TAG, "CAUSED BY: ");
+                        Log.w(TAG, cause);
+                    }
+                } else {
+                    Log.w(TAG, error);
+                }
             }
         }
     }
