@@ -9,10 +9,7 @@ import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.location.LocationManager;
-import android.os.AsyncTask;
-import android.os.Build;
-import android.os.Handler;
-import android.os.Looper;
+import android.os.*;
 import android.provider.Settings;
 import android.text.InputType;
 import android.view.KeyEvent;
@@ -155,6 +152,17 @@ public final class CodeUtils {
               getKB(r.maxMemory()),
               getKB(freeMemLess));
         return freeMemLess;
+    }
+
+    public static String getTimespan(long uptimeMillisOnStart) {
+        double secs = (SystemClock.uptimeMillis() - uptimeMillisOnStart) / 1000d;
+        if (secs < 10) {
+            return String.format("%.03fs", secs);
+        } else if (secs < 60) {
+            return String.valueOf((int) secs) + "s";
+        } else {
+            return "" + (secs / 60) + "m " + (secs % 60) + "s";
+        }
     }
 
     public interface RunnableWithView<T extends View> {
