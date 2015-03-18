@@ -21,6 +21,7 @@ import java.util.concurrent.Callable;
 
 import static com.carlosefonseca.common.utils.CodeUtils.getTag;
 import static com.carlosefonseca.common.utils.CodeUtils.isMainThread;
+import static com.carlosefonseca.common.utils.CodeUtils.runOnUIThread;
 
 /**
  * Creates popup dialogs for long, blocking operations.
@@ -102,9 +103,14 @@ public class LoadingDialog extends Dialog {
      * @param message  Message to display.
      * @param runnable A runnable to execute when the dialog is dismissed.
      */
-    public static void ErrorDialog(Context context, String message, @Nullable Runnable runnable) {
-        LoadingDialog dialog = new LoadingDialog(context, DialogType.ERROR, message);
-        dialog.showAndDismiss(runnable);
+    public static void ErrorDialog(Context context, String message, @Nullable final Runnable runnable) {
+        final LoadingDialog dialog = new LoadingDialog(context, DialogType.ERROR, message);
+        runOnUIThread(new Runnable() {
+            @Override
+            public void run() {
+                dialog.showAndDismiss(runnable);
+            }
+        });
     }
 
     /**

@@ -127,13 +127,18 @@ public class Rembrandt {
         final List<String> displayedImages = Collections.synchronizedList(new LinkedList<String>());
 
         @Override
-        public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
+        public void onLoadingComplete(final String imageUri, View view, Bitmap loadedImage) {
             if (loadedImage != null) {
-                ImageView imageView = (ImageView) view;
+                final ImageView imageView = (ImageView) view;
                 boolean firstDisplay = !displayedImages.contains(imageUri);
                 if (firstDisplay) {
-                    FadeInBitmapDisplayer.animate(imageView, 500);
-                    displayedImages.add(imageUri);
+                    CodeUtils.runOnUIThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            FadeInBitmapDisplayer.animate(imageView, 500);
+                            displayedImages.add(imageUri);
+                        }
+                    });
                 }
             }
         }
