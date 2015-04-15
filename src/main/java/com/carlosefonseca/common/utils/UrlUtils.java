@@ -16,7 +16,6 @@ import com.carlosefonseca.common.CFApp;
 import com.carlosefonseca.common.widgets.LoadingDialog;
 import junit.framework.Assert;
 import org.apache.commons.lang3.StringUtils;
-import org.jetbrains.annotations.Contract;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import org.json.JSONObject;
@@ -117,7 +116,6 @@ public final class UrlUtils {
 
     public static String urlForTel(String number) {return "tel:" + number.trim().replaceAll("\\s*", "");}
 
-    @Contract("null -> null")
     public static String simplifyUrlForDisplay(@Nullable String url) {
         //noinspection ConstantConditions
         return url == null ? null : url.trim().replaceFirst("https?://(www.)?", "").replace("?fref=ts", "");
@@ -259,7 +257,6 @@ public final class UrlUtils {
             context.startActivity(intent);
         }
 
-        @Contract("_,null -> false")
         public static boolean tryOpenProfileFromURL(Context context, @Nullable String url) {
             if (url == null) return false;
             final Matcher matcher = TWITTER_USER_NAME_REGEX.matcher(url);
@@ -271,7 +268,6 @@ public final class UrlUtils {
             return false;
         }
 
-        @Contract("null -> null")
         public static String getUserUrl(@Nullable String username) {
             if (username == null) { //noinspection ConstantConditions
                 return null;
@@ -299,7 +295,6 @@ public final class UrlUtils {
             context.startActivity(intent);
         }
 
-        @Contract("_, null -> false")
         public static boolean tryOpenProfileFromURL(Context context, @Nullable String url) {
             //noinspection ConstantConditions
             if (url == null) return false;
@@ -312,7 +307,6 @@ public final class UrlUtils {
             return false;
         }
 
-        @Contract("null -> null")
         public static String getUserUrl(String username) {
             if (username == null) { //noinspection ConstantConditions
                 return null;
@@ -335,7 +329,6 @@ public final class UrlUtils {
 
 //      "http://maps.google.com/maps?q=" + StringUtils.normalizeSpace(getName()).replaceAll(StringUtils.SPACE, "%20");
 
-        //@Contract("null -> null")
         public static String urlForAddress(@Nullable String address) {
             //noinspection ConstantConditions
             return address == null ? null : "geo:0,0?q=" + StringUtils.normalizeSpace(address);

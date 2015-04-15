@@ -53,6 +53,16 @@ public final class Log {
         sRemoteMinPriority = minPriority;
     }
 
+    private static boolean sUseSystemOut = false;
+
+    public static boolean usesSystemOut() {
+        return sUseSystemOut;
+    }
+
+    public static void useSystemOut(boolean useSystemOut) {
+        Log.sUseSystemOut = useSystemOut;
+    }
+
 
     public static void setUserEmail(String email) {
         if (remoteLogger != null) remoteLogger.setUserEmail(email);
@@ -128,8 +138,9 @@ public final class Log {
             // if didn't remote log but consoleLogging enabled or error, do a console log
             if (!logged && (consoleLogging || priority >= android.util.Log.ERROR)) {
                 // log to console using plain android Log.
-                android.util.Log.println(priority, tag, msg);
-                if (tr != null) android.util.Log.println(priority, tag, getStackTraceString(tr));
+                println(priority, tag, msg);
+                if (tr != null) println(priority, tag, getStackTraceString(tr));
+
             }
         }
         return priority;
@@ -243,6 +254,10 @@ public final class Log {
     }
 
     public static int println(int priority, String tag, String msg) {
+        if (sUseSystemOut) {
+            System.out.println(tag + " : " + msg);
+            return 1;
+        }
         return android.util.Log.println(priority, tag, msg);
     }
 

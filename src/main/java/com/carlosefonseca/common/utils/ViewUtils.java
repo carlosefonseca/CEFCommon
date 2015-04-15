@@ -10,7 +10,6 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.ScrollView;
 import android.widget.TextView;
-import org.jetbrains.annotations.Contract;
 
 public final class ViewUtils {
     private ViewUtils() {}
@@ -51,7 +50,6 @@ public final class ViewUtils {
      * @param view The view to remove.
      * @return The removed view.
      */
-//    @Contract("null -> null")
     public static <T extends View> T remove(@Nullable T view) {
         if (view != null && view.getParent() != null) ((ViewGroup) view.getParent()).removeView(view);
         //noinspection ConstantConditions

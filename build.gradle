@@ -36,7 +36,6 @@ dependencies {
     compile 'com.google.android.gms:play-services-location:6.5.87'
     //noinspection GradleDependency
     compile 'com.google.code.gson:gson:1.7.2'
-    compile('org.jetbrains:annotations:13.0') { transitive = true }
     compile 'com.nineoldandroids:library:2.4.0'
     compile 'de.greenrobot:eventbus:2.0.2'
     compile 'com.readystatesoftware.systembartint:systembartint:1.0.4'
