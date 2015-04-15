@@ -451,6 +451,14 @@ public final class CodeUtils {
             }
         });
     }
+    public static void ltoast(final String message) {
+        runOnUIThread(new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(CFApp.getContext(), message, Toast.LENGTH_LONG).show();
+            }
+        });
+    }
 
     /**
      * Null-safe equivalent of {@code a.equals(b)}.
