@@ -285,8 +285,13 @@ public class LoadingDialog extends Dialog {
     }
 
 
-    public LoadingDialog changeDialog(String message, DialogType dialogType) {
-        setupOverlayDialog(message, dialogType);
+    public LoadingDialog changeDialog(final String message, final DialogType dialogType) {
+        runOnUIThread(new Runnable() {
+            @Override
+            public void run() {
+                setupOverlayDialog(message, dialogType);
+            }
+        });
         return this;
     }
 
