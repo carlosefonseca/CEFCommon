@@ -105,8 +105,8 @@ public class NavBar extends LinearLayout {
     public void noBackButton() {
         backBt.setVisibility(GONE);
         if (((ViewGroup) getChildAt(0)).getChildCount() == 2) {
-            ViewUtils.setPaddingLeft(titleView, 0);
-            ViewUtils.setPaddingRight(titleView, 0);
+            ViewUtils.setPaddingLeft(0, titleView);
+            ViewUtils.setPaddingRight(0, titleView);
             titleView.setGravity(Gravity.CENTER);
         }
     }
