@@ -1,5 +1,7 @@
 package com.carlosefonseca.common.utils;
 
+import android.support.annotation.NonNull;
+
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -59,5 +61,13 @@ public class CFCalendar extends GregorianCalendar {
     public CFCalendar addYears(int years) {
         add(Calendar.YEAR, years);
         return this;
+    }
+
+    @NonNull
+    public static Calendar getTodayAtMidnight() {
+        Calendar todayAtMidnight = getInstance();
+        todayAtMidnight.set(HOUR, 0);
+        todayAtMidnight.set(MINUTE, 0);
+        return todayAtMidnight;
     }
 }
