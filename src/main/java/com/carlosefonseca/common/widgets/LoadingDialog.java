@@ -16,6 +16,7 @@ import com.carlosefonseca.common.R;
 import com.carlosefonseca.common.utils.Log;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import com.carlosefonseca.common.utils.TaskUtils;
 
 import java.util.concurrent.Callable;
 
@@ -124,7 +125,7 @@ public class LoadingDialog extends Dialog {
     }
 
     /**
-     * Creates a new Loading Dialog that runs a specified operation in background and dissmisses the dialog when
+     * Creates a new Loading Dialog that runs a specified operation in background and dismisses the dialog when
      * finished.
      *
      * @param context  Current context.
@@ -136,8 +137,10 @@ public class LoadingDialog extends Dialog {
         this(context, message);
         show();
         Task.callInBackground(callable).continueWith(new Continuation<T, Void>() {
+            @Nullable
             @Override
             public Void then(Task<T> task) throws Exception {
+                TaskUtils.hasErrors(TAG, "Callable failed", task);
                 LoadingDialog.this.dismissNow();
                 return null;
             }
