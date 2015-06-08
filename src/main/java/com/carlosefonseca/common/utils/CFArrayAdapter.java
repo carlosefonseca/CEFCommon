@@ -4,10 +4,7 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
-import android.widget.Filter;
-import android.widget.Filterable;
-import android.widget.TextView;
+import android.widget.*;
 import android.support.annotation.Nullable;
 import com.carlosefonseca.common.R;
 
@@ -28,7 +25,7 @@ import java.util.*;
  * or to have some of data besides toString() results fill the views,
  * override {@link #getView(int, android.view.View, android.view.ViewGroup)} to return the type of view you want.
  */
-public class CFArrayAdapter<T> extends BaseAdapter implements Filterable {
+public class CFArrayAdapter<T> extends BaseAdapter implements Filterable, ListAdapter {
     private static final String TAG = CodeUtils.getTag(CFArrayAdapter.class);
     /**
      * Contains the list of objects that represent the data of this ArrayAdapter.
