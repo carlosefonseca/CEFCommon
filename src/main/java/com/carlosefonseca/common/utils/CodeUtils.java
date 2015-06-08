@@ -42,8 +42,16 @@ public final class CodeUtils {
     private static final String TAG = CodeUtils.getTag(CodeUtils.class);
     public static final String SIDE_T = "├─";
     public static final String LONG_L = "└─";
+    private static Pattern sMacAddressPattern;
 
     private CodeUtils() {}
+
+    public static boolean isMacAddress(CharSequence macAddress) {
+        if (sMacAddressPattern == null) {
+            sMacAddressPattern = Pattern.compile("([0-9a-fA-F]{12})|(([0-9a-fA-F]{2}[-:]){5}[0-9a-fA-F]{2})");
+        }
+        return sMacAddressPattern.matcher(macAddress).matches();
+    }
 
     public static void hideKeyboard(View input) {
         //noinspection ConstantConditions
