@@ -47,6 +47,7 @@ public final class CodeUtils {
     private CodeUtils() {}
 
     public static boolean isMacAddress(CharSequence macAddress) {
+        if (macAddress == null) return false;
         if (sMacAddressPattern == null) {
             sMacAddressPattern = Pattern.compile("([0-9a-fA-F]{12})|(([0-9a-fA-F]{2}[-:]){5}[0-9a-fA-F]{2})");
         }
