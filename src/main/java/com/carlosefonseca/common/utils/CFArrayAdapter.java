@@ -580,5 +580,17 @@ public class CFArrayAdapter<T> extends BaseAdapter implements Filterable, ListAd
                 notifyDataSetInvalidated();
             }
         }
+
+        @Override
+        public CharSequence convertResultToString(Object resultValue) {
+            //noinspection unchecked
+            return CFArrayAdapter.this.convertFilterResultToString((T) resultValue);
+        }
+    }
+
+    protected CharSequence convertFilterResultToString(T resultValue) {
+        return resultValue == null
+               ? ""
+               : resultValue.toString();
     }
 }
