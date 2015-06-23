@@ -39,6 +39,7 @@ public final class CodeUtils {
 
     //    public static final Pattern packageNameRegex = Pattern.compile(".+\\.([^.]+\\.).+");
     public static final Pattern packageNameRegex = Pattern.compile("\\.");
+    public static Pattern NIF_PATTERN;
     private static final String TAG = CodeUtils.getTag(CodeUtils.class);
     public static final String SIDE_T = "├─";
     public static final String LONG_L = "└─";
@@ -172,6 +173,35 @@ public final class CodeUtils {
         } else {
             return "" + (secs / 60) + "m " + (secs % 60) + "s";
         }
+    }
+
+    /**
+     * Checks if the given String is a valid NIF.
+     * <p/>
+     * Must be numbers only, must start with 1,2,5,6,7,8 or 9, check digit must be valid.
+     *
+     * @param nif String containing the number to validate.
+     * @return true if is valid, false otherwise.
+     */
+    public static boolean isNifValid(String nif) {
+        if (NIF_PATTERN == null) NIF_PATTERN = Pattern.compile("[125689]\\d{8}");
+        if (!NIF_PATTERN.matcher(nif).matches()) return false;
+        int sum = 0;
+        int ii = 0;
+        for (int i = 9; i >= 2; i--) {
+            sum += i * getDigitFromChar(nif.charAt(ii++));
+        }
+        int expected = 11 - sum % 11;
+        expected = (expected > 9) ? 0 : expected;
+        return expected == getDigitFromChar(nif.charAt(8));
+    }
+
+    /**
+     * Converts a char into an int. Throws a RuntimeException if it is not a digit.
+     */
+    public static int getDigitFromChar(char c) {
+        if (c >= '0' && c <= '9') return c - '0';
+        throw new RuntimeException("Char '" + c + "' is not a number.");
     }
 
     public interface RunnableWithView<T extends View> {
