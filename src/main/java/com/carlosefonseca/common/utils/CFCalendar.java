@@ -66,7 +66,7 @@ public class CFCalendar extends GregorianCalendar {
     @NonNull
     public static Calendar getTodayAtMidnight() {
         Calendar todayAtMidnight = getInstance();
-        todayAtMidnight.set(HOUR, 0);
+        todayAtMidnight.set(HOUR_OF_DAY, 0);
         todayAtMidnight.set(MINUTE, 0);
         return todayAtMidnight;
     }
