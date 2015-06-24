@@ -141,7 +141,7 @@ public class LoadingDialog extends Dialog {
             @Override
             public Void then(Task<T> task) throws Exception {
                 TaskUtils.hasErrors(TAG, "Callable failed", task);
-                LoadingDialog.this.dismissNow();
+                LoadingDialog.this.dismissAfterStandardDelay();
                 return null;
             }
         });
@@ -348,7 +348,15 @@ public class LoadingDialog extends Dialog {
         else if (delegateBackToActivity && activity != null) activity.onBackPressed();
     }
 
+    /**
+     * @deprecated Use {@link #dismissAfterStandardDelay()}
+     */
+    @Deprecated
     public void dismissNow() {
+        dismissAfterStandardDelay();
+    }
+
+    public void dismissAfterStandardDelay() {
         dismissAfterStandardDelay(null);
     }
 
