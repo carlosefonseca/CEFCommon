@@ -82,9 +82,9 @@ public final class CodeUtils {
 
     public static String separator(final String text) {return "════════ " + text + " ════════";}
 
-    public static void sleep(int i) {
+    public static void sleep(int millis) {
         try {
-            Thread.sleep(i);
+            Thread.sleep(millis);
         } catch (InterruptedException e) {
             Log.e(TAG, "" + e.getMessage(), e);
         }
