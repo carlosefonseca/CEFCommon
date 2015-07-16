@@ -6,14 +6,15 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentActivity;
-import org.apache.commons.lang3.StringUtils;
 import com.carlosefonseca.common.CFApp;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
-import android.support.annotation.Nullable;
+import com.google.android.gms.iid.InstanceID;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
 
@@ -133,7 +134,7 @@ GooglePlay.CloudMessaging.registerCloudMessaging(this,
         private CloudMessaging() {}
 
         public interface CloudMessagingIdListener {
-            public void onCloudMessagingIdListener(String id);
+            void onCloudMessagingIdListener(String id);
         }
 
         public static void registerCloudMessaging(Activity context, String senderId, CloudMessagingIdListener listener) {
@@ -215,8 +216,13 @@ GooglePlay.CloudMessaging.registerCloudMessaging(this,
                 @Override
                 protected Void doInBackground(Void... params) {
                     try {
-                        GoogleCloudMessaging gcm = GoogleCloudMessaging.getInstance(CFApp.getContext());
-                        String id = gcm.register(senderId);
+                        InstanceID instanceID = InstanceID.getInstance(CFApp.getContext());
+                        String id = instanceID.getToken(senderId, GoogleCloudMessaging.INSTANCE_ID_SCOPE, null);
+
+                        // Old way
+                        // GoogleCloudMessaging gcm = GoogleCloudMessaging.getInstance(CFApp.getContext());
+                        // String id = gcm.register(senderId);
+
                         boolean consoleLogging = Log.isConsoleLogging();
                         Log.setConsoleLogging(true);
                         Log.i(TAG, "Device registered, registration ID=" + id);

@@ -8,7 +8,6 @@ import bolts.Continuation;
 import bolts.Task;
 import com.carlosefonseca.common.CFApp;
 import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GooglePlayServicesClient;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
@@ -23,10 +22,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-public class CFLocationManager implements GooglePlayServicesClient.ConnectionCallbacks,
-                                          GooglePlayServicesClient.OnConnectionFailedListener,
-                                          LocationListener,
-                                          LocationSource,
+public class CFLocationManager implements LocationListener, LocationSource,
                                           GoogleApiClient.ConnectionCallbacks,
                                           GoogleApiClient.OnConnectionFailedListener {
     private static final String TAG = CodeUtils.getTag(CFLocationManager.class);
@@ -139,12 +135,11 @@ public class CFLocationManager implements GooglePlayServicesClient.ConnectionCal
         }
     }
 
-
-    @Override
-    public void onDisconnected() {
-        connectionRequested = false;
-        toastLog("GooglePlay: Disconnected");
-    }
+//    @Override
+//    public void onDisconnected() {
+//        connectionRequested = false;
+//        toastLog("GooglePlay: Disconnected");
+//    }
 
     @Override
     public void onConnectionFailed(ConnectionResult connectionResult) {

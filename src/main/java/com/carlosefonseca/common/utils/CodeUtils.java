@@ -55,6 +55,11 @@ public final class CodeUtils {
         return sMacAddressPattern.matcher(macAddress).matches();
     }
 
+    public static void showKeyboard(View input) {
+        InputMethodManager imm = (InputMethodManager) input.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.showSoftInput(input, InputMethodManager.SHOW_IMPLICIT);
+    }
+
     public static void hideKeyboard(View input) {
         //noinspection ConstantConditions
         InputMethodManager imm = (InputMethodManager) input.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);

@@ -1,56 +1,34 @@
 package com.carlosefonseca.common.utils;
 
-import android.app.IntentService;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
-import android.support.v4.content.WakefulBroadcastReceiver;
-import com.google.android.gms.gcm.GoogleCloudMessaging;
+import com.google.android.gms.gcm.GcmListenerService;
 
-public abstract class GoogleCloudMessagingIntentService extends IntentService {
+public abstract class GoogleCloudMessagingIntentService extends GcmListenerService {
     private static final String TAG = CodeUtils.getTag(GoogleCloudMessagingIntentService.class);
     public static final int NOTIFICATION_ID = 1;
 
-    public GoogleCloudMessagingIntentService(String gcmIntentService) {
-        super(gcmIntentService);
-    }
-
+    /**
+     * Called when message is received.
+     *
+     * @param from SenderID of the sender.
+     * @param data Data bundle containing message data as key/value pairs.
+     *             For Set of keys use data.keySet().
+     */
+    // [START receive_message]
     @Override
-    protected void onHandleIntent(Intent intent) {
-        Bundle extras = intent.getExtras();
-        GoogleCloudMessaging gcm = GoogleCloudMessaging.getInstance(this);
-        // The getMessageType() intent parameter must be the intent you received
-        // in your BroadcastReceiver.
-        String messageType = gcm.getMessageType(intent);
+    public void onMessageReceived(String from, Bundle data) {
+        String message = data.getString("message");
+        Log.d(TAG, "From: " + from);
+        Log.d(TAG, "Message: " + message);
 
-        if (extras != null && !extras.isEmpty()) {  // has effect of unparcelling Bundle
-            /*
-             * Filter messages based on message type. Since it is likely that GCM
-             * will be extended in the future with new message types, just ignore
-             * any message types you're not interested in, or that you don't
-             * recognize.
-             */
-            switch (messageType) {
-                case GoogleCloudMessaging.MESSAGE_TYPE_SEND_ERROR:
-                    sendNotification("Send error: " + extras.toString());
-                    break;
-                case GoogleCloudMessaging.MESSAGE_TYPE_DELETED:
-                    sendNotification("Deleted messages on server: " + extras.toString());
-                    // If it's a regular GCM message, do some work.
-                    break;
-                case GoogleCloudMessaging.MESSAGE_TYPE_MESSAGE:
-                    // Post notification of received message.
-                    sendNotification(extras.getString("alert"));
-                    Log.i(TAG, "Received: " + extras.getString("alert"));
-                    break;
-            }
-        }
-        // Release the wake lock provided by the WakefulBroadcastReceiver.
-        WakefulBroadcastReceiver.completeWakefulIntent(intent);
+        sendNotification(message);
     }
+    // [END receive_message]
 
     protected abstract void sendNotification(String msg);
 
