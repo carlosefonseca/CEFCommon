@@ -263,6 +263,30 @@ public final class CodeUtils {
                                             @Nullable final DialogInterface.OnClickListener onDone) {
         editText.setImeOptions(EditorInfo.IME_ACTION_DONE);
         editText.setInputType(InputType.TYPE_CLASS_PHONE | InputType.TYPE_NUMBER_VARIATION_PASSWORD);
+        setOnEditTextEnter(dialog, editText, onDone);
+    }
+
+    @SuppressLint("InlinedApi")
+    public static void setupNumericEditText(final EditText editText,
+                                            @Nullable final DialogInterface.OnClickListener onDone) {
+        editText.setImeOptions(EditorInfo.IME_ACTION_DONE);
+        editText.setInputType(InputType.TYPE_CLASS_PHONE | InputType.TYPE_NUMBER_VARIATION_PASSWORD);
+        setOnEditTextEnter(editText, onDone);
+    }
+
+
+    @SuppressLint("InlinedApi")
+    public static void setupNumericEditText(final EditText editText, @Nullable final View.OnClickListener onDone) {
+        editText.setImeOptions(EditorInfo.IME_ACTION_DONE);
+        editText.setInputType(InputType.TYPE_CLASS_PHONE | InputType.TYPE_NUMBER_VARIATION_PASSWORD);
+        setOnEditTextEnter(editText, onDone);
+    }
+
+    public static void setOnEditTextEnter(EditText editText, @Nullable final DialogInterface.OnClickListener onDone) {
+        setOnEditTextEnter(null, editText, onDone);
+    }
+
+    public static void setOnEditTextEnter(final AlertDialog dialog, EditText editText, @Nullable final DialogInterface.OnClickListener onDone) {
         editText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
 
             @Override
@@ -279,32 +303,7 @@ public final class CodeUtils {
         });
     }
 
-
-    @SuppressLint("InlinedApi")
-    public static void setupNumericEditText(final EditText editText,
-                                            @Nullable final DialogInterface.OnClickListener onDone) {
-        editText.setImeOptions(EditorInfo.IME_ACTION_DONE);
-        editText.setInputType(InputType.TYPE_CLASS_PHONE | InputType.TYPE_NUMBER_VARIATION_PASSWORD);
-        editText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-
-            @Override
-            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                if (onDone != null &&
-                    (actionId == EditorInfo.IME_ACTION_SEARCH || actionId == EditorInfo.IME_ACTION_DONE ||
-                     event.getAction() == KeyEvent.ACTION_DOWN && event.getKeyCode() == KeyEvent.KEYCODE_ENTER)) {
-                    // the user is done typing.
-                    onDone.onClick(null, 0);
-                    return true; // consume.
-                }
-                return false; // pass on to other listeners.
-            }
-        });
-    }
-
-    @SuppressLint("InlinedApi")
-    public static void setupNumericEditText(final EditText editText, @Nullable final View.OnClickListener onDone) {
-        editText.setImeOptions(EditorInfo.IME_ACTION_DONE);
-        editText.setInputType(InputType.TYPE_CLASS_PHONE | InputType.TYPE_NUMBER_VARIATION_PASSWORD);
+    public static void setOnEditTextEnter(final EditText editText, @Nullable final View.OnClickListener onDone) {
         editText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
 
             @Override
