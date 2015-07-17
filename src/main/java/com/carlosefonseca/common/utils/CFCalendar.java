@@ -68,6 +68,8 @@ public class CFCalendar extends GregorianCalendar {
         Calendar todayAtMidnight = getInstance();
         todayAtMidnight.set(HOUR_OF_DAY, 0);
         todayAtMidnight.set(MINUTE, 0);
+        todayAtMidnight.set(SECOND, 0);
+        todayAtMidnight.set(MILLISECOND, 0);
         return todayAtMidnight;
     }
 }
