@@ -245,9 +245,14 @@ public class LoadingDialog extends Dialog {
      * @param runnable An optional runnable to be ran on dismissal.
      * @return This instance.
      */
-    public LoadingDialog showAndDismissSuccess(String message, @Nullable Runnable runnable) {
-        changeDialog(message, DialogType.COMPLETED);
-        showAndDismiss(runnable);
+    public LoadingDialog showAndDismissSuccess(final String message, @Nullable final Runnable runnable) {
+        runOnUIThread(new Runnable() {
+            @Override
+            public void run() {
+                setupOverlayDialog(message, DialogType.COMPLETED);
+                showAndDismiss(runnable);
+            }
+        });
         return this;
     }
 
@@ -268,9 +273,14 @@ public class LoadingDialog extends Dialog {
      * @param runnable An optional runnable to be ran on dismissal.
      * @return This instance.
      */
-    public LoadingDialog showAndDismissError(String message, @Nullable Runnable runnable) {
-        changeDialog(message, DialogType.ERROR);
-        showAndDismiss(runnable);
+    public LoadingDialog showAndDismissError(final String message, @Nullable final Runnable runnable) {
+        runOnUIThread(new Runnable() {
+            @Override
+            public void run() {
+                setupOverlayDialog(message, DialogType.ERROR);
+                showAndDismiss(runnable);
+            }
+        });
         return this;
     }
 
@@ -281,9 +291,14 @@ public class LoadingDialog extends Dialog {
      * @param message The message to display.
      * @return This instance.
      */
-    public LoadingDialog showLoading(String message) {
-        changeDialog(message, DialogType.LOADING);
-        show();
+    public LoadingDialog showLoading(final String message) {
+        runOnUIThread(new Runnable() {
+            @Override
+            public void run() {
+                setupOverlayDialog(message, DialogType.LOADING);
+                show();
+            }
+        });
         return this;
     }
 
