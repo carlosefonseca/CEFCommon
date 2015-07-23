@@ -267,6 +267,13 @@ public final class ListUtils {
                    LONG_L + " OLD:  " + oldObjects;
         }
 
+        public String toString(String header) {
+            return header + "\n" +
+                   SIDE_T + " NEW:  " + newObjects + "\n" +
+                   SIDE_T + " SAME: " + sameObjects + "\n" +
+                   LONG_L + " OLD:  " + oldObjects;
+        }
+
         protected String getTypeName() {
             final T instance = !newObjects.isEmpty()
                                ? newObjects.get(0)
@@ -277,6 +284,10 @@ public final class ListUtils {
         public boolean hasChanges() {
             return !newObjects.isEmpty() || !oldObjects.isEmpty() ||
                    (updatedObjects != null && !updatedObjects.isEmpty());
+        }
+
+        public int getFinalSize() {
+            return sameObjects.size()+newObjects.size();
         }
     }
 
