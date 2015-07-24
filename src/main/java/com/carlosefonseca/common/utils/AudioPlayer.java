@@ -1,15 +1,17 @@
 package com.carlosefonseca.common.utils;
 
 import android.content.Context;
+import android.content.res.AssetFileDescriptor;
 import android.media.MediaPlayer;
 import android.net.Uri;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.widget.Toast;
 import com.carlosefonseca.common.CFApp;
 import de.greenrobot.event.EventBus;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.LinkedList;
 import java.util.Queue;
 
@@ -128,11 +130,11 @@ public class AudioPlayer {
      * Starts playing the file, stopping another that was playing.
      */
     public static void playOrResumeFile(File audioFile) {
-        if (!audioFile.exists()) {
-            Log.i(TAG, "File " + audioFile + " doesn't exist.");
-            CodeUtils.toast("File " + audioFile + " doesn't exist.");
-            return;
-        }
+//        if (!audioFile.exists()) {
+//            Log.i(TAG, "File " + audioFile + " doesn't exist.");
+//            CodeUtils.toast("File " + audioFile + " doesn't exist.");
+//            return;
+//        }
         if (currentFile != null && currentFile.equals(audioFile) && currentMediaPlayer != null &&
             !currentMediaPlayer.isPlaying()) {
             resume();
@@ -201,11 +203,20 @@ public class AudioPlayer {
                 Log.e(TAG, new Exception("Failed to create MediaPlayer for audioFile " + audioFile.getName()));
             }
             return mediaPlayer;
-        } else {
-            Log.i(TAG, "" + audioFile.getName() + " doesn't exist!");
-            Toast.makeText(c, "Audio File " + audioFile.getName() + " doesn't exist!", Toast.LENGTH_SHORT).show();
-            return null;
+        } else if (UIL.existsOnPackage(audioFile.getName())) {
+            try {
+                AssetFileDescriptor afd = c.getAssets().openFd(audioFile.getName());
+                MediaPlayer player = new MediaPlayer();
+                player.setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
+                player.prepare();
+                return player;
+            } catch (IOException e) {
+                Log.e(TAG, "" + e.getMessage(), e);
+            }
         }
+        Log.i(TAG, "" + audioFile.getName() + " doesn't exist!");
+        Toast.makeText(c, "Audio File " + audioFile.getName() + " doesn't exist!", Toast.LENGTH_SHORT).show();
+        return null;
     }
 
 
