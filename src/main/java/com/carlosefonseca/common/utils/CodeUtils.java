@@ -6,6 +6,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.location.LocationManager;
@@ -207,6 +208,17 @@ public final class CodeUtils {
     public static int getDigitFromChar(char c) {
         if (c >= '0' && c <= '9') return c - '0';
         throw new RuntimeException("Char '" + c + "' is not a number.");
+    }
+
+    public static String getAppMetadata(Context context, String key) {
+        try {
+            ApplicationInfo ai = context.getPackageManager().getApplicationInfo(context.getPackageName(), PackageManager.GET_META_DATA);
+            Bundle bundle = ai.metaData;
+            return bundle.getString(key);
+        } catch (PackageManager.NameNotFoundException e) {
+            Log.w(TAG, e);
+            return null;
+        }
     }
 
     public interface RunnableWithView<T extends View> {
