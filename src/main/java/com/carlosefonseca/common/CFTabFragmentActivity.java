@@ -145,6 +145,7 @@ public class CFTabFragmentActivity extends CFActivity implements TabHost.OnTabCh
                 newTab.fragment = Fragment.instantiate(this, newTab.clss.getName(), newTab.args);
                 ft.add(realtabcontent, newTab.fragment, newTab.tag);
             } else {
+                if (newTab.fragment.isDetached()) ft.attach(newTab.fragment);
                 ft.show(newTab.fragment);
 //                    ft.attach(newTab.fragment);
             }
