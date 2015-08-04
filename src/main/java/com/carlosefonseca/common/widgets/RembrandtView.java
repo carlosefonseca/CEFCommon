@@ -1,18 +1,18 @@
 package com.carlosefonseca.common.widgets;
 
 import android.content.Context;
-import android.graphics.drawable.Drawable;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.widget.ImageView;
 import bolts.Task;
 import com.carlosefonseca.common.utils.CodeUtils;
 import com.carlosefonseca.common.utils.ImageUtils;
 import com.carlosefonseca.common.utils.Rembrandt;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 
 import java.io.File;
 
+@Deprecated
 public class RembrandtView extends ImageView {
     private static final java.lang.String TAG = CodeUtils.getTag(RembrandtView.class);
     private Rembrandt mRembrandt;
@@ -112,12 +112,6 @@ public class RembrandtView extends ImageView {
     @Override
     public void setImageResource(int resId) {
         super.setImageResource(resId);
-        this.url = null;
-    }
-
-    @Override
-    public void setImageDrawable(Drawable drawable) {
-        super.setImageDrawable(drawable);
         this.url = null;
     }
 

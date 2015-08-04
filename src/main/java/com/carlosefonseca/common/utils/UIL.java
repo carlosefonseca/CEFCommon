@@ -16,6 +16,7 @@ import com.nostra13.universalimageloader.core.assist.ImageScaleType;
 import com.nostra13.universalimageloader.core.assist.ImageSize;
 import com.nostra13.universalimageloader.core.assist.QueueProcessingType;
 import com.nostra13.universalimageloader.core.display.FadeInBitmapDisplayer;
+import com.nostra13.universalimageloader.core.display.RoundedBitmapDisplayer;
 import com.nostra13.universalimageloader.core.download.BaseImageDownloaderImpl;
 import com.nostra13.universalimageloader.core.download.ImageDownloader;
 import com.nostra13.universalimageloader.core.imageaware.ImageViewAware;
@@ -232,19 +233,19 @@ public final class UIL {
         sIL.loadImage(uri, targetImageSize, loadingListener);
     }
 
-    public static void display(@Nullable String str, ImageView imageView) {
+    public static void display(@Nullable String str, @NonNull ImageView imageView) {
         if (StringUtils.isNotBlank(str)) {
             sIL.displayImage(UIL.getUri(str), new ImageViewAware(imageView), null, null);
         }
     }
 
-    public static void displayPhoto(@Nullable String str, ImageView imageView) {
+    public static void displayPhoto(@Nullable String str, @NonNull ImageView imageView) {
         if (StringUtils.isNotBlank(str)) {
             sIL.displayImage(UIL.getUri(str), new ImageViewAware(imageView), mOptionsForPhotos, null);
         }
     }
 
-    public static void displayIcon(@Nullable String str, ImageView imageView) {
+    public static void displayIcon(@Nullable String str, @NonNull ImageView imageView) {
         if (StringUtils.isNotBlank(str)) {
             sIL.displayImage(UIL.getUri(str), new ImageViewAware(imageView), mOptionsForIcons, null);
         }
@@ -253,6 +254,24 @@ public final class UIL {
     public static void display(@Nullable String str, @Nullable ImageView imageView, ImageLoadingListener listener) {
         if (StringUtils.isNotBlank(str)) {
             sIL.displayImage(UIL.getUri(str), imageView != null ? new ImageViewAware(imageView) : null, null, listener);
+        }
+    }
+
+    public static void display(@Nullable String str, @Nullable ImageView imageView, DisplayImageOptions displayImageOptions) {
+        if (StringUtils.isNotBlank(str)) {
+            sIL.displayImage(UIL.getUri(str),
+                             imageView != null ? new ImageViewAware(imageView) : null,
+                             displayImageOptions,
+                             null);
+        }
+    }
+
+    public static void display(@Nullable String str, @Nullable ImageView imageView, ImageLoadingListener listener, DisplayImageOptions displayImageOptions) {
+        if (StringUtils.isNotBlank(str)) {
+            sIL.displayImage(UIL.getUri(str),
+                             imageView != null ? new ImageViewAware(imageView) : null,
+                             displayImageOptions,
+                             listener);
         }
     }
 
@@ -275,5 +294,9 @@ public final class UIL {
     public static Bitmap getIconDP(@Nullable String str, int w, int h) {
         if (StringUtils.isBlank(str)) return null;
         return sIL.loadImageSync(getUri(str), new ImageSize(dp2px(w), dp2px(h)), mOptionsForIcons);
+    }
+
+    public static DisplayImageOptions getDisplayOptions(RoundedBitmapDisplayer displayer) {
+        return new DisplayImageOptions.Builder().cloneFrom(mOptionsForPhotos).displayer(displayer).build();
     }
 }

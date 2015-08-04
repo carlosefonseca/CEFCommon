@@ -132,12 +132,10 @@ public class CFTabFragmentActivity extends CFActivity implements TabHost.OnTabCh
     public void onTabChanged(String tag) {
         TabInfo newTab = this.mapTabInfo.get(tag);
         Assert.assertNotNull(newTab);
-        if (mLastTab != newTab ||
-            (mLastTab != null && mLastTab.fragment != null && mLastTab.fragment.getView() == null)) {
+        if (mLastTab != newTab || (mLastTab.fragment != null && mLastTab.fragment.getView() == null)) {
             FragmentTransaction ft = this.getSupportFragmentManager().beginTransaction();
             if (mLastTab != null) {
                 if (mLastTab.fragment != null) {
-//                    ft.detach(mLastTab.fragment);
                     ft.hide(mLastTab.fragment);
                 }
             }
@@ -147,7 +145,6 @@ public class CFTabFragmentActivity extends CFActivity implements TabHost.OnTabCh
             } else {
                 if (newTab.fragment.isDetached()) ft.attach(newTab.fragment);
                 ft.show(newTab.fragment);
-//                    ft.attach(newTab.fragment);
             }
 
             onChangingTab(mLastTab, newTab);
