@@ -3,14 +3,14 @@ package com.carlosefonseca.common;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
+import android.support.annotation.Nullable;
+import android.support.v7.app.AppCompatActivity;
 import android.widget.Toast;
 import com.carlosefonseca.common.utils.ActivityStateListener;
 import com.carlosefonseca.common.utils.Log;
 import com.carlosefonseca.common.widgets.LoadingDialog;
 import com.readystatesoftware.systembartint.SystemBarTintManager;
 import de.greenrobot.event.EventBus;
-import android.support.annotation.Nullable;
 
 import java.lang.ref.WeakReference;
 
@@ -21,7 +21,7 @@ import static com.carlosefonseca.common.utils.CodeUtils.isMainThread;
 /**
  * Base Activity with a lot of good stuff.
  */
-public class CFActivity extends FragmentActivity implements ActivityStateListener.ActivityStateListenerProvider {
+public class CFActivity extends AppCompatActivity implements ActivityStateListener.ActivityStateListenerProvider {
 
     private static final String sTAG = getTag(CFActivity.class);
     public static final int REQUEST_EXIT = -1234;

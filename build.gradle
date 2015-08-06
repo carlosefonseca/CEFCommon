@@ -35,6 +35,7 @@ dependencies {
     compile 'com.google.android.gms:play-services-maps:7.5.0'
     compile 'com.google.android.gms:play-services-location:7.5.0'
     compile 'com.google.android.gms:play-services-gcm:7.5.0'
+    compile 'com.android.support:appcompat-v7:22.2.1'
     //noinspection GradleDependency
     compile 'com.google.code.gson:gson:1.7.2'
     compile 'com.nineoldandroids:library:2.4.0'

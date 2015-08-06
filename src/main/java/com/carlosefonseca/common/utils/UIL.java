@@ -2,6 +2,8 @@ package com.carlosefonseca.common.utils;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.view.View;
 import android.widget.ImageView;
 import com.android.vending.expansion.zipfile.APKExpansionSupport;
@@ -15,16 +17,14 @@ import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 import com.nostra13.universalimageloader.core.assist.ImageScaleType;
 import com.nostra13.universalimageloader.core.assist.ImageSize;
 import com.nostra13.universalimageloader.core.assist.QueueProcessingType;
+import com.nostra13.universalimageloader.core.display.BitmapDisplayer;
 import com.nostra13.universalimageloader.core.display.FadeInBitmapDisplayer;
-import com.nostra13.universalimageloader.core.display.RoundedBitmapDisplayer;
 import com.nostra13.universalimageloader.core.download.BaseImageDownloaderImpl;
 import com.nostra13.universalimageloader.core.download.ImageDownloader;
 import com.nostra13.universalimageloader.core.imageaware.ImageViewAware;
 import com.nostra13.universalimageloader.core.listener.ImageLoadingListener;
 import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener;
 import org.apache.commons.lang3.StringUtils;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 
 import java.io.File;
 import java.io.IOException;
@@ -296,7 +296,7 @@ public final class UIL {
         return sIL.loadImageSync(getUri(str), new ImageSize(dp2px(w), dp2px(h)), mOptionsForIcons);
     }
 
-    public static DisplayImageOptions getDisplayOptions(RoundedBitmapDisplayer displayer) {
+    public static DisplayImageOptions getDisplayOptions(BitmapDisplayer displayer) {
         return new DisplayImageOptions.Builder().cloneFrom(mOptionsForPhotos).displayer(displayer).build();
     }
 }

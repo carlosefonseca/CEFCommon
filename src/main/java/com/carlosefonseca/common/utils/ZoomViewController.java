@@ -116,6 +116,8 @@ public abstract class ZoomViewController<T extends View> {
         // the zoomed-in view (the default is the center of the view).
         ViewHelper.setPivotX(expandedView, 0f);
         ViewHelper.setPivotY(expandedView, 0f);
+        ViewHelper.setScaleX(expandedView, 1f);
+        ViewHelper.setScaleY(expandedView, 1f);
 
         // Construct and run the parallel animation of the four translation and scale properties
         // (X, Y, SCALE_X, and SCALE_Y).

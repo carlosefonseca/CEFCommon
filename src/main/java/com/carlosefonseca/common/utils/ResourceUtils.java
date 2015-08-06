@@ -349,14 +349,23 @@ public final class ResourceUtils {
             return this;
         }
 
+        /**
+         * @param value [0..359]
+         */
         public HSVColor addHue(double value) {
             return add(HUE, value);
         }
 
+        /**
+         * @param value [0..1]
+         */
         public HSVColor addSat(double value) {
             return add(SAT, value);
         }
 
+        /**
+         * @param value [0..1]
+         */
         public HSVColor addValue(double value) {
             return add(VAL, value);
         }
@@ -382,6 +391,18 @@ public final class ResourceUtils {
         private HSVColor mul(short field, double value) {
             hsv[field] = (float) Math.min(Math.max(hsv[field] * value, 0), field == HUE ? 359 : 1);
             return this;
+        }
+
+        public float getHue() {
+            return hsv[HUE];
+        }
+
+        public float getSat() {
+            return hsv[SAT];
+        }
+
+        public float getValue() {
+            return hsv[VAL];
         }
 
         public int color() {

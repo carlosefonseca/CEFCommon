@@ -42,10 +42,22 @@ public class GalleryPage extends FrameLayout {
     }
 
     protected void init() {
-        imageView = new ImageView(getContext());
-        imageView.setAdjustViewBounds(true);
-        imageView.setId(R.id.image);
-        addView(imageView, new LayoutParams(WRAP_CONTENT, MATCH_PARENT, Gravity.CENTER));
+//        imageView = new ImageView(getContext());
+//        imageView.setAdjustViewBounds(true);
+//        imageView.setId(R.id.image);
+//        addView(imageView, new LayoutParams(WRAP_CONTENT, MATCH_PARENT, Gravity.CENTER));
+    }
+
+    @Override
+    protected void onFinishInflate() {
+        super.onFinishInflate();
+        imageView = (ImageView) findViewById(R.id.image);
+        if (imageView == null) {
+            imageView = new ImageView(getContext());
+            imageView.setAdjustViewBounds(true);
+            imageView.setId(R.id.image);
+            addView(imageView, new LayoutParams(WRAP_CONTENT, MATCH_PARENT, Gravity.CENTER));
+        }
     }
 
     public void setScaleType(ImageView.ScaleType scaleType) {

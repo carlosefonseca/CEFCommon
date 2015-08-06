@@ -63,6 +63,7 @@ public class NavBar extends LinearLayout {
     private static int defaultNormalColor = NO_COLOR;
     private static int defaultPressedColor = NO_COLOR;
     private static int defaultTextColor = NO_COLOR;
+    private static int defaultBackgroundColor = NO_COLOR;
 
     // ELEMENTS
     private ImageButton backBt;
@@ -109,6 +110,10 @@ public class NavBar extends LinearLayout {
             ViewUtils.setPaddingRight(0, titleView);
             titleView.setGravity(Gravity.CENTER);
         }
+    }
+
+    public static void setDefaultBackgroundColor(int defaultBackgroundColor) {
+        NavBar.defaultBackgroundColor = defaultBackgroundColor;
     }
 
     /**
@@ -179,6 +184,7 @@ public class NavBar extends LinearLayout {
         LayoutInflater.from(context).inflate(R.layout.nav_bar, this);
 
         this.root = (LinearLayout) getChildAt(0);
+        if (defaultBackgroundColor != NO_COLOR) setBackgroundColor(defaultBackgroundColor);
 
         // TITLE
         titleView = (AutoResizeTextView) findViewById(R.id.nav_title);

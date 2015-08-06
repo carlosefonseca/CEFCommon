@@ -24,6 +24,18 @@ public final class ViewUtils {
         }
     }
 
+    public static void setPaddingH(int value, View... views) {
+        for (View view : views) {
+            view.setPadding(value, view.getPaddingTop(), value, view.getPaddingBottom());
+        }
+    }
+
+    public static void setPaddingV(int value, View... views) {
+        for (View view : views) {
+            view.setPadding(view.getPaddingLeft(), value, view.getPaddingRight(), value);
+        }
+    }
+
     public static void setPaddingLeft(int value, View... views) {
         for (View view : views) {
             view.setPadding(value, view.getPaddingTop(), view.getPaddingRight(), view.getPaddingBottom());
