@@ -5,6 +5,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.util.LruCache;
 import android.view.View;
 import android.widget.ImageView;
+import bolts.Task;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.assist.FailReason;
 import com.nostra13.universalimageloader.core.display.BitmapDisplayer;
@@ -19,6 +20,8 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
+import static com.carlosefonseca.common.utils.ImageUtils.dp2px;
+
 /**
  * This class is basically a re-packaging of multiple Bitmap methods in ImageUtils, in an interface similar to
  * Square's Picasso. It doesn't have half the features of Picasso but does what I need, which is downloading, caching
@@ -28,6 +31,7 @@ public class Gogh {
     private static final short NOT_ANIMATED = 0;
     private static final short FADE_IN = 1;
     private static final short CROSS_FADE = 2;
+    public static final int DP_5 = dp2px(5);
 
     private String mUrl;
     private int mPlaceholder;
@@ -36,6 +40,9 @@ public class Gogh {
     private short mAnimation;
     private DisplayImageOptions mOptions;
     private boolean mHideIfNull;
+    private OnBitmap listener;
+    private OnBitmap mOnBitmap;
+    private Task<Bitmap>.TaskCompletionSource mTaskSource;
 
 
     private Gogh(String url) {
@@ -66,6 +73,10 @@ public class Gogh {
         return new Gogh(UIL.getUri(file)).icon();
     }
 
+    public static Gogh loadIcon(@Nullable String url) {
+        return new Gogh(UIL.getUri(url)).icon();
+    }
+
     private Gogh photo() {
         mOptions = UIL.mOptionsForPhotos;
         return this;
@@ -86,11 +97,11 @@ public class Gogh {
     }
 
     public Gogh circle() {
-        return displayer(GoghHelper.getCircleBitmapDisplayer());
+        return displayer(GoghHelper.getCircleBitmapDisplayer(0));
     }
 
     public Gogh circle(boolean circle) {
-        return circle ? displayer(GoghHelper.getCircleBitmapDisplayer()) : displayer(null);
+        return circle ? displayer(GoghHelper.getCircleBitmapDisplayer(0)) : displayer(null);
     }
 
     private Gogh displayer(BitmapDisplayer displayer) {
@@ -104,6 +115,15 @@ public class Gogh {
 
     public Gogh hideIfNull(boolean hide) {
         mHideIfNull = hide;
+        return this;
+    }
+
+    public interface OnBitmap {
+        void bitmap(Bitmap bitmap);
+    }
+
+    public Gogh onBitmap(OnBitmap runnable) {
+        mOnBitmap = runnable;
         return this;
     }
 
@@ -124,6 +144,18 @@ public class Gogh {
     public void xFade(final ImageView view) {
         into(view, CROSS_FADE);
     }
+
+    public Task<Bitmap> taskInto(final ImageView view) {
+        mTaskSource = Task.create();
+        into(view);
+        return mTaskSource.getTask();
+    }
+    public Task<Bitmap> taskFadeIn(final ImageView view) {
+        mTaskSource = Task.create();
+        into(view, FADE_IN);
+        return mTaskSource.getTask();
+    }
+
 
 
     public static class GoghHelper {
@@ -157,6 +189,9 @@ public class Gogh {
                     imageLoadingListener = crossFadeDisplayListener;
                     break;
             }
+            if (g.mOnBitmap != null || g.mTaskSource != null) {
+                imageLoadingListener = new MySimpleImageLoadingListener(g.mTaskSource, imageLoadingListener, g.mOnBitmap);
+            }
 
             if (g.mDisplayer != null) {
                 g.mOptions = new DisplayImageOptions.Builder().cloneFrom(g.mOptions).displayer(g.mDisplayer).build();
@@ -172,17 +207,21 @@ public class Gogh {
                         return new RoundedBitmapDisplayer(key);
                     }
                 };
+        static LruCache<Integer, CircleBitmapDisplayer> sCircleBitmapDisplayerCache =
+                new LruCache<Integer, CircleBitmapDisplayer>(5) {
+                    @Override
+                    protected CircleBitmapDisplayer create(Integer key) {
+                        return new CircleBitmapDisplayer(key);
+                    }
+                };
 
-        private static CircleBitmapDisplayer sCircleBitmapDisplayer;
-
-        protected static BitmapDisplayer getRoundCornersBitmapDisplayer(int cornerRadius) {
+        public static BitmapDisplayer getRoundCornersBitmapDisplayer(int cornerRadius) {
             return sRoundCornersBitmapDisplayerCache.get(cornerRadius);
         }
 
 
-        protected static CircleBitmapDisplayer getCircleBitmapDisplayer() {
-            if (sCircleBitmapDisplayer == null) sCircleBitmapDisplayer = new CircleBitmapDisplayer();
-            return sCircleBitmapDisplayer;
+        public static CircleBitmapDisplayer getCircleBitmapDisplayer(int margin) {
+            return sCircleBitmapDisplayerCache.get(margin);
         }
 
 
@@ -227,5 +266,56 @@ public class Gogh {
                 }
             }
         };
+
+        private static class MySimpleImageLoadingListener extends SimpleImageLoadingListener {
+            @Nullable private final Task<Bitmap>.TaskCompletionSource mTaskSource;
+            @Nullable ImageLoadingListener base;
+            @Nullable OnBitmap listener;
+
+            public MySimpleImageLoadingListener(@Nullable ImageLoadingListener base, @Nullable OnBitmap listener) {
+                this.base = base;
+                this.listener = listener;
+                mTaskSource = null;
+            }
+
+            public MySimpleImageLoadingListener(@Nullable Task<Bitmap>.TaskCompletionSource taskSource, @Nullable ImageLoadingListener base, @Nullable OnBitmap listener) {
+                mTaskSource = taskSource;
+                this.base = base;
+                this.listener = listener;
+            }
+
+            @Override
+            public void onLoadingFailed(String imageUri, View view, FailReason failReason) {
+                if (base != null) {
+                    base.onLoadingFailed(imageUri, view, failReason);
+                }
+                if (mTaskSource != null) {
+                    mTaskSource.setError(new RuntimeException(String.valueOf(failReason), failReason.getCause()));
+                }
+            }
+
+            @Override
+            public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
+                if (listener != null) {
+                    listener.bitmap(loadedImage);
+                }
+                if (base != null) {
+                    base.onLoadingComplete(imageUri, view, loadedImage);
+                }
+                if (mTaskSource != null) {
+                    mTaskSource.setResult(loadedImage);
+                }
+            }
+
+            @Override
+            public void onLoadingCancelled(String imageUri, View view) {
+                if (base != null) {
+                    base.onLoadingCancelled(imageUri, view);
+                }
+                if (mTaskSource != null) {
+                    mTaskSource.setCancelled();
+                }
+            }
+        }
     }
 }

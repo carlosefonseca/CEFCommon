@@ -8,6 +8,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
@@ -226,4 +227,11 @@ public final class ViewUtils {
         view.setLayoutParams(view.getLayoutParams());
     }
 
+    public static void setLayoutWidthHeightWeight(View view, int width, int height, int weight) {
+        LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams) view.getLayoutParams();
+        layoutParams.width = width;
+        layoutParams.height = height;
+        layoutParams.weight = weight;
+        view.setLayoutParams(layoutParams);
+    }
 }

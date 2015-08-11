@@ -5,8 +5,6 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
 
-import java.security.InvalidParameterException;
-
 /**
  * Detects triple taps. Uses a mix of tap and double tap detection to figure out when a triple tap occurs.
  * This implementation is very simple, at least when compared with the {@link android.view.GestureDetector}, which I tried to
@@ -19,7 +17,7 @@ import java.security.InvalidParameterException;
  * Looks like you need to set {@link View#setClickable(boolean)} to true on views that aren't buttons.
  */
 @SuppressWarnings("ConstantConditions")
-public class TripleTapTouchListener implements View.OnTouchListener {
+public abstract class TripleTapTouchListener implements View.OnTouchListener {
     private static final String TAG = CodeUtils.getTag(TripleTapTouchListener.class);
     final boolean log = false;
 
@@ -27,7 +25,6 @@ public class TripleTapTouchListener implements View.OnTouchListener {
     private static final int DOUBLE_TAP_MIN_TIME = 40;//ViewConfiguration.getDoubleTapMinTime();
     private static final int TAP_TIMEOUT = ViewConfiguration.getTapTimeout();
 
-    private final OnTripleTapListener mTripleTapListener;
     private final int mTouchSlopSquare;
     private int mDownCount;
     private int mUpCount;
@@ -39,37 +36,13 @@ public class TripleTapTouchListener implements View.OnTouchListener {
     private MotionEvent[] mUps = new MotionEvent[3];
 
 
-    /**
-     * The listener that is used to notify when a triple-tap occurs.
-     */
-    public interface OnTripleTapListener {
-        /**
-         * Notified when an event within a triple-tap gesture occurs.
-         *
-         * @param e The first motion event that occurred during the triple-tap gesture.
-         * @return true if the event is consumed, else false
-         */
-        boolean onTripleTapEvent(MotionEvent e);
-    }
-
-
-    public TripleTapTouchListener(Context context, OnTripleTapListener tripleTapListener) {
-        if (tripleTapListener == null) {
-            throw new InvalidParameterException("Listener is null");
-        }
-        mTripleTapListener = tripleTapListener;
-
+    public TripleTapTouchListener(Context context) {
         final ViewConfiguration configuration = ViewConfiguration.get(context);
         int touchSlop = configuration.getScaledDoubleTapSlop();
         mTouchSlopSquare = touchSlop * touchSlop;
     }
 
-    public TripleTapTouchListener(View view, OnTripleTapListener tripleTapListener) {
-        if (tripleTapListener == null) {
-            throw new InvalidParameterException("Listener is null");
-        }
-        mTripleTapListener = tripleTapListener;
-
+    public TripleTapTouchListener(View view) {
         final ViewConfiguration configuration = ViewConfiguration.get(view.getContext());
         int touchSlop = configuration.getScaledDoubleTapSlop();
         mTouchSlopSquare = touchSlop * touchSlop;
@@ -77,12 +50,8 @@ public class TripleTapTouchListener implements View.OnTouchListener {
         view.setOnTouchListener(this);
     }
 
-    public static TripleTapTouchListener set(View view, OnTripleTapListener tripleTapTouchListener) {
-        return new TripleTapTouchListener(view, tripleTapTouchListener);
-    }
-
     @Override
-    public boolean onTouch(View v, MotionEvent ev) {
+    public final boolean onTouch(View v, MotionEvent ev) {
         synchronized (lock) {
             final int action = ev.getAction();
 
@@ -131,7 +100,7 @@ public class TripleTapTouchListener implements View.OnTouchListener {
                             MotionEvent mDown = mDowns[0];
                             mDowns[0] = null;
                             cancel();
-                            return mTripleTapListener.onTripleTapEvent(mDown);
+                            return onTripleTapEvent(mDown);
                         } else {
                             mUps[mUpCount] = MotionEvent.obtain(ev);
                             mUpCount++;
@@ -151,6 +120,8 @@ public class TripleTapTouchListener implements View.OnTouchListener {
             return false;
         }
     }
+
+    public abstract boolean onTripleTapEvent(MotionEvent event);
 
     private void cancel() {
         if (log) Log.v(TAG, "CANCEL");

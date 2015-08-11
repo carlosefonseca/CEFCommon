@@ -72,7 +72,18 @@ public class CircleBitmapDisplayer implements BitmapDisplayer {
             this.margin = margin;
 
             bitmapShader = new BitmapShader(bitmap, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP);
-            mBitmapRect = new RectF(margin, margin, bitmap.getWidth() - margin, bitmap.getHeight() - margin);
+
+            if (bitmap.getWidth() > bitmap.getHeight()) {
+                mBitmapRect = new RectF((bitmap.getWidth() / 2) - (bitmap.getHeight() / 2 - margin),
+                                        margin,
+                                        (bitmap.getWidth() / 2) + (bitmap.getHeight() / 2 - margin),
+                                        bitmap.getHeight() - margin);
+            } else {
+                mBitmapRect = new RectF(margin,
+                                        (bitmap.getHeight() / 2) - (bitmap.getWidth() / 2 - margin),
+                                        bitmap.getWidth() - margin,
+                                        (bitmap.getHeight() / 2) + (bitmap.getWidth() / 2 - margin));
+            }
 
             paint = new Paint();
             paint.setAntiAlias(true);
