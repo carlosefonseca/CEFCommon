@@ -249,7 +249,7 @@ public class AutoResizeTextView extends TextView {
 
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-        if (changed || mNeedsResize) reAdjust();
+        if (!isInEditMode() && (changed || mNeedsResize)) reAdjust();
         super.onLayout(changed, left, top, right, bottom);
     }
 
@@ -378,7 +378,6 @@ public class AutoResizeTextView extends TextView {
 
     @Override
     protected void onTextChanged(final CharSequence text, final int start, final int before, final int after) {
-        super.onTextChanged(text, start, before, after);
         mNeedsResize = true;
         requestLayout();
         invalidate();
@@ -388,7 +387,7 @@ public class AutoResizeTextView extends TextView {
     protected void onSizeChanged(int width, int height, int oldwidth, int oldheight) {
         mTextCachedSizes.clear();
         super.onSizeChanged(width, height, oldwidth, oldheight);
-        if (width != oldwidth || height != oldheight) {
+        if (!isInEditMode() && (width != oldwidth || height != oldheight)) {
             reAdjust();
         }
     }

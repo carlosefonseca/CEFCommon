@@ -1,6 +1,9 @@
 package com.carlosefonseca.common.utils;
 
 import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.util.LruCache;
 import android.view.View;
@@ -8,19 +11,14 @@ import android.widget.ImageView;
 import bolts.Task;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.assist.FailReason;
+import com.nostra13.universalimageloader.core.assist.LoadedFrom;
 import com.nostra13.universalimageloader.core.display.BitmapDisplayer;
-import com.nostra13.universalimageloader.core.display.FadeInBitmapDisplayer;
-import com.nostra13.universalimageloader.core.display.RoundedBitmapDisplayer;
+import com.nostra13.universalimageloader.core.imageaware.ImageAware;
 import com.nostra13.universalimageloader.core.listener.ImageLoadingListener;
 import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-
-import static com.carlosefonseca.common.utils.ImageUtils.dp2px;
 
 /**
  * This class is basically a re-packaging of multiple Bitmap methods in ImageUtils, in an interface similar to
@@ -31,16 +29,14 @@ public class Gogh {
     private static final short NOT_ANIMATED = 0;
     private static final short FADE_IN = 1;
     private static final short CROSS_FADE = 2;
-    public static final int DP_5 = dp2px(5);
 
     private String mUrl;
     private int mPlaceholder;
-    private BitmapDisplayer mDisplayer;
+    private DrawableMaker<?> mDisplayer;
     private ImageView mView;
     private short mAnimation;
     private DisplayImageOptions mOptions;
     private boolean mHideIfNull;
-    private OnBitmap listener;
     private OnBitmap mOnBitmap;
     private Task<Bitmap>.TaskCompletionSource mTaskSource;
 
@@ -50,31 +46,23 @@ public class Gogh {
     }
 
     public static Gogh loadPhotoURI(@Nullable String url) {
-        return new Gogh(url);
+        return new Gogh(url).photo();
     }
 
     public static Gogh loadIconURI(@Nullable String url) {
-        return new Gogh(url);
-    }
-
-    public static Gogh load(@Nullable String url) {
-        return new Gogh(UIL.getUri(url));
-    }
-
-    public static Gogh load(@Nullable File file) {
-        return new Gogh(UIL.getUri(file));
+        return new Gogh(url).icon();
     }
 
     public static Gogh loadPhoto(@Nullable String url) {
-        return new Gogh(UIL.getUri(url)).photo();
+        return loadPhotoURI(UIL.getUri(url));
     }
 
     public static Gogh loadIcon(@Nullable File file) {
-        return new Gogh(UIL.getUri(file)).icon();
+        return loadIconURI(UIL.getUri(file));
     }
 
     public static Gogh loadIcon(@Nullable String url) {
-        return new Gogh(UIL.getUri(url)).icon();
+        return loadIconURI(UIL.getUri(url));
     }
 
     private Gogh photo() {
@@ -101,10 +89,20 @@ public class Gogh {
     }
 
     public Gogh circle(boolean circle) {
-        return circle ? displayer(GoghHelper.getCircleBitmapDisplayer(0)) : displayer(null);
+        return circle ? displayer(GoghHelper.getCircleBitmapDisplayer(0)) : this;
     }
 
-    private Gogh displayer(BitmapDisplayer displayer) {
+    public Gogh square(boolean square) {
+        return square ? displayer(new DrawableMaker<Drawable>() {
+            @NonNull
+            @Override
+            public Drawable getDrawable(@NonNull Bitmap bitmap) {
+                return new SquareDrawable(bitmap);
+            }
+        }) : this;
+    }
+
+    private Gogh displayer(DrawableMaker<?> displayer) {
         mDisplayer = displayer;
         return this;
     }
@@ -156,7 +154,9 @@ public class Gogh {
         return mTaskSource.getTask();
     }
 
-
+    public String getUri() {
+        return mUrl;
+    }
 
     public static class GoghHelper {
         private static final String TAG = CodeUtils.getTag(GoghHelper.class);
@@ -178,33 +178,26 @@ public class Gogh {
             }
 
             ImageLoadingListener imageLoadingListener = null;
-            switch (g.mAnimation) {
-                case NOT_ANIMATED:
-                    imageLoadingListener = null;
-                    break;
-                case FADE_IN:
-                    imageLoadingListener = animateFirstDisplayListener;
-                    break;
-                case CROSS_FADE:
-                    imageLoadingListener = crossFadeDisplayListener;
-                    break;
-            }
             if (g.mOnBitmap != null || g.mTaskSource != null) {
-                imageLoadingListener = new MySimpleImageLoadingListener(g.mTaskSource, imageLoadingListener, g.mOnBitmap);
+                imageLoadingListener = new MySimpleImageLoadingListener(g.mTaskSource, g.mOnBitmap);
             }
 
-            if (g.mDisplayer != null) {
-                g.mOptions = new DisplayImageOptions.Builder().cloneFrom(g.mOptions).displayer(g.mDisplayer).build();
+            if (g.mAnimation != NOT_ANIMATED || g.mDisplayer != null) {
+                MySimpleImageDisplayer displayer = new MySimpleImageDisplayer(g.mAnimation, g.mDisplayer);
+                g.mOptions = new DisplayImageOptions.Builder().cloneFrom(g.mOptions)
+                                                              .displayer(displayer)
+                                                              .resetViewBeforeLoading(g.mAnimation != CROSS_FADE)
+                                                              .build();
             }
 
             UIL.display(g.mUrl, g.mView, imageLoadingListener, g.mOptions);
         }
 
-        static LruCache<Integer, RoundedBitmapDisplayer> sRoundCornersBitmapDisplayerCache =
-                new LruCache<Integer, RoundedBitmapDisplayer>(5) {
+        static LruCache<Integer, CFRoundedBitmapDisplayer> sRoundCornersBitmapDisplayerCache =
+                new LruCache<Integer, CFRoundedBitmapDisplayer>(5) {
                     @Override
-                    protected RoundedBitmapDisplayer create(Integer key) {
-                        return new RoundedBitmapDisplayer(key);
+                    protected CFRoundedBitmapDisplayer create(Integer key) {
+                        return new CFRoundedBitmapDisplayer(key);
                     }
                 };
         static LruCache<Integer, CircleBitmapDisplayer> sCircleBitmapDisplayerCache =
@@ -215,7 +208,7 @@ public class Gogh {
                     }
                 };
 
-        public static BitmapDisplayer getRoundCornersBitmapDisplayer(int cornerRadius) {
+        public static CFRoundedBitmapDisplayer getRoundCornersBitmapDisplayer(int cornerRadius) {
             return sRoundCornersBitmapDisplayerCache.get(cornerRadius);
         }
 
@@ -225,70 +218,40 @@ public class Gogh {
         }
 
 
-        static SimpleImageLoadingListener animateFirstDisplayListener = new SimpleImageLoadingListener() {
+        private static class MySimpleImageDisplayer implements BitmapDisplayer {
+            private final short mAnimation;
+            @Nullable private final DrawableMaker<?> mTransform;
 
-            final List<String> displayedImages = Collections.synchronizedList(new LinkedList<String>());
-
-            @Override
-            public void onLoadingFailed(String imageUri, View view, FailReason failReason) {
-                super.onLoadingFailed(imageUri, view, failReason);
+            public MySimpleImageDisplayer(short animation, @Nullable DrawableMaker<?> transform) {
+                mAnimation = animation;
+                mTransform = transform;
             }
 
             @Override
-            public void onLoadingComplete(final String imageUri, View view, Bitmap loadedImage) {
-                if (loadedImage != null) {
-                    final ImageView imageView = (ImageView) view;
-                    boolean firstDisplay = !displayedImages.contains(imageUri);
-                    if (firstDisplay) {
-                        CodeUtils.runOnUIThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                FadeInBitmapDisplayer.animate(imageView, 500);
-                                displayedImages.add(imageUri);
-                            }
-                        });
-                    }
+            public void display(Bitmap bitmap, ImageAware imageAware, LoadedFrom loadedFrom) {
+                Drawable drawable = mTransform != null
+                                    ? mTransform.getDrawable(bitmap)
+                                    : new BitmapDrawable(imageAware.getWrappedView().getResources(), bitmap);
+
+                if (mAnimation == NOT_ANIMATED ||  loadedFrom == LoadedFrom.MEMORY_CACHE) {
+                    imageAware.setImageDrawable(drawable);
+                } else {
+                    CrossFadeBitmapDisplayer.setImageDrawableWithXFade(imageAware, drawable, 250);
                 }
             }
-        };
-
-        static SimpleImageLoadingListener crossFadeDisplayListener = new SimpleImageLoadingListener() {
-            @Override
-            public void onLoadingComplete(final String imageUri, View view, final Bitmap loadedImage) {
-                if (loadedImage != null) {
-                    final ImageView imageView = (ImageView) view;
-                    CodeUtils.runOnUIThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            CrossFadeBitmapDisplayer.animate(imageView, loadedImage, 500);
-                        }
-                    });
-                }
-            }
-        };
+        }
 
         private static class MySimpleImageLoadingListener extends SimpleImageLoadingListener {
             @Nullable private final Task<Bitmap>.TaskCompletionSource mTaskSource;
-            @Nullable ImageLoadingListener base;
-            @Nullable OnBitmap listener;
+            @Nullable private final OnBitmap listener;
 
-            public MySimpleImageLoadingListener(@Nullable ImageLoadingListener base, @Nullable OnBitmap listener) {
-                this.base = base;
-                this.listener = listener;
-                mTaskSource = null;
-            }
-
-            public MySimpleImageLoadingListener(@Nullable Task<Bitmap>.TaskCompletionSource taskSource, @Nullable ImageLoadingListener base, @Nullable OnBitmap listener) {
+            public MySimpleImageLoadingListener(@Nullable Task<Bitmap>.TaskCompletionSource taskSource, @Nullable OnBitmap listener) {
                 mTaskSource = taskSource;
-                this.base = base;
                 this.listener = listener;
             }
 
             @Override
             public void onLoadingFailed(String imageUri, View view, FailReason failReason) {
-                if (base != null) {
-                    base.onLoadingFailed(imageUri, view, failReason);
-                }
                 if (mTaskSource != null) {
                     mTaskSource.setError(new RuntimeException(String.valueOf(failReason), failReason.getCause()));
                 }
@@ -299,9 +262,6 @@ public class Gogh {
                 if (listener != null) {
                     listener.bitmap(loadedImage);
                 }
-                if (base != null) {
-                    base.onLoadingComplete(imageUri, view, loadedImage);
-                }
                 if (mTaskSource != null) {
                     mTaskSource.setResult(loadedImage);
                 }
@@ -309,9 +269,6 @@ public class Gogh {
 
             @Override
             public void onLoadingCancelled(String imageUri, View view) {
-                if (base != null) {
-                    base.onLoadingCancelled(imageUri, view);
-                }
                 if (mTaskSource != null) {
                     mTaskSource.setCancelled();
                 }

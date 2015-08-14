@@ -17,6 +17,7 @@ package com.carlosefonseca.common.utils;
 
 import android.graphics.*;
 import android.graphics.drawable.Drawable;
+import android.support.annotation.NonNull;
 import com.nostra13.universalimageloader.core.assist.LoadedFrom;
 import com.nostra13.universalimageloader.core.display.BitmapDisplayer;
 import com.nostra13.universalimageloader.core.imageaware.ImageAware;
@@ -38,7 +39,7 @@ import com.nostra13.universalimageloader.core.imageaware.ImageViewAware;
  * @author Sergey Tarasevich (nostra13[at]gmail[dot]com)
  * @since 1.5.6
  */
-public class CircleBitmapDisplayer implements BitmapDisplayer {
+public class CircleBitmapDisplayer implements BitmapDisplayer, DrawableMaker<CircleBitmapDisplayer.CircleDrawable> {
 
     protected final int margin;
 
@@ -56,8 +57,11 @@ public class CircleBitmapDisplayer implements BitmapDisplayer {
             throw new IllegalArgumentException("ImageAware should wrap ImageView. ImageViewAware is expected.");
         }
 
-        imageAware.setImageDrawable(new CircleDrawable(bitmap, margin));
+        imageAware.setImageDrawable(getDrawable(bitmap));
     }
+
+    @NonNull
+    public CircleDrawable getDrawable(@NonNull Bitmap bitmap) {return new CircleDrawable(bitmap, margin);}
 
     public static class CircleDrawable extends Drawable {
 

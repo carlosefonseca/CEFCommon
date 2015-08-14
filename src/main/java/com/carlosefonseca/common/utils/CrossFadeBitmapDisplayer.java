@@ -17,10 +17,9 @@ package com.carlosefonseca.common.utils;
 
 import android.graphics.Bitmap;
 import android.graphics.Color;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.Drawable;
-import android.graphics.drawable.TransitionDrawable;
+import android.graphics.Matrix;
+import android.graphics.Rect;
+import android.graphics.drawable.*;
 import android.view.View;
 import android.widget.ImageView;
 import com.nostra13.universalimageloader.core.assist.LoadedFrom;
@@ -49,6 +48,10 @@ public class CrossFadeBitmapDisplayer implements BitmapDisplayer {
     public void display(Bitmap bitmap, ImageAware imageAware, LoadedFrom loadedFrom) {
         BitmapDrawable drawable = new BitmapDrawable(imageAware.getWrappedView().getContext().getResources(), bitmap);
 
+        setImageDrawableWithXFade(imageAware, drawable, durationMillis);
+    }
+
+    public void display(Drawable drawable, ImageAware imageAware, LoadedFrom loadedFrom) {
         setImageDrawableWithXFade(imageAware, drawable, durationMillis);
     }
 
