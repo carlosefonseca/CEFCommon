@@ -12,7 +12,9 @@ import android.content.pm.PackageManager;
 import android.location.LocationManager;
 import android.os.*;
 import android.provider.Settings;
+import android.text.Editable;
 import android.text.InputType;
+import android.text.TextWatcher;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
@@ -533,6 +535,24 @@ public final class CodeUtils {
     public static void setVisibility(int visibility, View...views) {
         for (View view : views) {
             view.setVisibility(visibility);
+        }
+    }
+
+    public static class SimpleTextWatcher implements TextWatcher {
+
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+        }
+
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+        }
+
+        @Override
+        public void afterTextChanged(Editable s) {
+
         }
     }
 }
