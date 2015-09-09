@@ -165,6 +165,8 @@ public class Gogh {
 
 
         protected static void run(Gogh g) {
+            DisplayImageOptions options = g.mOptions;
+            DisplayImageOptions.Builder optionsBuilder = null;
             if (g.mHideIfNull) {
                 if (g.mUrl == null) {
                     g.mView.setVisibility(View.GONE);
@@ -174,7 +176,12 @@ public class Gogh {
             } else if (g.mPlaceholder != 0) {
                 if (g.mUrl == null) {
                     g.mView.setImageResource(g.mPlaceholder);
+                    return;
                 }
+                optionsBuilder = new DisplayImageOptions.Builder().cloneFrom(options)
+                                                                  .showImageOnFail(g.mPlaceholder)
+                                                                  .showImageForEmptyUri(g.mPlaceholder)
+                                                                  .showImageOnLoading(g.mPlaceholder);
             }
 
             ImageLoadingListener imageLoadingListener = null;
@@ -184,13 +191,12 @@ public class Gogh {
 
             if (g.mAnimation != NOT_ANIMATED || g.mDisplayer != null) {
                 MySimpleImageDisplayer displayer = new MySimpleImageDisplayer(g.mAnimation, g.mDisplayer);
-                g.mOptions = new DisplayImageOptions.Builder().cloneFrom(g.mOptions)
-                                                              .displayer(displayer)
-                                                              .resetViewBeforeLoading(g.mAnimation != CROSS_FADE)
-                                                              .build();
+                if (optionsBuilder == null) optionsBuilder = new DisplayImageOptions.Builder().cloneFrom(options);
+                optionsBuilder.displayer(displayer).resetViewBeforeLoading(g.mAnimation != CROSS_FADE);
             }
 
-            UIL.display(g.mUrl, g.mView, imageLoadingListener, g.mOptions);
+            if (optionsBuilder != null) options = optionsBuilder.build();
+            UIL.display(g.mUrl, g.mView, imageLoadingListener, options);
         }
 
         static LruCache<Integer, CFRoundedBitmapDisplayer> sRoundCornersBitmapDisplayerCache =
