@@ -11,6 +11,7 @@ import android.view.View;
 import android.widget.ImageView;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import junit.framework.Assert;
 
 import static android.R.attr.*;
 
@@ -491,7 +492,11 @@ public class MSDrawable {
         mColors[state] = color;
 //        mShapes[state] = shape;
         mShapeDrawables[state] = shape != null ? new ShapeDrawable(shape) : null;
-        if (bitmapDrawable instanceof BitmapDrawable) {
+        if (bitmapDrawable == null && bitmap != null) {
+            mBitmapDrawables[state] = null;
+            mBitmaps[state] = bitmap;
+            mFinal[state] = null;
+        } else if (bitmapDrawable instanceof BitmapDrawable) {
             mBitmapDrawables[state] = (BitmapDrawable) bitmapDrawable;
             mBitmaps[state] = bitmap;
             mFinal[state] = null;
@@ -507,6 +512,7 @@ public class MSDrawable {
     }
 
     private BitmapDrawable getDrawable(int state) {
+        Assert.assertNotNull("Resources object is needed in the constructor!", mResources);
         return mBitmapDrawables[state] != null
                ? mBitmapDrawables[state]
                : new BitmapDrawable(mResources, mBitmaps[state]);
