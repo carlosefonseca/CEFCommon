@@ -3,6 +3,7 @@ package com.carlosefonseca.common.utils;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.support.annotation.IntDef;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.util.LruCache;
@@ -19,6 +20,8 @@ import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListene
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * This class is basically a re-packaging of multiple Bitmap methods in ImageUtils, in an interface similar to
@@ -26,16 +29,21 @@ import java.io.File;
  * and setting on ImageViews.
  */
 public class Gogh {
+
+    @IntDef({NOT_ANIMATED, FADE_IN, CROSS_FADE})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface AnimationMode {}
+
     private static final short NOT_ANIMATED = 0;
     private static final short FADE_IN = 1;
     private static final short CROSS_FADE = 2;
 
     private String mUrl;
-    private int mPlaceholder;
     private DrawableMaker<?> mDisplayer;
     private ImageView mView;
     private short mAnimation;
     private DisplayImageOptions mOptions;
+    private DisplayImageOptions.Builder mOptionsBuilder;
     private boolean mHideIfNull;
     private OnBitmap mOnBitmap;
     private Task<Bitmap>.TaskCompletionSource mTaskSource;
@@ -75,9 +83,51 @@ public class Gogh {
         return this;
     }
 
-    public Gogh placeholder(int drawable) {
-        this.mPlaceholder = drawable;
+    public DisplayImageOptions.Builder getOptionsBuilder() {
+        if (mOptionsBuilder == null) {
+            mOptionsBuilder = new DisplayImageOptions.Builder().cloneFrom(mOptions);
+            mOptions = null;
+        }
+        return mOptionsBuilder;
+    }
+
+    // PLACEHOLDER
+
+    public Gogh showImageOnLoading(int imageRes) {
+        getOptionsBuilder().showImageOnLoading(imageRes);
         return this;
+    }
+
+    public Gogh showImageOnLoading(Drawable drawable) {
+        getOptionsBuilder().showImageOnLoading(drawable);
+        return this;
+    }
+
+    public Gogh showImageForEmptyUri(int imageRes) {
+        getOptionsBuilder().showImageForEmptyUri(imageRes);
+        return this;
+    }
+
+    public Gogh showImageForEmptyUri(Drawable drawable) {
+        getOptionsBuilder().showImageForEmptyUri(drawable);
+        return this;
+    }
+
+    public Gogh showImageOnFail(int imageRes) {
+        getOptionsBuilder().showImageOnFail(imageRes);
+        return this;
+    }
+
+    public Gogh showImageOnFail(Drawable drawable) {
+        getOptionsBuilder().showImageOnFail(drawable);
+        return this;
+    }
+
+    // PLACEHOLDER END
+
+    @Deprecated
+    public Gogh placeholder(int drawable) {
+        return showImageForEmptyUri(drawable).showImageOnFail(drawable);
     }
 
     public Gogh roundCorners(int radius) {
@@ -125,12 +175,15 @@ public class Gogh {
         return this;
     }
 
-    public void into(final ImageView view, short animated) {
+    public void into(final ImageView view, @AnimationMode short animated) {
         mView = view;
         mAnimation = animated;
         GoghHelper.run(this);
     }
 
+    /**
+     * Specify the destination view, placing the image without any animation
+     */
     public void into(final ImageView view) {
         into(view, NOT_ANIMATED);
     }
@@ -166,22 +219,13 @@ public class Gogh {
 
         protected static void run(Gogh g) {
             DisplayImageOptions options = g.mOptions;
-            DisplayImageOptions.Builder optionsBuilder = null;
+            DisplayImageOptions.Builder optionsBuilder = g.mOptionsBuilder;
             if (g.mHideIfNull) {
                 if (g.mUrl == null) {
                     g.mView.setVisibility(View.GONE);
                 } else {
                     g.mView.setVisibility(View.VISIBLE);
                 }
-            } else if (g.mPlaceholder != 0) {
-                if (g.mUrl == null) {
-                    g.mView.setImageResource(g.mPlaceholder);
-                    return;
-                }
-                optionsBuilder = new DisplayImageOptions.Builder().cloneFrom(options)
-                                                                  .showImageOnFail(g.mPlaceholder)
-                                                                  .showImageForEmptyUri(g.mPlaceholder)
-                                                                  .showImageOnLoading(g.mPlaceholder);
             }
 
             ImageLoadingListener imageLoadingListener = null;
@@ -196,7 +240,7 @@ public class Gogh {
             }
 
             if (optionsBuilder != null) options = optionsBuilder.build();
-            UIL.display(g.mUrl, g.mView, imageLoadingListener, options);
+            UIL.display_(g.mUrl, g.mView, imageLoadingListener, options);
         }
 
         static LruCache<Integer, CFRoundedBitmapDisplayer> sRoundCornersBitmapDisplayerCache =
@@ -239,7 +283,7 @@ public class Gogh {
                                     ? mTransform.getDrawable(bitmap)
                                     : new BitmapDrawable(imageAware.getWrappedView().getResources(), bitmap);
 
-                if (mAnimation == NOT_ANIMATED ||  loadedFrom == LoadedFrom.MEMORY_CACHE) {
+                if (mAnimation == NOT_ANIMATED || loadedFrom == LoadedFrom.MEMORY_CACHE) {
                     imageAware.setImageDrawable(drawable);
                 } else {
                     CrossFadeBitmapDisplayer.setImageDrawableWithXFade(imageAware, drawable, 250);

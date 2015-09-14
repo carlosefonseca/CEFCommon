@@ -146,7 +146,13 @@ public final class UIL {
                 } else if (sApkExpansionZipFile != null && sApkExpansionZipFile.contains(str)) {
                     uri = BaseImageDownloaderImpl.obbScheme + str;
                 } else { // set full path to ext/files
-                    uri = ImageDownloader.Scheme.FILE.wrap(sExternalFilesDir + "/" + str);
+                    final String path = sExternalFilesDir + "/" + str;
+                    if (new File(path).exists()) {
+                        uri = ImageDownloader.Scheme.FILE.wrap(path);
+                    } else {
+                        uri = null;
+                        Log.w(TAG, "File " + str + " does not exist!");
+                    }
                 }
             }
             // we have a full path
@@ -159,8 +165,8 @@ public final class UIL {
                     } else if (sApkExpansionZipFile != null && sApkExpansionZipFile.contains(str)) {
                         uri = BaseImageDownloaderImpl.obbScheme + str;
                     } else {
-                        // File doesn't exist but oh well...
-                        uri = ImageDownloader.Scheme.FILE.wrap(str);
+                        uri = null;
+                        Log.w(TAG, "File " + str + " does not exist!");
                     }
                 }
             }
@@ -273,6 +279,13 @@ public final class UIL {
                              displayImageOptions,
                              listener);
         }
+    }
+
+    static void display_(@Nullable String str, @Nullable ImageView imageView, ImageLoadingListener listener, DisplayImageOptions displayImageOptions) {
+        sIL.displayImage(UIL.getUri(str),
+                         imageView != null ? new ImageViewAware(imageView) : null,
+                         displayImageOptions,
+                         listener);
     }
 
     public static void displayPhoto(@Nullable String str, @Nullable ImageView imageView, ImageLoadingListener listener) {
