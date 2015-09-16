@@ -48,9 +48,10 @@ import static android.R.attr.*;
 @SuppressWarnings("UnusedDeclaration")
 public class MSDrawable {
 
-    private final Resources mResources;
+    private Resources mResources;
 
     public MSDrawable asBackground(View view) {
+        if (mResources == null) mResources = view.getResources();
         Drawable background = build();
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
             //noinspection deprecation
@@ -62,6 +63,7 @@ public class MSDrawable {
     }
 
     public MSDrawable asImage(ImageView imageView) {
+        if (mResources == null) mResources = imageView.getResources();
         imageView.setImageDrawable(build());
         return this;
     }

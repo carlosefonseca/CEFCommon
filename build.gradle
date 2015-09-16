@@ -30,11 +30,11 @@ repositories {
 
 dependencies {
     //noinspection GradleDependency
-    compile 'com.android.support:support-v4:22.2.1'
+    compile 'com.android.support:support-v4:23.0.1'
     //noinspection GradleDynamicVersion,GradleDependency
-    compile 'com.google.android.gms:play-services-maps:7.5.0'
-    compile 'com.google.android.gms:play-services-location:7.5.0'
-    compile 'com.google.android.gms:play-services-gcm:7.5.0'
+    compile 'com.google.android.gms:play-services-maps:7.8.0'
+    compile 'com.google.android.gms:play-services-location:7.8.0'
+    compile 'com.google.android.gms:play-services-gcm:7.8.0'
     compile 'com.android.support:appcompat-v7:22.2.1'
     //noinspection GradleDependency
     compile 'com.google.code.gson:gson:1.7.2'

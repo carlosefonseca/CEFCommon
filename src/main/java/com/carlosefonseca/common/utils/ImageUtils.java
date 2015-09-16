@@ -21,6 +21,7 @@ import android.view.animation.Animation;
 import android.widget.ImageView;
 import bolts.Task;
 import com.carlosefonseca.common.CFApp;
+import junit.framework.Assert;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -503,6 +504,7 @@ public final class ImageUtils {
      * @return Bitmap with new color.
      */
     public static BitmapDrawable createRecoloredDrawable(Resources resources, Bitmap bitmap, int color) {
+        Assert.assertNotNull(resources);
         return new BitmapDrawable(resources, createRecoloredBitmap(bitmap, color));
     }
 
