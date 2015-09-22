@@ -136,7 +136,12 @@ public final class UIL {
             } else if (sApkExpansionZipFile != null && sApkExpansionZipFile.contains(lastSegmentOfURL)) {
                 uri = BaseImageDownloaderImpl.obbScheme + lastSegmentOfURL;
             } else {
-                uri = str.replaceAll(" ", "%20");
+                final String path = sExternalFilesDir + "/" + str;
+                if (new File(path).exists()) {
+                    uri = ImageDownloader.Scheme.FILE.wrap(path);
+                }else {
+                    uri = str.replaceAll(" ", "%20");
+                }
             }
 
         } else {
