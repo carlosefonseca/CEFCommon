@@ -194,6 +194,10 @@ public final class UIL {
         return uri;
     }
 
+    public static boolean exists(String file) {
+        return new File(sExternalFilesDir, file).exists() || existsOnPackage(file);
+    }
+
     public static boolean existsOnPackage(String file) {
         return sAssets.contains(file) || (sApkExpansionZipFile != null && sApkExpansionZipFile.contains(file));
     }
