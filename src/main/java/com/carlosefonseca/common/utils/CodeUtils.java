@@ -223,6 +223,10 @@ public final class CodeUtils {
         }
     }
 
+    public static boolean atLeastLollipop() {return Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP;}
+    public static boolean atLeastJellyBean() {return Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN;}
+    public static boolean atLeastHoneycomb() {return Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR1;}
+
     public interface RunnableWithView<T extends View> {
         void run(T view);
     }

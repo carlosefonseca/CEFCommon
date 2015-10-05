@@ -320,21 +320,12 @@ public final class ImageUtils {
      * @return New image.
      */
     public static Bitmap cropSquare(Bitmap bitmap) {
-        int originalWidth = bitmap.getWidth();
-        int originalHeight = bitmap.getHeight();
-        int x, y, side;
-        if (originalWidth > originalHeight) {
-            x = (originalWidth - originalHeight) / 2;
-            y = 0;
-            side = originalHeight;
-        } else {
-            x = 0;
-            y = (originalHeight - originalWidth) / 2;
-            side = originalWidth;
-        }
-//        Log.v("getThumbnail", "x:" + x + " y:" + y + " side:" + side);
-        bitmap = Bitmap.createBitmap(bitmap, x, y, side, side);
-        return bitmap;
+        Rect centerSquare = getCenterSquare(bitmap);
+        return Bitmap.createBitmap(bitmap,
+                                   centerSquare.left,
+                                   centerSquare.top,
+                                   centerSquare.width(),
+                                   centerSquare.height());
     }
 
 
