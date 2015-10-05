@@ -21,6 +21,8 @@ import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.AttributeSet;
 
+import java.util.ArrayList;
+
 /**
  * A ViewPager subclass enabling infinte scrolling of the viewPager elements
  * 
@@ -44,11 +46,11 @@ public class LoopViewPager extends ViewPager {
 
     private static final boolean DEFAULT_BOUNDARY_CASHING = false;
 
-    OnPageChangeListener mOuterPageChangeListener;
     private LoopPagerAdapterWrapper mAdapter;
     private boolean mBoundaryCaching = DEFAULT_BOUNDARY_CASHING;
-    
-    
+    private ArrayList<OnPageChangeListener> mOnPageChangeListeners;
+
+
     /**
      * helper function which may be used when implementing FragmentPagerAdapter
      *   
@@ -89,7 +91,7 @@ public class LoopViewPager extends ViewPager {
 
     @Override
     public PagerAdapter getAdapter() {
-        return mAdapter != null ? mAdapter.getRealAdapter() : mAdapter;
+        return mAdapter != null ? mAdapter.getRealAdapter() : null;
     }
 
     @Override
@@ -110,9 +112,32 @@ public class LoopViewPager extends ViewPager {
     }
 
     @Override
+    public void addOnPageChangeListener(OnPageChangeListener listener) {
+        if (this.mOnPageChangeListeners == null) {
+            this.mOnPageChangeListeners = new ArrayList<>();
+        }
+        this.mOnPageChangeListeners.add(listener);
+
+    }
+
+    @Override
+    public void removeOnPageChangeListener(OnPageChangeListener listener) {
+        if (this.mOnPageChangeListeners != null) {
+            this.mOnPageChangeListeners.remove(listener);
+        }
+    }
+
+    @Override
+    public void clearOnPageChangeListeners() {
+        if (this.mOnPageChangeListeners != null) {
+            this.mOnPageChangeListeners.clear();
+        }
+    }
+
+    @Override
     public void setOnPageChangeListener(OnPageChangeListener listener) {
-        mOuterPageChangeListener = listener;
-    };
+        throw new RuntimeException("Use addOnPageChangeListener you dummy!");
+    }
 
     public LoopViewPager(Context context) {
         super(context);
@@ -125,7 +150,7 @@ public class LoopViewPager extends ViewPager {
     }
 
     private void init() {
-        super.setOnPageChangeListener(onPageChangeListener);
+        super.addOnPageChangeListener(onPageChangeListener);
     }
 
     private OnPageChangeListener onPageChangeListener = new OnPageChangeListener() {
@@ -138,8 +163,14 @@ public class LoopViewPager extends ViewPager {
             int realPosition = mAdapter.toRealPosition(position);
             if (mPreviousPosition != realPosition) {
                 mPreviousPosition = realPosition;
-                if (mOuterPageChangeListener != null) {
-                    mOuterPageChangeListener.onPageSelected(realPosition);
+
+                if (mOnPageChangeListeners != null) {
+                    for (int i = 0, z = mOnPageChangeListeners.size(); i < z; i++) {
+                        OnPageChangeListener listener = mOnPageChangeListeners.get(i);
+                        if (listener != null) {
+                            listener.onPageSelected(realPosition);
+                        }
+                    }
                 }
             }
         }
@@ -159,16 +190,20 @@ public class LoopViewPager extends ViewPager {
             }
 
             mPreviousOffset = positionOffset;
-            if (mOuterPageChangeListener != null) {
-                if (realPosition != mAdapter.getRealCount() - 1) {
-                    mOuterPageChangeListener.onPageScrolled(realPosition,
-                            positionOffset, positionOffsetPixels);
-                } else {
-                    if (positionOffset > .5) {
-                        mOuterPageChangeListener.onPageScrolled(0, 0, 0);
-                    } else {
-                        mOuterPageChangeListener.onPageScrolled(realPosition,
-                                0, 0);
+
+            if (mOnPageChangeListeners != null) {
+                for (int i = 0, z = mOnPageChangeListeners.size(); i < z; i++) {
+                    OnPageChangeListener listener = mOnPageChangeListeners.get(i);
+                    if (listener != null) {
+                        if (realPosition != mAdapter.getRealCount() - 1) {
+                            listener.onPageScrolled(realPosition, positionOffset, positionOffsetPixels);
+                        } else {
+                            if (positionOffset > .5) {
+                                listener.onPageScrolled(0, 0, 0);
+                            } else {
+                                listener.onPageScrolled(realPosition, 0, 0);
+                            }
+                        }
                     }
                 }
             }
@@ -184,10 +219,14 @@ public class LoopViewPager extends ViewPager {
                     setCurrentItem(realPosition, false);
                 }
             }
-            if (mOuterPageChangeListener != null) {
-                mOuterPageChangeListener.onPageScrollStateChanged(state);
+            if (mOnPageChangeListeners != null) {
+                for (int i = 0, z = mOnPageChangeListeners.size(); i < z; i++) {
+                    OnPageChangeListener listener = mOnPageChangeListeners.get(i);
+                    if (listener != null) {
+                        listener.onPageScrollStateChanged(state);
+                    }
+                }
             }
         }
     };
-
 }
