@@ -2,6 +2,7 @@ package com.carlosefonseca.common.utils;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -226,6 +227,21 @@ public final class CodeUtils {
     public static boolean atLeastLollipop() {return Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP;}
     public static boolean atLeastJellyBean() {return Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN;}
     public static boolean atLeastHoneycomb() {return Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR1;}
+
+    public static String getProcessName(Context context) {
+        return getProcess(context).processName;
+    }
+
+    public static ActivityManager.RunningAppProcessInfo getProcess(Context context) {
+        int pid = android.os.Process.myPid();
+        ActivityManager manager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningAppProcessInfo processInfo : manager.getRunningAppProcesses()) {
+            if (processInfo.pid == pid) {
+                return processInfo;
+            }
+        }
+        throw new RuntimeException("no matching process");
+    }
 
     public interface RunnableWithView<T extends View> {
         void run(T view);
