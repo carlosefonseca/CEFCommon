@@ -39,7 +39,7 @@ dependencies {
     //noinspection GradleDependency
     compile 'com.google.code.gson:gson:1.7.2'
     compile 'com.nineoldandroids:library:2.4.0'
-    compile 'de.greenrobot:eventbus:2.0.2'
+    compile 'de.greenrobot:eventbus:2.4.0'
     compile 'com.readystatesoftware.systembartint:systembartint:1.0.4'
     compile 'com.parse.bolts:bolts-android:1.1.4'
     compile 'com.facebook.rebound:rebound:0.3.6'

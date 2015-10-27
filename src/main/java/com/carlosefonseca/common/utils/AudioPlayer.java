@@ -67,11 +67,11 @@ public class AudioPlayer {
         }
 
         public static void register(Object object) {
-            EventBus.getDefault().register(object, AudioPlayerNotification.class);
+            EventBus.getDefault().register(object);
         }
 
         public static void unregister(Object object) {
-            EventBus.getDefault().unregister(object, AudioPlayerNotification.class);
+            EventBus.getDefault().unregister(object);
         }
     }
 

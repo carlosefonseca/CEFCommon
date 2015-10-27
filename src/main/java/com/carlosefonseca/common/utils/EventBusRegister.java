@@ -1,6 +1,5 @@
 package com.carlosefonseca.common.utils;
 
-import org.apache.commons.lang3.ArrayUtils;
 import de.greenrobot.event.EventBus;
 
 import java.lang.ref.WeakReference;
@@ -12,33 +11,26 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * It also tracks whether or not it is already registered, so there's no problem in calling (un)register twice.
  */
 public class EventBusRegister extends ActivityStateListener.SimpleInterface {
-    private final Class<?>[] eventTypes;
     WeakReference<Object> subscriber;
     AtomicBoolean registered = new AtomicBoolean(false);
 
     /**
      * Creates the helper and registers.
      */
-    public EventBusRegister(Object subscriber, Class<?>... eventTypes) {
+    public EventBusRegister(Object subscriber) {
         this.subscriber = new WeakReference<>(subscriber);
-        this.eventTypes = eventTypes;
         register();
     }
 
     public void register() {
         if (registered.compareAndSet(false, true)) {
-            if (eventTypes.length == 1) {
-                EventBus.getDefault().register(this.subscriber.get(), eventTypes[0]);
-            } else {
-                Class<?>[] subarray = ArrayUtils.subarray(eventTypes, 1, eventTypes.length);
-                EventBus.getDefault().register(this.subscriber.get(), eventTypes[0], subarray);
-            }
+            EventBus.getDefault().register(this.subscriber.get());
         }
     }
 
     public void unregister() {
         if (registered.compareAndSet(true, false)) {
-            EventBus.getDefault().unregister(this.subscriber.get(), eventTypes);
+            EventBus.getDefault().unregister(this.subscriber.get());
         }
     }
 

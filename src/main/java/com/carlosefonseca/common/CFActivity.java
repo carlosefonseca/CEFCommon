@@ -150,7 +150,7 @@ public class CFActivity extends FragmentActivity implements ActivityStateListene
         //noinspection ObjectEquality
         setLatestActivity();
         if (canRegisterRunnables && !registered) {
-            EventBus.getDefault().registerSticky(this, RunnableOnActivity.class, RunnableOnActivityWrapper.class);
+            EventBus.getDefault().registerSticky(this);
             registered = true;
         }
         if (mActivityStateListener != null) mActivityStateListener.onStart();
@@ -184,7 +184,7 @@ public class CFActivity extends FragmentActivity implements ActivityStateListene
     protected void onPause() {
         super.onPause();
         if (registered) {
-            EventBus.getDefault().unregister(this, RunnableOnActivity.class, RunnableOnActivityWrapper.class);
+            EventBus.getDefault().unregister(this);
             registered = false;
         }
 //        clearLatestActivityIfSame();
