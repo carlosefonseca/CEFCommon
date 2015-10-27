@@ -21,12 +21,10 @@ import android.view.animation.Animation;
 import android.widget.ImageView;
 import bolts.Task;
 import com.carlosefonseca.common.CFApp;
+import com.nostra13.universalimageloader.utils.IoUtils;
 import junit.framework.Assert;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.security.InvalidParameterException;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -229,7 +227,7 @@ public final class ImageUtils {
         }
     }
 
-    static void writeImageInBackground(final File file, final Bitmap bitmap) {
+    public static void writeImageInBackground(final File file, final Bitmap bitmap) {
         Task.callInBackground(new Callable<Object>() {
             @Nullable
             @Override
@@ -248,6 +246,31 @@ public final class ImageUtils {
                 return null;
             }
         });
+    }
+
+    /**
+     * Based on {@link com.nostra13.universalimageloader.cache.disc.impl.BaseDiscCache#save(String, Bitmap)}
+     * @throws IOException
+     */
+    public static boolean writeImage(Bitmap bitmap, File imageFile) throws IOException {
+        final String TEMP_IMAGE_POSTFIX = ".tmp";
+        final int DEFAULT_BUFFER_SIZE = 32 * 1024; // 32 Kb
+
+        File tmpFile = new File(imageFile.getAbsolutePath() + TEMP_IMAGE_POSTFIX);
+        OutputStream os = new BufferedOutputStream(new FileOutputStream(tmpFile), DEFAULT_BUFFER_SIZE);
+        boolean savedSuccessfully = false;
+        try {
+            savedSuccessfully = bitmap.compress(Bitmap.CompressFormat.PNG, 100, os);
+        } finally {
+            IoUtils.closeSilently(os);
+            if (savedSuccessfully && !tmpFile.renameTo(imageFile)) {
+                savedSuccessfully = false;
+            }
+            if (!savedSuccessfully) {
+                tmpFile.delete();
+            }
+        }
+        return savedSuccessfully;
     }
 
 

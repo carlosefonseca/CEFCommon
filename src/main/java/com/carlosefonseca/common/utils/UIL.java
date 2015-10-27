@@ -33,6 +33,7 @@ import java.util.regex.Pattern;
 import java.util.zip.ZipFile;
 
 import static com.carlosefonseca.common.utils.ImageUtils.dp2px;
+import static com.carlosefonseca.common.utils.ListUtils.list;
 
 public final class UIL {
 
@@ -177,6 +178,15 @@ public final class UIL {
             }
         }
         return uri;
+    }
+
+    public static boolean isLocal(String uri) {
+        ArrayList<String> list = list(ImageDownloader.Scheme.FILE.name(),
+                                      ImageDownloader.Scheme.ASSETS.name(),
+                                      BaseImageDownloaderImpl.obbScheme);
+
+        for (String s1 : list) if (uri.toLowerCase(Locale.US).startsWith(s1)) return true;
+        return false;
     }
 
     @Nullable

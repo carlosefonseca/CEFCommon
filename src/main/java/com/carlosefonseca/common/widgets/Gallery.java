@@ -55,14 +55,24 @@ public class Gallery extends ViewPager {
         setOffscreenPageLimit(2);
     }
 
+    /**
+     * Scale in X and Y independently, so that image matches view exactly.
+     * This may change the aspect ratio of the image.
+     */
     public void stretch() {
         this.scaleType = ImageView.ScaleType.FIT_XY;
     }
 
+    /**
+     * Maintains the image aspect ratio but scales down so that the image fits entirely inside the view.
+     */
     public void scaleDown() {
         this.scaleType = ImageView.ScaleType.FIT_CENTER;
     }
 
+    /**
+     * Scales up the image so that it fills the view entirely. Maintains aspect ratio. Centers the image on the view.
+     */
     public void scaleUp() {
         this.scaleType = ImageView.ScaleType.CENTER_CROP;
     }

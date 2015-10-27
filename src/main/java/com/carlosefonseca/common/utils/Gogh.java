@@ -65,6 +65,10 @@ public class Gogh {
         return loadPhotoURI(UIL.getUri(url));
     }
 
+    public static Gogh loadPhoto(@Nullable File file) {
+        return loadPhotoURI(UIL.getUri(file));
+    }
+
     public static Gogh loadIcon(@Nullable File file) {
         return loadIconURI(UIL.getUri(file));
     }
@@ -135,12 +139,14 @@ public class Gogh {
     }
 
     public Gogh circle() {
-        return displayer(GoghHelper.getCircleBitmapDisplayer(0));
+        return circle(true);
     }
 
     public Gogh circle(boolean circle) {
         return circle ? displayer(GoghHelper.getCircleBitmapDisplayer(0)) : this;
     }
+
+    public Gogh square() {return square(true);}
 
     public Gogh square(boolean square) {
         return square ? displayer(new DrawableMaker<Drawable>() {

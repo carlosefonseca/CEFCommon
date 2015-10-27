@@ -25,12 +25,20 @@ public final class ViewUtils {
         }
     }
 
+    /**
+     * Changes left and right padding
+     */
     public static void setPaddingH(int value, View... views) {
         for (View view : views) {
             view.setPadding(value, view.getPaddingTop(), value, view.getPaddingBottom());
         }
     }
 
+    /**
+     * Changes top and bottom padding
+     * @param value
+     * @param views
+     */
     public static void setPaddingV(int value, View... views) {
         for (View view : views) {
             view.setPadding(view.getPaddingLeft(), value, view.getPaddingRight(), value);
