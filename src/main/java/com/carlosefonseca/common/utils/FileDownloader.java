@@ -160,7 +160,7 @@ public final class FileDownloader {
         }
 
         public Download(String url) {
-            this(url, new File(CFApp.getContext().getExternalCacheDir(), NetworkingUtils.getLastSegmentOfURL(url)));
+            this(url, new File(CFApp.getContext().getExternalCacheDir(), UrlUtils.getLastSegmentOfURL(url)));
         }
 
         boolean canRetry() {

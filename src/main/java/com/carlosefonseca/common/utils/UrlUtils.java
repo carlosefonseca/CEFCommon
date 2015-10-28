@@ -21,8 +21,7 @@ import android.support.annotation.Nullable;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.URL;
+import java.net.*;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -127,6 +126,52 @@ public final class UrlUtils {
     @Nullable
     public static String filterHttp(@Nullable String url) {
         return url == null || !url.startsWith("http") ? null : url;
+    }
+
+    @SuppressWarnings("UnusedDeclaration")
+    public static String getLastSegmentOfURL(@NonNull String url) {
+        if (url.endsWith("/")) url = url.substring(0, url.length() - 1);
+        return url.substring(url.lastIndexOf("/") + 1);
+    }
+
+    /**
+     * Strips any / from the ending of the string and then removes anything from the ending to the first / from the
+     * end.
+     * Examples:
+     * <pre>
+     * http://a.com/dir/qwert  -> http://a.com/dir
+     * http://a.com/dir/qwert/ -> http://a.com/dir
+     * http://a.com/dir/page// -> http://a.com/dir
+     * </pre>
+     * Watch out for these cases:
+     * <pre>
+     * http://a.com/dir/page?var=a     -> http://a.com/dir
+     * http://a.com/dir/page?var=a/b/c -> http://a.com/dir/page?var=a/b
+     * http://a.com                    -> http:/
+     * </pre>
+     */
+    @SuppressWarnings("UnusedDeclaration")
+    public static String getWithoutLastSegmentOfURL(@NonNull String url) {
+        return StringUtils.substringBeforeLast(StringUtils.stripEnd(url, "/"), "/");
+    }
+
+    @SuppressWarnings("UnusedDeclaration")
+    public static String appendPathToURL(@NonNull String url, @Nullable String path) {
+        return StringUtils.appendIfMissing(url, "/") + StringUtils.defaultString(path);
+    }
+
+    @SuppressWarnings("UnusedDeclaration")
+    public static String fixURL(String urlStr) throws MalformedURLException, URISyntaxException {
+//    String urlStr = "http://abc.dev.domain.com/0007AC/ads/800x480 15sec h.264.mp4";
+        URL url = new URL(urlStr);
+        URI uri = new URI(url.getProtocol(),
+                          url.getUserInfo(),
+                          url.getHost(),
+                          url.getPort(),
+                          url.getPath(),
+                          url.getQuery(),
+                          url.getRef());
+        return uri.toURL().toString();
     }
 
     public static final class Facebook {

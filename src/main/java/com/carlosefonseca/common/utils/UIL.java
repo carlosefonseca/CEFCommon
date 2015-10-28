@@ -131,7 +131,7 @@ public final class UIL {
 
         final String uri;
         if (str.startsWith("http")) { // Full URL
-            String lastSegmentOfURL = NetworkingUtils.getLastSegmentOfURL(str);
+            String lastSegmentOfURL = UrlUtils.getLastSegmentOfURL(str);
             if (sAssets.contains(lastSegmentOfURL)) {
                 uri = ImageDownloader.Scheme.ASSETS.wrap(lastSegmentOfURL);
             } else if (sApkExpansionZipFile != null && sApkExpansionZipFile.contains(lastSegmentOfURL)) {

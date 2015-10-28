@@ -21,9 +21,6 @@ import de.greenrobot.event.EventBus;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
 
 import static com.carlosefonseca.common.CFApp.getContext;
@@ -299,26 +296,6 @@ public final class NetworkingUtils {
         }
     };
 
-    @SuppressWarnings("UnusedDeclaration")
-    public static String getLastSegmentOfURL(@NonNull String url) {
-        if (url.endsWith("/")) url = url.substring(0, url.length() - 1);
-        return url.substring(url.lastIndexOf("/") + 1);
-    }
-
-    @SuppressWarnings("UnusedDeclaration")
-    public static String fixURL(String urlStr) throws MalformedURLException, URISyntaxException {
-//    String urlStr = "http://abc.dev.domain.com/0007AC/ads/800x480 15sec h.264.mp4";
-        URL url = new URL(urlStr);
-        URI uri = new URI(url.getProtocol(),
-                          url.getUserInfo(),
-                          url.getHost(),
-                          url.getPort(),
-                          url.getPath(),
-                          url.getQuery(),
-                          url.getRef());
-        return uri.toURL().toString();
-    }
-
     /**
      * Fetches a Bitmap from a URL. Don't call this from the Main Thread.
      *
@@ -362,7 +339,7 @@ public final class NetworkingUtils {
     public static File getFileFromUrlOrPath(@NonNull String filenameOrUrl) {
         File file;
         if (filenameOrUrl.startsWith("http://")) {
-            file = ResourceUtils.getFullPath(getLastSegmentOfURL(filenameOrUrl));
+            file = ResourceUtils.getFullPath(UrlUtils.getLastSegmentOfURL(filenameOrUrl));
         } else {
             file = filenameOrUrl.startsWith("/") ? new File(filenameOrUrl) : ResourceUtils.getFullPath(filenameOrUrl);
         }
