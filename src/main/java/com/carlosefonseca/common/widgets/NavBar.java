@@ -204,7 +204,7 @@ public class NavBar extends LinearLayout {
             backBt.setOnClickListener(new OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    ((Activity) context).finish();
+                    ((Activity) context).onBackPressed();
                 }
             });
         }
