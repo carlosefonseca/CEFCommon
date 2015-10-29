@@ -1,5 +1,6 @@
 package com.carlosefonseca.common.widgets;
 
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -10,6 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
+import bolts.Task;
 import com.carlosefonseca.common.R;
 
 public class YesNoDialog extends DialogFragment {
@@ -203,5 +205,27 @@ public class YesNoDialog extends DialogFragment {
         });
 
         return dialog;
+    }
+
+    /**
+     * Displays Yes/No dialog. Returns task with true or false respectively.
+     */
+    public static Task<Boolean> getYesNoDialogTask(Context context, String message, String yes, String no) {
+        final Task<Boolean>.TaskCompletionSource source = Task.create();
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        builder.setMessage(message).setPositiveButton(yes, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                source.setResult(true);
+            }
+        }).setNegativeButton(no, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                source.setResult(false);
+            }
+        }).setCancelable(false).show();
+
+        return source.getTask();
     }
 }
