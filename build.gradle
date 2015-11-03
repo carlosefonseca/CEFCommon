@@ -2,27 +2,9 @@ buildscript {
     repositories {
         mavenCentral()
     }
-    dependencies {
-        classpath 'com.github.dcendents:android-maven-plugin:1.2'
-    }
 }
 
 apply plugin: 'com.android.library'
-apply plugin: 'com.github.dcendents.android-maven'
-
-
-version '1.0.2'
-group 'com.carlosefonseca'
-
-//uploadArchives {
-//    repositories {
-//        mavenDeployer {
-//            repository(url: mvnRepoUrl)
-//        }
-//    }
-//}
-
-
 
 repositories {
     mavenCentral()
