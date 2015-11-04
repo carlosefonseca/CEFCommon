@@ -98,12 +98,6 @@ public class CFApp extends Application {
         return mi.availMem;
     }
 
-    @Override
-    public void onTerminate() {
-        context = null;
-        super.onTerminate();
-    }
-
     public static SharedPreferences getUserPreferences() {return getUserPreferences("default");}
 
     public static SharedPreferences getUserPreferences(String name) {
