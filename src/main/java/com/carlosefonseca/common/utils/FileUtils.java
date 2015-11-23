@@ -182,12 +182,14 @@ public final class FileUtils {
             OutputStream os;
             os = new FileOutputStream(file);
             os.write(text.getBytes());
+            os.close();
             return true;
         } catch (FileNotFoundException e) {
             Log.w(TAG, "File not found " + file);
         } catch (IOException e) {
-            Log.e(TAG, "Error writing to file " + file, e);
+            Log.w(TAG, "Error writing to file " + file, e);
         }
+        Log.wtf(TAG, "Uh? " + file);
         return false;
     }
 

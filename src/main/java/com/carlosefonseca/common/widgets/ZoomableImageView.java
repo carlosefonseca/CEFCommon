@@ -3,16 +3,15 @@ package com.carlosefonseca.common.widgets;
 import android.content.Context;
 import android.graphics.*;
 import android.os.Handler;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.util.AttributeSet;
-import android.util.FloatMath;
 import android.view.GestureDetector;
 import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.MotionEvent;
 import android.view.View;
 import com.carlosefonseca.common.utils.CodeUtils;
 import com.carlosefonseca.common.utils.Log;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 
 public class ZoomableImageView extends View {
     private static final String TAG = CodeUtils.getTag(ZoomableImageView.class);
@@ -360,7 +359,7 @@ public class ZoomableImageView extends View {
     private float spacing(MotionEvent event) {
         float x = event.getX(0) - event.getX(1);
         float y = event.getY(0) - event.getY(1);
-        return FloatMath.sqrt(x * x + y * y);
+        return (float) Math.sqrt(x * x + y * y);
     }
 
     private void midPoint(PointF point, MotionEvent event) {

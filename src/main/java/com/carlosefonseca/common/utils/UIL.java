@@ -48,6 +48,7 @@ public final class UIL {
     private UIL() {}
 
     public static void initUIL(Context context) {
+        if (sIL != null) return;
         // The name for images is the last part of the URL
         FileNameGenerator fileNameGenerator = new FileNameGenerator() {
             @Override
