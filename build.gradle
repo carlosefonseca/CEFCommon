@@ -12,8 +12,8 @@ repositories {
 
 dependencies {
     //noinspection GradleDependency
-    compile 'com.android.support:support-v4:'+rootProject.ext.compatLib
-    compile 'com.android.support:appcompat-v7:'+rootProject.ext.compatLib
+    compile 'com.android.support:support-v4:'+rootProject.ext.supportLib
+    compile 'com.android.support:appcompat-v7:'+rootProject.ext.supportLib
     //noinspection GradleDynamicVersion,GradleDependency
     compile 'com.google.android.gms:play-services-maps:'+rootProject.ext.playServices
     compile 'com.google.android.gms:play-services-location:'+rootProject.ext.playServices
