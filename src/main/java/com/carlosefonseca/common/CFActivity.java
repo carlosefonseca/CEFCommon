@@ -1,6 +1,7 @@
 package com.carlosefonseca.common;
 
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -142,6 +143,10 @@ public class CFActivity extends FragmentActivity implements ActivityStateListene
             tintManager.setStatusBarTintEnabled(true);
             tintManager.setTintColor(color);
         }
+    }
+
+    protected boolean isLandscape() {
+        return getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE;
     }
 
     @Override
