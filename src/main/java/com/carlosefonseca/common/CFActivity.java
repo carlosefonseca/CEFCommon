@@ -149,7 +149,7 @@ public class CFActivity extends FragmentActivity implements ActivityStateListene
         super.onStart();
         //noinspection ObjectEquality
         setLatestActivity();
-        if (canRegisterRunnables && !registered) {
+        if (canRegisterRunnables && !registered && !EventBus.getDefault().isRegistered(this)) {
             EventBus.getDefault().registerSticky(this);
             registered = true;
         }
@@ -226,6 +226,7 @@ public class CFActivity extends FragmentActivity implements ActivityStateListene
         EventBus.getDefault().postSticky(new RunnableOnActivityWrapper(runnableOnActivity));
     }
 
+    @Deprecated
     public static RunnableOnActivity makeToast(final String message, final int time) {
         return new RunnableOnActivity() {
 
@@ -236,10 +237,12 @@ public class CFActivity extends FragmentActivity implements ActivityStateListene
         };
     }
 
+    @Deprecated
     public static RunnableOnActivity makeToast(String message) {
         return makeToast(message, Toast.LENGTH_SHORT);
     }
 
+    @Deprecated
     public static void Toast(final String message) {
         final CFActivity activity = latestActivity != null ? latestActivity.get() : null;
         if (activity != null) {
