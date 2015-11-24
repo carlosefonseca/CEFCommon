@@ -80,6 +80,9 @@ public class CFTabFragmentActivity extends CFActivity implements TabHost.OnTabCh
         mTabHost.setOnTabChangedListener(this);
     }
 
+    public void setCurrentTabByTag(String tag) {
+        mTabHost.setCurrentTabByTag(tag);
+    }
 
     protected void addTab(String text, @Nullable View view, Class fragmentClass, @Nullable Bundle args) {
         if (mTabHost == null) throw new RuntimeException("TabHost not initialized. Call initialiseTabHost first.");
