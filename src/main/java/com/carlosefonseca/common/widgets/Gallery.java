@@ -281,10 +281,14 @@ public class Gallery extends ViewPager {
             public void onClick(View v) {
                 // View tag stores the original object
                 // Image View tag stores the position
-                int position = (int) v.findViewById(R.id.image).getTag();
+                int position = getIndexOfGalleryPage(v);
                 clickListener.onClick(objects.get(position));
             }
         });
+    }
+
+    private static int getIndexOfGalleryPage(View v) {
+        return v instanceof GalleryPage ? ((GalleryPage) v).getPosition() : (int) v.findViewById(R.id.image).getTag();
     }
 
     public void setupWithFiles(List<File> files, final OnViewItemClickListener<File> clickListener) {

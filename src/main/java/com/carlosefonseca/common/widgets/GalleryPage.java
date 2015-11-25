@@ -82,4 +82,8 @@ public class GalleryPage extends FrameLayout {
     public ImageView getImageView() {
         return imageView;
     }
+
+    public int getPosition() {
+        return position;
+    }
 }
