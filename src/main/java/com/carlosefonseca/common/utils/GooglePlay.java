@@ -236,7 +236,7 @@ GooglePlay.CloudMessaging.registerCloudMessaging(this,
 
                         // Persist the regID - no need to register again.
                         storeRegistrationId(id);
-                    } catch (IOException ex) {
+                    } catch (Exception ex) {
                         Log.w(TAG, "Error :" + ex.getMessage());
                         // If there is an error, don't just keep trying to register.
                         // Require the user to click a button again, or perform
