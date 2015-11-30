@@ -593,4 +593,8 @@ public class CFArrayAdapter<T> extends BaseAdapter implements Filterable, ListAd
                ? ""
                : resultValue.toString();
     }
+
+    public LayoutInflater getInflater() {
+        return mInflater;
+    }
 }

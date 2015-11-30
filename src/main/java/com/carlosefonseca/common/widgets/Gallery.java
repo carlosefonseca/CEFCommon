@@ -64,7 +64,7 @@ public class Gallery extends ViewPager {
     }
 
     /**
-     * Maintains the image aspect ratio but scales down so that the image fits entirely inside the view.
+     * Maintains the image aspect ratio but scales so that the image fits entirely inside the view (no crop).
      */
     public void scaleDown() {
         this.scaleType = ImageView.ScaleType.FIT_CENTER;

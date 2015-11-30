@@ -2,6 +2,7 @@ package com.carlosefonseca.common.utils;
 
 import android.content.Context;
 import android.content.res.ColorStateList;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
@@ -234,6 +235,10 @@ public final class ResourceUtils {
     public static boolean channelsAboveThreshold(int color, double ratio) {
         ratio = 255 * ratio;
         return Color.red(color) > ratio && Color.green(color) > ratio && Color.blue(color) > ratio;
+    }
+
+    public static boolean isLandscape(Resources resources) {
+        return resources.getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE;
     }
 
     public static enum State {
