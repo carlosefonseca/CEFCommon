@@ -10,6 +10,8 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.ShapeDrawable;
 import android.graphics.drawable.StateListDrawable;
 import android.os.Build;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -23,8 +25,6 @@ import com.carlosefonseca.common.utils.CodeUtils;
 import com.carlosefonseca.common.utils.Log;
 import com.carlosefonseca.common.utils.ResourceUtils;
 import com.carlosefonseca.common.utils.ViewUtils;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 
 import static com.carlosefonseca.common.utils.ResourceUtils.createDualStateDrawable;
 
@@ -40,7 +40,7 @@ import static com.carlosefonseca.common.utils.ResourceUtils.createDualStateDrawa
  * a requirement that might lower its interest, it's in testing). Setting the color will also automagically change the
  * onPressed color of the buttons to a darker color.
  * <p/>
- * Extra buttons can be added to the right side of the bar either by setting them on XML of by using the {@link
+ * Extra buttons can be added to the right side of the bar either by setting them on XML or by using the {@link
  * #addView(android.view.View, android.view.ViewGroup.LayoutParams)}. A 1dp white margin will be added to the element
  * as well as the background color.
  */
@@ -167,6 +167,7 @@ public class NavBar extends LinearLayout {
         backDrawable = a.getDrawable(R.styleable.NavBar_android_drawableLeft);
         if (backDrawable == null) backDrawable = defaultBackDrawable;
 //        if (defaultTitleDrawable != null) titleDrawable = defaultTitleDrawable;
+
         a.recycle();
     }
 

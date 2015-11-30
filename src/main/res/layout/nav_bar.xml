@@ -21,7 +21,6 @@
             android:layout_weight="1"
             tools:text="TEXT"
             android:lineSpacingMultiplier="1.1"
-            android:textSize="20sp"
             android:textStyle="bold"
             android:maxLines="2"
             android:ellipsize="end"
