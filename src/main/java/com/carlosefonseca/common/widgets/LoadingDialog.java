@@ -71,8 +71,8 @@ public class LoadingDialog extends Dialog {
      * @param context Current context.
      * @param message Message to display.
      */
-    public static void SuccessDialog(Context context, String message) {
-        SuccessDialog(context, message, null);
+    public static LoadingDialog SuccessDialog(Context context, String message) {
+        return SuccessDialog(context, message, null);
     }
 
     /**
@@ -82,9 +82,10 @@ public class LoadingDialog extends Dialog {
      * @param message  Message to display.
      * @param runnable A runnable to execute when the dialog is dismissed.
      */
-    public static void SuccessDialog(Context context, String message, @Nullable Runnable runnable) {
+    public static LoadingDialog SuccessDialog(Context context, String message, @Nullable Runnable runnable) {
         LoadingDialog dialog = new LoadingDialog(context, DialogType.COMPLETED, message);
         dialog.showAndDismiss(runnable);
+        return dialog;
     }
 
     /**
@@ -93,8 +94,8 @@ public class LoadingDialog extends Dialog {
      * @param context Current context.
      * @param message Message to display.
      */
-    public static void ErrorDialog(Context context, String message) {
-        ErrorDialog(context, message, null);
+    public static LoadingDialog ErrorDialog(Context context, String message) {
+        return ErrorDialog(context, message, null);
     }
 
     /**
@@ -104,7 +105,7 @@ public class LoadingDialog extends Dialog {
      * @param message  Message to display.
      * @param runnable A runnable to execute when the dialog is dismissed.
      */
-    public static void ErrorDialog(Context context, String message, @Nullable final Runnable runnable) {
+    public static LoadingDialog ErrorDialog(Context context, String message, @Nullable final Runnable runnable) {
         final LoadingDialog dialog = new LoadingDialog(context, DialogType.ERROR, message);
         runOnUIThread(new Runnable() {
             @Override
@@ -112,6 +113,17 @@ public class LoadingDialog extends Dialog {
                 dialog.showAndDismiss(runnable);
             }
         });
+        return dialog;
+    }
+
+    /**
+     * Convenience static method to display a Loading message.
+     *
+     * @param context Current context.
+     * @param message Message to display.
+     */
+    public static LoadingDialog LoadingDialog(Context context, String message) {
+        return new LoadingDialog(context, message).showAndReturn();
     }
 
     /**
