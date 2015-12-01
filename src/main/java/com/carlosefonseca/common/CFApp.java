@@ -1,12 +1,12 @@
 package com.carlosefonseca.common;
 
+import android.annotation.TargetApi;
 import android.app.ActivityManager;
 import android.app.Application;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Environment;
-import android.util.DisplayMetrics;
 import com.carlosefonseca.common.utils.CodeUtils;
 import com.carlosefonseca.common.utils.Log;
 
@@ -121,27 +121,20 @@ public class CFApp extends Application {
         SMALL_PHONE, PHONE, LARGE_PHONE, TABLET_7, TABLET_10
     }
 
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
     public static FormFactor getFormFactor() {
         if (sFormFactor != null) return sFormFactor;
-        DisplayMetrics metrics = context.getResources().getDisplayMetrics();
-        int widthPixels = metrics.widthPixels;
-        int heightPixels = metrics.heightPixels;
-        float scaleFactor = metrics.density;
-        float widthDp = widthPixels / scaleFactor;
-        float heightDp = heightPixels / scaleFactor;
-        float smallestWidth = Math.min(widthDp, heightDp);
 
-        if (smallestWidth >= 720) {
-            sFormFactor = FormFactor.TABLET_10;
-        } else if (smallestWidth >= 600) {
-            sFormFactor = FormFactor.TABLET_7;
-        } else if (smallestWidth >= 480) {
-            sFormFactor = FormFactor.LARGE_PHONE;
-        } else if (smallestWidth >= 360) {
-            sFormFactor = FormFactor.PHONE;
-        } else if (smallestWidth >= 320) {
-            sFormFactor = FormFactor.SMALL_PHONE;
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB_MR2) {
+            throw new UnsupportedOperationException("smallestScreenWidthDp requires SDK 13+");
         }
+        float smallestWidth = getContext().getResources().getConfiguration().smallestScreenWidthDp;
+
+        if (smallestWidth >= 720) sFormFactor = FormFactor.TABLET_10;
+        else if (smallestWidth >= 600) sFormFactor = FormFactor.TABLET_7;
+        else if (smallestWidth >= 480) sFormFactor = FormFactor.LARGE_PHONE;
+        else if (smallestWidth >= 360) sFormFactor = FormFactor.PHONE;
+        else if (smallestWidth >= 320) sFormFactor = FormFactor.SMALL_PHONE;
         return sFormFactor;
     }
 
