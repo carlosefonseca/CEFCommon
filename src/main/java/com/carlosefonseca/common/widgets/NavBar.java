@@ -401,10 +401,17 @@ public class NavBar extends LinearLayout {
         return defaultNormalColor;
     }
 
+    /**
+     * Sets the background color and computes a darker color for the pressed states.
+     */
     public static void setDefaultColor(int normalColor) {
         setDefaultColors(normalColor, computeDarkerColor(normalColor));
     }
 
+    /**
+     * Sets the background color and the pressed color.
+     * @see #setDefaultColor(int)
+     */
     public static void setDefaultColors(int normalColor, int pressedColor) {
         defaultNormalColor = normalColor;
         defaultPressedColor = pressedColor;
