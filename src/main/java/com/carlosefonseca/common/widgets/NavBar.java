@@ -342,6 +342,12 @@ public class NavBar extends LinearLayout {
         return textColor;
     }
 
+    /**
+     * Returns the text color in use, either current text color or default text color.
+     */
+    public int getTextColorInUse() {
+        return textColor != NO_COLOR ? textColor : defaultTextColor;
+    }
 
 
     /**

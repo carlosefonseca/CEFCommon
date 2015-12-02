@@ -44,7 +44,7 @@ public class AudioPlayer {
 
         @Override
         public String toString() {
-            return String.format("AudioNotif:%-5s-%s", status, file != null ? file.getName() : "");
+            return String.format("AudioNotif:%-5s %s", status, file != null ? file.getName() : "");
         }
 
         public static void PostStart(@Nullable File file) {
