@@ -263,6 +263,10 @@ public class AudioPlayer {
         }
     }
 
+    public static boolean isPlaying(@Nullable File file) {
+        return file != null && isPlaying() && currentFile.equals(file);
+    }
+
     @Nullable
     public static MediaPlayer getMediaPlayer() {
         return currentMediaPlayer;
@@ -282,6 +286,11 @@ public class AudioPlayer {
 
     public static File getCurrentFile() {
         return currentFile;
+    }
+
+    @Nullable
+    public static File getPlayingFile() {
+        return isPlaying() ? currentFile : null;
     }
 
     static class MediaPlayerWrapper {
