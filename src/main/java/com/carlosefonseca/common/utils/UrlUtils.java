@@ -117,7 +117,9 @@ public final class UrlUtils {
 
     public static String simplifyUrlForDisplay(@Nullable String url) {
         //noinspection ConstantConditions
-        return url == null ? null : url.trim().replaceFirst("https?://(www.)?", "").replace("?fref=ts", "");
+        return url == null
+               ? null
+               : StringUtils.removeEnd(url.trim().replaceFirst("https?://(www.)?", "").replace("?fref=ts", ""), "/");
     }
 
     /**
