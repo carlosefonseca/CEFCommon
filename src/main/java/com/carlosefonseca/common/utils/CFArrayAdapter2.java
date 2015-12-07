@@ -6,6 +6,13 @@ import android.view.ViewGroup;
 
 import java.util.List;
 
+/**
+ * ArrayAdapter where you override {@link #instantiateView(ViewGroup)} and {@link #setupView(View, Object)} and you
+ * can use your own class for the views.
+ *
+ * @param <T> The model object
+ * @param <V> The class for the view
+ */
 public class CFArrayAdapter2<T, V extends View> extends CFArrayAdapter<T> {
 
     public CFArrayAdapter2(Context context, List<T> objects) {
@@ -28,8 +35,6 @@ public class CFArrayAdapter2<T, V extends View> extends CFArrayAdapter<T> {
 
     /**
      * Override to implement the creation of your view.
-     *
-     * @param parent
      */
     protected V instantiateView(ViewGroup parent) {
         throw new UnsupportedOperationException("Implement instantiateView");
@@ -37,9 +42,6 @@ public class CFArrayAdapter2<T, V extends View> extends CFArrayAdapter<T> {
 
     /**
      * Override the setup your view with the item
-     *
-     * @param view
-     * @param item
      */
     protected void setupView(V view, T item, int position) {
         setupView(view, item);
@@ -47,11 +49,24 @@ public class CFArrayAdapter2<T, V extends View> extends CFArrayAdapter<T> {
 
     /**
      * Override the setup your view with the item
-     *
-     * @param view
-     * @param item
      */
     protected void setupView(V view, T item) {
     }
 
+
+    /**
+     * Don't use these if you're using CFArrayAdapter2. Use {@link #setupView(View, Object)}.
+     */
+    @Override
+    protected final void setOnView(View view, T item) {
+        super.setOnView(view, item);
+    }
+
+    /**
+     * Don't use these if you're using CFArrayAdapter2. Use {@link #setupView(View, Object)}.
+     */
+    @Override
+    protected final void setOnDropdownView(View view, T item) {
+        super.setOnDropdownView(view, item);
+    }
 }

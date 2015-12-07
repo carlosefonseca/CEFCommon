@@ -11,6 +11,20 @@ import com.carlosefonseca.common.R;
 import java.util.*;
 
 /**
+ * Carlos: Copy of Android's ArrayAdapter with some adjustments.
+ * <ul>
+ * <li>You can override {@link #setOnView(View, Object)} or {@link #setOnDropdownView(View, Object)} and skip
+ * implementing inflation altogether.
+ * <li>You can override {@link #getItemText(Object)} or {@link #getItemTextDropdown(Object)} and
+ * only provide your own "toString".
+ * <li>There's a {@link #getInflater()} you can use.
+ * </ul>
+ *
+ * <p>See {@link CFArrayAdapter2} if you have a class for your cells.</p>
+ *
+ * <hr>
+ * <p>
+ *
  * A concrete BaseAdapter that is backed by an array of arbitrary
  * objects.  By default this class expects that the provided resource id references
  * a single TextView.  If you want to use a more complex layout, use the constructors that
@@ -92,7 +106,7 @@ public class CFArrayAdapter<T> extends BaseAdapter implements Filterable, ListAd
      * @param objects The objects to represent in the ListView.
      */
     @SafeVarargs
-    public CFArrayAdapter(Context context, T...objects) {
+    public CFArrayAdapter(Context context, T... objects) {
         this(context, R.layout.cf_spinner_item, Arrays.asList(objects));
     }
 
@@ -433,6 +447,32 @@ public class CFArrayAdapter<T> extends BaseAdapter implements Filterable, ListAd
         }
         assert view != null;
 
+        T item = getItem(position);
+        if (isDropdown) {
+            setOnDropdownView(view, item);
+        } else {
+            setOnView(view, item);
+        }
+
+        return view;
+    }
+
+    /**
+     * Override to perform your own setup of the model on the view.
+     */
+    protected void setOnView(View view, T item) {
+        internalSetupView(false, view, item);
+    }
+
+    /**
+     * Override to perform your own setup of the model on the view, for a dropdown.
+     */
+    protected void setOnDropdownView(View view, T item) {
+        internalSetupView(true, view, item);
+    }
+
+    private void internalSetupView(boolean isDropdown, View view, T item) {
+        TextView text;
         try {
             if (mFieldId == 0) {
                 //  If no custom field is assigned, assume the whole resource is a TextView
@@ -446,10 +486,7 @@ public class CFArrayAdapter<T> extends BaseAdapter implements Filterable, ListAd
             throw new IllegalStateException("ArrayAdapter requires the resource ID to be a TextView", e);
         }
 
-        T item = getItem(position);
         text.setText(isDropdown ? getItemTextDropdown(item) : getItemText(item));
-
-        return view;
     }
 
 
@@ -589,9 +626,7 @@ public class CFArrayAdapter<T> extends BaseAdapter implements Filterable, ListAd
     }
 
     protected CharSequence convertFilterResultToString(T resultValue) {
-        return resultValue == null
-               ? ""
-               : resultValue.toString();
+        return resultValue == null ? "" : resultValue.toString();
     }
 
     public LayoutInflater getInflater() {
