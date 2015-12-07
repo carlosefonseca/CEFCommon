@@ -9,6 +9,7 @@ import android.os.Build;
 import android.os.Environment;
 import com.carlosefonseca.common.utils.CodeUtils;
 import com.carlosefonseca.common.utils.Log;
+import com.carlosefonseca.common.utils.ResourceUtils;
 
 import java.io.File;
 
@@ -155,5 +156,9 @@ public class CFApp extends Application {
                 return true;
         }
         return false;
+    }
+
+    public static boolean isLandscape() {
+        return ResourceUtils.isLandscape(context.getResources());
     }
 }

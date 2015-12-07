@@ -145,7 +145,7 @@ public class CFActivity extends FragmentActivity implements ActivityStateListene
         }
     }
 
-    protected boolean isLandscape() {
+    public boolean isLandscape() {
         return getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE;
     }
 
