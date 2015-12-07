@@ -3,33 +3,33 @@ package com.carlosefonseca.common.utils;
 import android.app.Activity;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import com.carlosefonseca.common.widgets.ZoomableRembrandtView;
+import com.carlosefonseca.common.widgets.ZoomableUILView;
 import android.support.annotation.Nullable;
 
 import java.io.File;
 
-public class ZoomZoomableRembrandtController extends ZoomViewController<ZoomableRembrandtView> {
-    public ZoomZoomableRembrandtController(ViewGroup container) {
+public class ZoomZoomableUILController extends ZoomViewController<ZoomableUILView> {
+    public ZoomZoomableUILController(ViewGroup container) {
         super(container);
     }
 
-    public ZoomZoomableRembrandtController(Activity activity) {
+    public ZoomZoomableUILController(Activity activity) {
         super(activity);
     }
 
     @Override
-    protected ZoomableRembrandtView createExpandedView() {
-        return new ZoomableRembrandtView(getContext());
+    protected ZoomableUILView createExpandedView() {
+        return new ZoomableUILView(getContext());
     }
 
     public void zoomFromView(ImageView thumb, File file) {
-        final ZoomableRembrandtView view = getExpandedView();
+        final ZoomableUILView view = getExpandedView();
         view.setImageFile(file);
         zoomFromView(thumb, view);
     }
 
     public void zoomFromView(ImageView thumb, @Nullable String url) {
-        final ZoomableRembrandtView view = getExpandedView();
+        final ZoomableUILView view = getExpandedView();
         view.setImageUrl(url);
         zoomFromView(thumb, view);
     }

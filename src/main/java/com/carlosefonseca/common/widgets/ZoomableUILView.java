@@ -12,17 +12,17 @@ import android.support.annotation.Nullable;
 
 import java.io.File;
 
-public class ZoomableRembrandtView extends ZoomableImageView {
+public class ZoomableUILView extends ZoomableImageView {
 
-    private static final String TAG = CodeUtils.getTag(ZoomableRembrandtView.class);
+    private static final String TAG = CodeUtils.getTag(ZoomableUILView.class);
     private Bitmap mBitmap;
     private Object mLastUrlOrFile;
 
-    public ZoomableRembrandtView(Context context) {
+    public ZoomableUILView(Context context) {
         super(context);
     }
 
-    public ZoomableRembrandtView(Context context, AttributeSet attrs) {
+    public ZoomableUILView(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
 

@@ -213,6 +213,12 @@ public class Gogh {
         return mTaskSource.getTask();
     }
 
+    public Task<Bitmap> taskXFade(final ImageView view) {
+        mTaskSource = Task.create();
+        into(view, CROSS_FADE);
+        return mTaskSource.getTask();
+    }
+
     public String getUri() {
         return mUrl;
     }

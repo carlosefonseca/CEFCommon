@@ -24,7 +24,7 @@ public class GalleryPlus extends FrameLayout {
     private ImageView arrowRightView;
     private boolean hideIfEmpty;
     @Nullable private Double aspectRatio;
-    private ZoomZoomableRembrandtController zoomRembrandtController;
+    private ZoomZoomableUILController zoomRembrandtController;
 
     public GalleryPlus(Context context) {
         super(context);
@@ -192,7 +192,7 @@ public class GalleryPlus extends FrameLayout {
         if (activity != null) {
             if (zoomRembrandtController == null) {
                 ViewGroup rootView = (ViewGroup) activity.getWindow().getDecorView().getRootView();
-                zoomRembrandtController = new ZoomZoomableRembrandtController(rootView);
+                zoomRembrandtController = new ZoomZoomableUILController(rootView);
             }
             if (galleryView.getAdapter().isUrlList()) {
                 galleryView.setOnUrlItemClickListener(new Gallery.OnViewItemClickListener<String>() {
@@ -218,7 +218,7 @@ public class GalleryPlus extends FrameLayout {
     public void setupWithZoomForFiles(List<File> images, Activity activity) {
         ViewGroup rootView = (ViewGroup) activity.getWindow().getDecorView().getRootView();
 //        final ZoomZoomZoom zoomRembrandtController = new ZoomZoomZoom(rootView);
-        zoomRembrandtController = new ZoomZoomableRembrandtController(rootView);
+        zoomRembrandtController = new ZoomZoomableUILController(rootView);
         this.setupWithFiles(images, new Gallery.OnViewItemClickListener<File>() {
             @Override
             public void onClick(View v, File item) {
