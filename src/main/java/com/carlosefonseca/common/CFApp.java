@@ -52,6 +52,10 @@ public class CFApp extends Application {
 
     protected void init(int currentVersion, int previousVersion) {}
 
+    public static boolean isLandscapeTablet() {
+        return isLandscape() && isTablet();
+    }
+
 
     public static boolean testIfTestDevice() {
         if (isTestDevice == null) isTestDevice = isEmulator() || checkForceLogFile();
