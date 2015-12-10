@@ -62,7 +62,7 @@ public final class UIL {
         UnlimitedDiscCache diskCache = new UnlimitedDiscCache(sExternalFilesDir, null, fileNameGenerator);
 
         ImageLoaderConfiguration.Builder builder = new ImageLoaderConfiguration.Builder(context);
-        if (CFApp.isTestDevice()) builder.writeDebugLogs();
+        if (false && CFApp.isTestDevice()) builder.writeDebugLogs();
 
         try {
             sApkExpansionZipFile = APKExpansionSupport.getAPKExpansionZipFile(context);
