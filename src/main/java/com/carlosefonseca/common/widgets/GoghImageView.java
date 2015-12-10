@@ -18,7 +18,7 @@ public class GoghImageView extends ImageView {
     @Nullable private Double aspectRatio;
 
     int placeholder;
-    private String uri;
+    private String uri = "!";
 
     public GoghImageView(Context context) {
         super(context);
@@ -40,6 +40,9 @@ public class GoghImageView extends ImageView {
         setImageUri(UIL.getUri(url), xFade);
     }
 
+    /**
+     * Returns the Gogh instance with built-in configs for this kind of ImageView
+     */
     public Gogh goghForImageUrl(String url) {
         return Gogh.loadPhotoURI(url).hideIfNull(hideIfNull).placeholder(placeholder);
     }
