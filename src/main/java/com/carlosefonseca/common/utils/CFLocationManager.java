@@ -28,7 +28,7 @@ public class CFLocationManager implements LocationListener, LocationSource,
     private static final String TAG = CodeUtils.getTag(CFLocationManager.class);
 
     private LocationRequest mRequest;
-    private int frequencyMillis = 5000;
+    private int frequencyMillis = 750;
 
     protected OnLocationChangedListener mapLocationChangedListener;
     protected Handler handler;
@@ -117,6 +117,7 @@ public class CFLocationManager implements LocationListener, LocationSource,
     private void startLocationUpdates() {
         if (isLocating) Log.d(TAG, "It's already locating but ok…");
         if (getGAC().isConnected()) {
+            // Any previous LocationRequests registered on this LocationListener will be replaced.
             LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, getLocationRequest(), this)
                                              .setResultCallback(startStatusResultCallback);
         } else {
@@ -230,8 +231,8 @@ public class CFLocationManager implements LocationListener, LocationSource,
         if (mRequest == null) {
             mRequest = LocationRequest.create()
                                       .setInterval(frequencyMillis)
-                                      .setFastestInterval(frequencyMillis / 2)
-                                      .setSmallestDisplacement(5)
+                                      .setFastestInterval(100)
+                                      .setSmallestDisplacement(1)
                                       .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
         }
         return mRequest;
