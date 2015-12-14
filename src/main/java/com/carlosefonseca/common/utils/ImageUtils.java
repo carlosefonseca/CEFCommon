@@ -177,8 +177,27 @@ public final class ImageUtils {
         }
     }
 
+    /**
+     * Creates a new Bitmap and new canvas, and draws the given bitmap on the canvas.
+     * @return A wrapper with both the new canvas and the bitmap that backs that canvas.
+     */
     public static ImageUtils.BitmapCanvas canvasFromBitmap(Bitmap bitmap) {
         final Bitmap bitmap1 = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), Bitmap.Config.ARGB_8888);
+        final BitmapCanvas bitmapCanvas = new BitmapCanvas(bitmap1, new Canvas(bitmap1));
+        bitmapCanvas.canvas.drawBitmap(bitmap, 0, 0, new Paint(Paint.DITHER_FLAG));
+        return bitmapCanvas;
+    }
+
+    /**
+     * Creates a new Bitmap and new canvas, and draws the given bitmap on the canvas.
+     *
+     * This version makes a bitmap scaled up. A bitmap that is 100x100 on a xhdip screen will return a 200x200 bitmap
+     *
+     * @return A wrapper with both the new canvas and the bitmap that backs that canvas.
+     */
+    public static ImageUtils.BitmapCanvas canvasFromBitmapScaled(Bitmap bitmap) {
+        bitmap.setDensity(DisplayMetrics.DENSITY_DEFAULT);
+        final Bitmap bitmap1 = Bitmap.createBitmap(dp2px(bitmap.getWidth()), dp2px(bitmap.getHeight()), Bitmap.Config.ARGB_8888);
         final BitmapCanvas bitmapCanvas = new BitmapCanvas(bitmap1, new Canvas(bitmap1));
         bitmapCanvas.canvas.drawBitmap(bitmap, 0, 0, new Paint(Paint.DITHER_FLAG));
         return bitmapCanvas;
