@@ -128,6 +128,16 @@ public final class FileUtils {
         }
     }
 
+    /**
+     * Deletes a directory tree.
+     * Avoids a "Device or resource busy" problem. From http://stackoverflow.com/a/11776458/1069444
+     */
+    public static boolean deleteDirWorkaround(File dir) {
+        final File newDir = new File(dir.getAbsolutePath() + System.currentTimeMillis());
+        dir.renameTo(newDir);
+        return deleteDir(newDir);
+    }
+
     public static boolean deleteDir(File dir) {
         if (dir != null) {
             if (dir.isDirectory()) {
@@ -171,7 +181,7 @@ public final class FileUtils {
             InputStream is;
             is = new FileInputStream(file);
             return new Scanner(is, "UTF-8").useDelimiter("\\A").next();
-        } catch (FileNotFoundException e) {
+        } catch (FileNotFoundException | NoSuchElementException e) {
             Log.w(TAG, "File not found " + file);
         }
         return null;
