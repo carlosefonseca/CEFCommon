@@ -136,7 +136,7 @@ public class CFApp extends Application {
         float smallestWidth = getContext().getResources().getConfiguration().smallestScreenWidthDp;
 
         if (smallestWidth >= 720) sFormFactor = FormFactor.TABLET_10;
-        else if (smallestWidth >= 600) sFormFactor = FormFactor.TABLET_7;
+        else if (smallestWidth >= 533) sFormFactor = FormFactor.TABLET_7;
         else if (smallestWidth >= 480) sFormFactor = FormFactor.LARGE_PHONE;
         else if (smallestWidth >= 360) sFormFactor = FormFactor.PHONE;
         else if (smallestWidth >= 320) sFormFactor = FormFactor.SMALL_PHONE;
